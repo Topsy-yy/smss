@@ -1,0 +1,9 @@
+{
+  "name": "Scholarship Management System",
+  "short_name": "SMS",
+  "start_url": "/index.php",
+  "display": "standalone",
+  "background_color": "#f3f6fa",
+  "theme_color": "#0b3558",
+  "description": "Role-based portal for scholarship applications and administration"
+}

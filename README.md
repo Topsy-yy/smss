@@ -43,9 +43,10 @@ It supports three main user roles:
 		 ```bash
 		 mysql -u root -p < backend/scholarship_management_system.sql
 		 ```
-4. Update `config.php` with your local environment values:
+4. Create a local `.env` file (copy from `.env.example`) and set your environment values:
 	 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`
 	 - SMTP settings (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, etc.)
+	 - `config.php` now reads these values from `.env`.
 5. Ensure PHP has required extensions enabled:
 	 - `mysqli`
 	 - `pdo_mysql`
@@ -61,7 +62,7 @@ The bundled SQL dump includes sample users. Example admin account in seed data:
 
 ## Security Notes
 
-- Rotate/remove any hardcoded credentials from `config.php` before deploying.
+- Keep credentials in `.env` and out of source control.
 - Use environment-specific secrets for DB and SMTP credentials.
 - Disable debug output in production.
 - Serve the app over HTTPS in production.

@@ -33,6 +33,8 @@ $conn = getDbConnection();
 
       <!-- Custom CSS -->
       <link href="../css/main.css" rel="stylesheet">
+      <link href="../css/admin.css" rel="stylesheet">
+	<link href="../css/pages/admin.css" rel="stylesheet">
 
   </head>
 

@@ -27,6 +27,8 @@ require '../config.php';
       <link href="../css/bootstrap.min.css" rel="stylesheet">
 
       <link href="../css/main.css" rel="stylesheet">
+      <link href="../css/admin.css" rel="stylesheet">
+      <link href="../css/pages/admin.css" rel="stylesheet">
 
   </head>
 
@@ -197,25 +199,27 @@ require '../config.php';
   	<?php
 
 
-			// Open a directory, and read its contents
-  			if (is_dir($dir)){
-  				$i=0;
-  			  if ($dh = opendir($dir)){
-  			    while (($file = readdir($dh)) !== false){
-  			    	if($i>1){
+      // Open a directory and list actual files only.
+      if (is_dir($dir)){
+        if ($dh = opendir($dir)){
+          while (($file = readdir($dh)) !== false){
+          	if($file !== '.' && $file !== '..'){
+          		$filePath = $dir . $file;
+          		if (!is_file($filePath)) {
+          			continue;
+          		}
 	?>
 						<tr>
 							<td>
-								<?php echo $file;?>
+                <?php echo htmlspecialchars($file);?>
 							</td>
 							<td>
-								<form action="<?php echo $dir."".$file ;?>" method="post" target="_blank">
-                    <button name="view" value="view">View</button>
-			          </form>
+                <a href="<?php echo htmlspecialchars($filePath); ?>" target="_blank" rel="noopener noreferrer">
+                  <button type="button">View</button>
+                </a>
 			         </td>
     <?php
 			      	}
-			      	$i +=1;
 			    }
 			    closedir($dh);
 			  }

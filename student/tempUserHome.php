@@ -30,45 +30,18 @@
     }
 ?>
 
-<!DOCTYPE html>
-
-<html>
-
-  <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="description" content="">
-      <meta name="author" content="">
-
-
-      <!-- Bootstrap Core CSS -->
-      <link href="../css/bootstrap.min.css" rel="stylesheet">
-      <link href="../css/tempuserhome.css" rel="stylesheet">
-      <!-- Custom CSS -->
-      <link href="../css/main.css" rel="stylesheet">
-
-      <title>Home</title>
-  </head>
+<?php
+$pageTitle = 'Student Home';
+$assetPrefix = '../';
+$roleStyles = array('css/user.css');
+$pageStyles = array('css/pages/student.css');
+require __DIR__ . '/../includes/head-dashboard.php';
+?>
 
   <body class = "index">
     <div id = "page-wrapper">
 
-      <!-- Header -->
-        <header id = "header" class = "alt" style="background-color:#f3f6fa;color:black;height:4%">
-          <h1 id = "logo"><a href = "javascript:history.back()" class="button special">Back</a></h1>
-          <nav id = "nav">
-            <ul>
-              <li class = "current"><a href = "tempUserHome.php">Home</a></li>
-              <li><a href = "tempUserProfile.php">User Profile</a></li>
-              <li><a href = "tempUserApply.php">Apply</a></li>
-              <li><a href = "tempUserView.php">View Scholarship Status</a></li>
-              <li><?php echo $_SESSION['currentUserName']. " (ID:" . $_SESSION['currentUserID'] . ")"?></li>
-              <li><a href = "../backend/logout.php" class = "button special">Logout</a></li>
-            </ul>
-          </nav>
-        </header>
+      <?php require __DIR__ . '/../includes/nav-student.php'; ?>
 
         <!-- Banner -->
         <section id="test">
@@ -319,47 +292,12 @@
 
         </article>
 
-        <section id="cta">
-          <header>
-            <h2>Ready to find your <strong>next opportunity</strong>?</h2>
-            <p>Explore trusted scholarships, apply with confidence, and manage everything in one place.</p>
-          </header>
-          <footer>
-            <ul class="buttons">
-              <li><a href="../tempAboutUs.php" class="button special">About Us</a></li>
-            </ul>
-          </footer>
-        </section>
-
-      <!-- Footer -->
-        <footer id="footer">
-          <ul class="icons">
-            <li><a href="#" class="icon circle fa-twitter"><span class="label">Twitter</span></a></li>
-            <li><a href="#" class="icon circle fa-facebook"><span class="label">Facebook</span></a></li>
-            <li><a href="#" class="icon circle fa-google-plus"><span class="label">Google+</span></a></li>
-            <li><a href="#" class="icon circle fa-github"><span class="label">Github</span></a></li>
-            <li><a href="#" class="icon circle fa-dribbble"><span class="label">Dribbble</span></a></li>
-          </ul>
-
-          <ul class="copyright">
-            <li>&copy; All rights reserved</li><li>Design: <a href="#">RB</a></li>
-          </ul>
-
-
-        </footer>
+<?php
+$ctaTitle = 'Ready to find your <strong>next opportunity</strong>?';
+$ctaText = 'Explore trusted scholarships, apply with confidence, and manage everything in one place.';
+require __DIR__ . '/../includes/footer-dashboard.php';
+?>
 
 
     </div>
-
-    <!-- Scripts -->
-      <script src="../js/jquery.min.js"></script>
-      <script src="../js/jquery.dropotron.min.js"></script>
-      <script src="../js/jquery.scrolly.min.js"></script>
-      <script src="../js/jquery.scrollgress.min.js"></script>
-      <script src="../js/skel.min.js"></script>
-      <script src="../js/util.js"></script>
-      <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-      <script src="../js/main.js"></script>
-
-  </body>
-</html>
+<?php require __DIR__ . '/../includes/scripts-dashboard.php'; ?>

@@ -59,6 +59,8 @@ foreach ($rows9 as $key => $value)
       <link href="../css/bootstrap.min.css" rel="stylesheet">
 
       <link href="../css/main.css" rel="stylesheet">
+      <link href="../css/sig.css" rel="stylesheet">
+	<link href="../css/pages/signatory.css" rel="stylesheet">
 
   </head>
 
@@ -152,21 +154,10 @@ foreach ($rows9 as $key => $value)
 				                            <label style="font-size: 15px;">This is a scholarship to study a ... (check all that apply)</label><br>
 				                            <select name="degree" style="padding-top: 10px;padding-bottom: 10px; padding-left: 5%">
 			                                    <option value="select" selected>Select</option>
-			                                    <option value="class1">Class 1</option>
-			                                    <option value="class2">Class 2</option>
-			                                    <option value="class3">Class 3</option>
-			                                    <option value="class4">Class 4</option>
-			                                    <option value="class5">Class 5</option>
-			                                    <option value="class6">Class 6</option>
-			                                    <option value="class7">Class 7</option>
-			                                    <option value="class8">Class 8</option>
-			                                    <option value="class9">Class 9</option>
-			                                    <option value="class10">Class 10</option>
-			                                    <option value="class11">Class 11</option>
-			                                    <option value="class12passed">Class 12 Passed</option>
+			                                    
 			                                    <option value="diploma">Diploma</option>
-			                                    <option value="graduation">Graduation</option>
-			                                    <option value="postgraduation">Post-Graduation</option>
+			                                    <option value="undergraduate">Undergraduate</option>
+			                                    <option value="postgraduate">Post-Graduate</option>
 			                                    <option value="phd">PhD</option>
 			                                </select>
 				                            <br><br><br>
@@ -177,21 +168,12 @@ foreach ($rows9 as $key => $value)
 			                                    <option value="select" selected>Select</option>
 			                                    <option value="male">Male</option>
 			                                    <option value="female">Female</option>
-			                                    <option value="male+female">Both</option>
-			                                    <option value="transgender">Transgender</option>
+			                                    
+			                                    <option value="prefer">Prefer Not to Say</option>
 			                                </select>
 			                                <br><br><br>
 
-			                                <label><strong>Religion </strong></label><br>
-				                            <label style="font-size: 15px;">This is a scholarship for a particular gender ...</label><br>
-				                            <input type="checkbox" name="religion[]" value="buddhism">Buddhism<br>
-				                            <input type="checkbox" name="religion[]" value="christian">Christian<br>
-				                            <input type="checkbox" name="religion[]" value="hindu">Hindu<br>
-				                            <input type="checkbox" name="religion[]" value="jain">Jain<br>
-				                            <input type="checkbox" name="religion[]" value="Muslim">Muslim<br>
-				                            <input type="checkbox" name="religion[]" value="Parsi">Parsi<br>
-				                            <input type="checkbox" name="religion[]" value="Sikh">Sikh<br>
-											<br><br>
+			                                
 
 											<label><strong>Scholarship type</strong></label><br>
 				                            <label style="font-size: 15px;">Selct any Type of Scholarship from Below ...</label><br>

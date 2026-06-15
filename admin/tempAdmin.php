@@ -4,67 +4,18 @@
   session_start();
   require '../backend/security.php';
   require_login(2);
+
+  $pageTitle = 'Admin Home';
+  $assetPrefix = '../';
+  $roleStyles = array('css/admin.css');
+  $pageStyles = array('css/pages/admin.css');
+  require __DIR__ . '/../includes/head-dashboard.php';
 ?>
-<!DOCTYPE html>
-
-<html lang="en">
-
-  <head>
-      <title>Home</title>
-
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="description" content="">
-      <meta name="author" content="">
-
-
-      <!-- Bootstrap Core CSS -->
-      <link href="../css/bootstrap.min.css" rel="stylesheet">
-      <link href="../css/tempuserhome.css" rel="stylesheet">
-      <!-- Custom CSS -->
-      <link href="../css/main.css" rel="stylesheet">
-
-  </head>
 
   <body class = "index">
     <div id = "page-wrapper">
 
-      <!-- Header -->
-        <header id = "header" class = "alt" style="background-color:#f3f6fa;color:black;height:4%">
-          <h1 id = "logo"><a href = "javascript:history.back()" class="button special">Back</a></h1>
-          <nav id = "nav">
-            <ul>
-              <li class = "current"><a href = "#">Home</a></li>
-              <li class = "submenu">
-                <a href = "#">Applications</a>
-                <ul>
-                  <li><a href = "tempPendingApp.php">Pending Students</a></li>
-                  <li><a href = "tempAcceptedApp.php">Accepted Students</a></li>
-                  <li><a href = "tempRejectedApp.php">Rejected Students</a></li>
-                </ul>
-              </li>
-              <li class = "submenu">
-                <a href = "tempScholarship.php">Scholarships</a>
-                <ul>
-                  <li><a href = "tempScholarship.php?scholarship=Pending">Pending Scholarships</a></li>
-                  <li><a href = "tempScholarship.php?scholarship=Approved">Accepted Scholarships</a></li>
-                  <li><a href = "tempScholarship.php?scholarship=Rejected">Rejected Scholarships</a></li>
-                </ul>
-              </li>
-              <li class = "submenu">
-                <a href = "">Users</a>
-                <ul>
-                  <li><a href = "tempAdminShow.php">Admin</a></li>
-                  <li><a href = "tempSignatoryShow.php">Signatory</a></li>
-                  <li><a href = "tempStudentShow.php">Students</a></li>
-                </ul>
-              </li>
-              <li><a href = "../backend/logout.php" class = "button special">Logout</a></li>
-            </ul>
-          </nav>
-        </header>
+      <?php require __DIR__ . '/../includes/nav-admin.php'; ?>
 
         <!-- Banner -->
         <section id="test">
@@ -215,47 +166,12 @@
 
         </article>
 
-        <section id="cta">
-          <header>
-            <h2>Ready to keep the platform <strong>running smoothly</strong>?</h2>
-            <p>Continue managing approvals, users, and scholarships with confidence.</p>
-          </header>
-          <footer>
-            <ul class="buttons">
-              <li><a href="../tempAboutUs.php" class="button special">About Us</a></li>
-            </ul>
-          </footer>
-        </section>
-
-      <!-- Footer -->
-        <footer id="footer">
-
-          <ul class="icons">
-            <li><a href="#" class="icon circle fa-twitter"><span class="label">Twitter</span></a></li>
-            <li><a href="#" class="icon circle fa-facebook"><span class="label">Facebook</span></a></li>
-            <li><a href="#" class="icon circle fa-google-plus"><span class="label">Google+</span></a></li>
-            <li><a href="#" class="icon circle fa-github"><span class="label">Github</span></a></li>
-            <li><a href="#" class="icon circle fa-dribbble"><span class="label">Dribbble</span></a></li>
-          </ul>
-
-          <ul class="copyright">
-            <li>&copy; Scholarship Management System</li><li>Design: <a href="#">Team SMS</a></li>
-          </ul>
-
-        </footer>
+<?php
+$ctaTitle = 'Ready to keep the platform <strong>running smoothly</strong>?';
+$ctaText = 'Continue managing approvals, users, and scholarships with confidence.';
+require __DIR__ . '/../includes/footer-dashboard.php';
+?>
 
 
     </div>
-
-    <!-- Scripts -->
-      <script src="../js/jquery.min.js"></script>
-      <script src="../js/jquery.dropotron.min.js"></script>
-      <script src="../js/jquery.scrolly.min.js"></script>
-      <script src="../js/jquery.scrollgress.min.js"></script>
-      <script src="../js/skel.min.js"></script>
-      <script src="../js/util.js"></script>
-      <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-      <script src="../js/main.js"></script>
-
-  </body>
-</html>
+<?php require __DIR__ . '/../includes/scripts-dashboard.php'; ?>

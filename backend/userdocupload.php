@@ -1,79 +1,95 @@
-<!DOCTYPE HTML>
-<html>
-  <head>
-   </head>
-   <body>
-   	<?php
-	session_start();
+<?php
+session_start();
 require '../config.php';
+
 $_SESSION['selectedAppID'] = 0;
+$_SESSION['appList'] = null;
 
-  $_SESSION['appList'] = NULL;
+function jsRedirect($path, $message = null) {
+    if ($message !== null) {
+        echo '<script>alert(' . json_encode($message) . ');location.replace(' . json_encode($path) . ');</script>';
+    } else {
+        echo '<script>location.replace(' . json_encode($path) . ');</script>';
+    }
+    exit;
+}
 
-  //check validity of the user
-  $currentUserID=$_SESSION['currentUserID'];
-  $schid=$_SESSION['schid'];
-  $sigID = $_SESSION['sigID'];
-  if($currentUserID==NULL){
-    header("Location:../index.php");
-  }
-  if($schid==NULL || $sigID==NULL){
-  	header("Location:../student/tempUserApply.php");
-  }
-	if($_POST['apply'] == "Apply >>"){
+$currentUserID = $_SESSION['currentUserID'] ?? null;
+$schid = $_SESSION['schid'] ?? null;
+$sigID = $_SESSION['sigID'] ?? null;
 
-		//inserting into database
-		$flag=0;
-		$date1=date("Y-m-d H:i:s");
+if ($currentUserID === null) {
+    jsRedirect('../index.php');
+}
 
-		// Connect to database
-	    $conn = getDbConnection();
+if ($schid === null || $sigID === null) {
+    jsRedirect('../student/tempUserApply.php', 'Please select a scholarship first.');
+}
 
-     	  // Checks Connection
-	    if ($conn->connect_error) {
-	        die("Connection failed: " . $conn->connect_error);
-	    }
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    jsRedirect('../student/applyprocess.php', 'Invalid request.');
+}
 
-	    $sql="INSERT INTO application(studentID,sigID,scholarshipID,appDate) VALUES ('$currentUserID','$sigID','$schid','$date1')";
-	    if (mysqli_query($conn, $sql)) {
-			$flag=1;
-		}
-		else{
-			echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-			$flag=0;
-		}
+// Accept any POST submit from apply process to avoid value-mismatch issues.
+if (!isset($_POST['apply'])) {
+    jsRedirect('../student/applyprocess.php', 'Invalid application submission.');
+}
 
-		//uploading docs
-		if($flag==1){
-			$fileupload=NULL;
-			$total = count($_FILES['file']['name']);
-			$folder=$currentUserID."_".$schid;
-			mkdir("../applications/$folder/");
-			for( $i=0 ; $i < $total ; $i++ ) {
-				if(is_uploaded_file($_FILES['file']['tmp_name'][$i])){
-	      		    //move_uploaded_file
-				    copy($_FILES["file"]["tmp_name"][$i],"../applications/$folder/" . $_FILES["file"]["name"][$i]);
-				    $fileupload .='1';
-				}
-			}
-			if($fileupload=='111'){
-				 ?>
-				    <script type="text/javascript">
-				   		alert("Your Application is Submitted Successfully!");
-				   		location.replace("../student/tempUserHome.php")
-				   	</script>
-			  	<?php
-			}
-		}
-		else{
-		?>
-			<script>
-				alert("Error! File upload Failed.");
-				location.replace("../student/applyprocess.php");
-			</script>
-		<?php
-		}
-	}
-?>
-</body>
-</html>
+$conn = getDbConnection();
+if ($conn->connect_error) {
+    jsRedirect('../student/applyprocess.php', 'Database connection failed. Please try again.');
+}
+
+$date1 = date('Y-m-d H:i:s');
+$sql = "INSERT INTO application(studentID,sigID,scholarshipID,appDate,appstatus,verifiedBySignatory,previous_appstatus,previous_verifiedBySignatory) VALUES ('$currentUserID','$sigID','$schid','$date1','Pending','Pending','Pending','Pending')";
+try {
+    if (!mysqli_query($conn, $sql)) {
+        $conn->close();
+        jsRedirect('../student/applyprocess.php', 'Application submission failed. You may have already applied.');
+    }
+} catch (Throwable $e) {
+    $conn->close();
+    jsRedirect('../student/applyprocess.php', 'Application submission failed. Please try again.');
+}
+
+$total = (isset($_FILES['file']['name']) && is_array($_FILES['file']['name'])) ? count($_FILES['file']['name']) : 0;
+if ($total === 0) {
+    $conn->close();
+    jsRedirect('../student/applyprocess.php', 'Please upload the required documents.');
+}
+
+$folder = $currentUserID . '_' . $schid;
+$targetDir = "../applications/$folder/";
+
+if (!is_dir($targetDir) && !mkdir($targetDir, 0777, true)) {
+    $conn->close();
+    jsRedirect('../student/applyprocess.php', 'Could not create application folder.');
+}
+
+$uploadedCount = 0;
+for ($i = 0; $i < $total; $i++) {
+    if (!isset($_FILES['file']['tmp_name'][$i], $_FILES['file']['name'][$i])) {
+        continue;
+    }
+
+    if (!is_uploaded_file($_FILES['file']['tmp_name'][$i])) {
+        continue;
+    }
+
+    $safeName = basename($_FILES['file']['name'][$i]);
+    if ($safeName === '') {
+        continue;
+    }
+
+    if (copy($_FILES['file']['tmp_name'][$i], $targetDir . $safeName)) {
+        $uploadedCount++;
+    }
+}
+
+$conn->close();
+
+if ($uploadedCount === $total) {
+    jsRedirect('../student/tempUserHome.php', 'Your Application is Submitted Successfully!');
+}
+
+jsRedirect('../student/applyprocess.php', 'Application was saved, but one or more files failed to upload. Please try again.');

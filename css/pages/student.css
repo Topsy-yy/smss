@@ -1,0 +1,97 @@
+/* ===== Source: css/pages/student/apply.css ===== */
+/* Page-specific overrides for student/apply.php */
+
+/* ===== Source: css/pages/student/applyprocess.css ===== */
+/* Page-specific overrides for student/applyprocess.php */
+/* ==========================================================================
+   STUDENT PORTAL & APPLICATION FLOW COMPONENTS
+   ========================================================================== */
+
+/* Multi-step or Long Form Container */
+.form-container {
+    background: var(--bg-surface);
+    padding: var(--pad-md);
+    border-radius: var(--radius-md);
+    border: 1px solid #e2e8f0;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* File Upload Dropzone (For Transcripts, ID copies, etc.) */
+.upload-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: var(--radius-md);
+    padding: var(--pad-md);
+    text-align: center;
+    background: var(--bg-primary);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    margin-bottom: var(--pad-sm);
+}
+
+.upload-zone:hover, .upload-zone:focus-within {
+    border-color: var(--brand-primary);
+    background: #eff6ff;
+}
+
+.upload-zone input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.upload-zone label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.upload-zone label strong {
+    color: var(--brand-primary);
+}
+
+/* Status Notifications (For success/error redirects from applyprocess) */
+.alert-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--pad-xs);
+    padding: var(--pad-sm);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--pad-md);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: #dcfce7;
+    color: var(--brand-success);
+    border: 1px solid #bbf7d0;
+}
+
+.alert-error {
+    background-color: #fee2e2;
+    color: var(--brand-danger);
+    border: 1px solid #fecaca;
+}
+
+/* ===== Source: css/pages/student/tempschdesc.css ===== */
+/* Page-specific overrides for student/tempschdesc.php */
+
+/* ===== Source: css/pages/student/tempUserApply.css ===== */
+/* Page-specific overrides for student/tempUserApply.php */
+
+/* ===== Source: css/pages/student/tempUserHome.css ===== */
+/* Page-specific overrides for student/tempUserHome.php */
+
+/* ===== Source: css/pages/student/tempUserProfile.css ===== */
+/* Page-specific overrides for student/tempUserProfile.php */
+
+/* ===== Source: css/pages/student/tempUserView.css ===== */
+/* Page-specific overrides for student/tempUserView.php */
+

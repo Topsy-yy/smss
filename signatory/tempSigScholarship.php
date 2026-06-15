@@ -61,6 +61,8 @@ foreach ($rows9 as $key => $value)
 
       <!-- Custom CSS -->
       <link href="../css/main.css" rel="stylesheet">
+      <link href="../css/sig.css" rel="stylesheet">
+	<link href="../css/pages/signatory.css" rel="stylesheet">
 
   </head>
 

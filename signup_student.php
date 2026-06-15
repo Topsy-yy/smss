@@ -17,7 +17,8 @@
       <title>Student Signup</title>
 
       <link href="css/bootstrap.min.css" rel="stylesheet">
-      <!-- <link href="css/login.css" rel="stylesheet"> -->
+      <link href="css/login.css" rel="stylesheet">
+  <link href="css/portal.css" rel="stylesheet">
 
     <!-- Custom Google Web Font -->
     <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet">

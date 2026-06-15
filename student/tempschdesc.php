@@ -57,6 +57,8 @@ $_SESSION['selectedAppID'] = 0;
 
       <!-- Custom CSS -->
       <link href="../css/main.css" rel="stylesheet">
+      <link href="../css/user.css" rel="stylesheet">
+      <link href="../css/pages/student.css" rel="stylesheet">
 
   </head>
 

@@ -1,47 +1,11 @@
 <?php
 session_start();
 require 'backend/security.php';
+$pageTitle = 'Login';
+$assetPrefix = '';
+$pageStyles = array('css/portal.css');
+require __DIR__ . '/includes/head-auth.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-      <meta charset="utf-8">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
-
-      <meta name="description" content="">
-      <meta name="author" content="">
-
-
-      <title>Login</title>
-
-      <link href="css/bootstrap.min.css" rel="stylesheet">
-      <!-- <link href="css/login.css" rel="stylesheet"> -->
-
-    <!-- Custom Google Web Font -->
-    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Arvo:400,700' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Exo:100,200,400' rel='stylesheet' type='text/css'>
-
-    <!-- Custom CSS-->
-    <link href="css/general.css" rel="stylesheet">
-
-    <!-- Owl-Carousel -->
-    <link href="css/custom.css" rel="stylesheet">
-    <link href="css/owl.carousel.css" rel="stylesheet">
-    <link href="css/owl.theme.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-    <link href="css/animate.css" rel="stylesheet">
-
-    <!-- Magnific Popup core CSS file -->
-    <link rel="stylesheet" href="css/magnific-popup.css">
-
-    <script src="js/modernizr-2.8.3.min.js"></script>  <!-- Modernizr /-->
-
-
-
-  </head>
 
   <body id="home" class="auth-page">
 
@@ -81,33 +45,4 @@ require 'backend/security.php';
      </div>
     </div>
 
-
-    <!-- JavaScript -->
-    <script src="js/jquery-1.10.2.js"></script>
-    <script src="js/bootstrap.js"></script>
-    <script src="js/owl.carousel.js"></script>
-    <script src="js/script.js"></script>
-    <!-- StikyMenu -->
-    <script src="js/stickUp.min.js"></script>
-    <script type="text/javascript">
-      jQuery(function($) {
-      $(document).ready( function() {
-        $('.navbar-default').stickUp();
-
-      });
-      });
-
-    </script>
-    <!-- Smoothscroll -->
-    <script type="text/javascript" src="js/jquery.corner.js"></script>
-    <script src="js/wow.min.js"></script>
-    <script>
-     new WOW().init();
-    </script>
-    <script src="js/classie.js"></script>
-    <script src="js/uiMorphingButton_inflow.js"></script>
-    <!-- Magnific Popup core JS file -->
-    <script src="js/jquery.magnific-popup.js"></script>
-
-  </body>
-</html>
+<?php require __DIR__ . '/includes/scripts-auth.php'; ?>

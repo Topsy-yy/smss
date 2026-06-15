@@ -71,6 +71,8 @@ foreach ($rows9 as $key => $value)
       <link href="../css/bootstrap.min.css" rel="stylesheet">
 
       <link href="../css/main.css" rel="stylesheet">
+      <link href="../css/sig.css" rel="stylesheet">
+      <link href="../css/pages/signatory.css" rel="stylesheet">
 
   </head>
 

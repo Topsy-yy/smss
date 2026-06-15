@@ -1,162 +1,266 @@
 <?php
   session_start();
-require '../config.php';
-$_SESSION['selectedAppID'] = 0;
-
+  require '../config.php';
+  
+  $_SESSION['selectedAppID'] = 0;
   $_SESSION['appList'] = NULL;
 
-  //check validity of the user
-  $currentUserID=$_SESSION['currentUserID'];
-  if($currentUserID==NULL){
-    header("Location:../index.php");
+  // Check validity of the user
+  $currentUserID = $_SESSION['currentUserID'];
+  if($currentUserID == NULL){
+    header("Location: ../index.php");
+    exit(); // Prevents script from continuing execution if not logged in
   }
 
   // Connect to database
-    $conn = getDbConnection();
-
-  // Checks Connection
-    if ($conn->connect_error) {
+  $conn = getDbConnection();
+  if ($conn->connect_error) {
       die("Connection failed: " . $conn->connect_error);
-    }
+  }
 
-  $getName = "select S.firstName, S.middleName, S.lastName from student S where S.studentID = '".$_SESSION['currentUserID']."'";
+  // Fetch User Name
+  $getName = "SELECT S.firstName, S.middleName, S.lastName FROM student S WHERE S.studentID = '".$_SESSION['currentUserID']."'";
+  $nameResult = mysqli_query($conn, $getName);
 
-  $nameResult = mysqli_query($conn,$getName);
-
-  // Get every row of the table formed from the query
-    while($rows9=mysqli_fetch_row($nameResult)){
+  while($rows9 = mysqli_fetch_row($nameResult)){
       foreach ($rows9 as $key => $value){
-	 	    if($key == 0){
-          $_SESSION['currentUserName'] = $value;
-		    }
-    		if($key == 1){
-    			$_SESSION['currentUserName'] = $_SESSION['currentUserName'] . " " . $value;
-    		}
-        if($key == 2){
-          $_SESSION['currentUserName'] = $_SESSION['currentUserName'] . ". " . $value;
-  		  }
-	    }
-    }
-    $conn->close();
+          if($key == 0){ $_SESSION['currentUserName'] = $value; }
+          if($key == 1){ $_SESSION['currentUserName'] .= " " . $value; }
+          if($key == 2){ $_SESSION['currentUserName'] .= ". " . $value; }
+      }
+  }
+  $conn->close();
 ?>
-<!DOCTYPE HTML>
-<html>
-  <head>
-      <title>Home</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Scholarship</title>
+    <style>
+        /* ==========================================================================
+           1. DESIGN TOKENS (VARIABLES) & RESET
+           ========================================================================== */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --brand-primary: #2563eb;
+            --brand-danger: #dc2626;
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --pad-xs: 0.5rem;
+            --pad-sm: 1rem;
+            --pad-md: 1.5rem;
+        }
 
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="description" content="">
-      <meta name="author" content="">
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
 
+        /* ==========================================================================
+           2. LAYOUT SHELL
+           ========================================================================== */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-      <!-- Bootstrap Core CSS -->
-      <link href="../css/bootstrap.min.css" rel="stylesheet">
+        .app-content {
+            flex: 1;
+            padding: var(--pad-sm);
+        }
 
-      <!-- Custom CSS -->
-      <link href="../css/main.css" rel="stylesheet">
-  </head>
-  <body class = "no-sidebar">
-      <script type="text/javascript">
-          function fileValidation(name){
-              var fileInput = document.getElementById(name);
-              var filePath = fileInput.value;
-              var allowedExtensions = /(\.pdf)$/i;  //  /(\.jpg|\.jpeg|\.png|\.gif)$/i
-              if(!allowedExtensions.exec(filePath)){
-                  alert('Please upload file having extensions .pdf only.');
-                  fileInput.value = '';
-                  return false;
-              }else if(fileInput.files[0].size > 8000000){
-                alert('File size too large');
-                  fileInput.value = '';
-                  return false;
-              }
-              else{ }
-          }
-          </script>
+        @media (min-width: 768px) {
+            .app-content {
+                padding: var(--pad-md);
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+            }
+        }
 
+        /* ==========================================================================
+           3. FORM & UPLOAD COMPONENTS
+           ========================================================================== */
+        .form-container {
+            background: var(--bg-surface);
+            padding: var(--pad-md);
+            border-radius: var(--radius-md);
+            border: 1px solid #e2e8f0;
+            max-width: 650px;
+            width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
 
-    <div id = "page-wrapper">
+        .form-container h2 {
+            margin-bottom: 0.5rem;
+        }
 
-      <!-- Header -->
-        <header id = "header">
-          <h1 id = "logo"><a href = "javascript:history.back()" class="button special">Back</a></h1>
-          <nav id = "nav">
-            <ul>
-              <li><a href = "tempUserHome.php">Home</a></li>
-              <li><a href = "tempUserProfile.php">User Profile</a></li>
-              <li class = "current"><a href = "tempUserApply.php">Apply</a></li>
-              <li><a href = "tempUserView.php">View Scholarship Status</a></li>
-              <li><?php echo $_SESSION['currentUserName']. " (ID:" . $_SESSION['currentUserID'] . ")"?></li>
-              <li><a href = "../backend/logout.php" class = "button special">Logout</a></li>
-            </ul>
-          </nav>
-        </header>
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
 
-      <!-- Main -->
-        <article id="main">
+        .form-group label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
 
-          <header class="special container">
-            <span class="icon fa-mobile"></span>
-            <h2>SUPPORTING DOCUMENTS</h2>
-          </header>
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            background: var(--bg-primary);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
 
-            <section class="wrapper style4 container">
-              <h1>Please Submit all the Documents as mentioned below.</h1>
-              <h1><b>NOTE : </b>The documents must be of the format- <u><b>PDF</b></u></h1><br>
-              <form action="../backend/userdocupload.php" method="post" enctype="multipart/form-data">
+        .upload-zone:hover, .upload-zone:focus-within {
+            border-color: var(--brand-primary);
+            background: #eff6ff;
+        }
 
-                  <label><b>1. <u>Aadhar Card : </u></b></label>
-                  <label>This must contain two copies of AADHAR Card, both front and back side copy.Collate into one pdf and upload it HERE(MAX SIZE : 800kb)<span style="color: red">*</span> </label>
-                  <input type="file"  name="file[]" id="aadharcard" onchange=" return fileValidation('aadharcard')" required><br>
+        .upload-zone input[type="file"] {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
 
-                  <!-- <hr> not working -->
-                  <label>_____________________________________________________________________________________________________________________________________</label><br><br>
+        .upload-zone label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 400;
+            cursor: pointer;
+            display: block;
+        }
 
-                  <label><b>2. <u> Fee Receipt : </u></b></label>
-                  <label>This must contain Receipt of the fees of entire year(Collate into one pdf if you have more than one document) and upload it HERE(MAX SIZE : 800kb)<span style="color: red">*</span> </label>
-                  <input type="file"  name="file[]" id="feereceipt" onchange=" return fileValidation('feereceipt')" required><br>
+        .upload-zone label strong {
+            color: var(--brand-primary);
+        }
 
-                  <!-- <hr> not working -->
-                  <label>_____________________________________________________________________________________________________________________________________</label><br><br>
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.85rem var(--pad-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
 
-                  <label><b>3. <u> First Page of Saving Account Passbook : </u></b></label>
-                  <label>This must contain first page of your saving account passbook.Deatils such as your fullname, IFSC code, bank account number, branch name must be clearly visible in the document (MAX SIZE : 800kb)<span style="color: red">*</span> </label>
-                  <input type="file"  name="file[]" id="passbook" onchange="return fileValidation('passbook')" required><br><br>
+        .btn-primary {
+            background-color: var(--brand-primary);
+            color: white;
+        }
 
-                  <input type="submit" name="apply" value="Apply >>">
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <main class="app-content">
+            <div class="form-container">
+                <h2>Upload Supporting Documents</h2>
+                <p style="color: var(--text-muted); margin-bottom: var(--pad-md);">
+                    Please submit the required academic and identification documents in <strong>PDF format</strong> (Max 8MB each).
+                </p>
 
-              </form>
-            </section>
-        </article>
-        <!-- Footer -->
-        <footer id="footer">
+                <form action="../backend/userdocupload.php" method="post" enctype="multipart/form-data" id="applicationForm">
 
-          <ul class="icons">
-            <li><a href="#" class="icon circle fa-twitter"><span class="label">Twitter</span></a></li>
-            <li><a href="#" class="icon circle fa-facebook"><span class="label">Facebook</span></a></li>
-            <li><a href="#" class="icon circle fa-google-plus"><span class="label">Google+</span></a></li>
-            <li><a href="#" class="icon circle fa-github"><span class="label">Github</span></a></li>
-            <li><a href="#" class="icon circle fa-dribbble"><span class="label">Dribbble</span></a></li>
-          </ul>
+                    <div class="form-group">
+                        <label>1. Student ID Copy</label>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                            Upload a scanned copy of your valid university student ID. Both front and back sides collated into one PDF. <span style="color: var(--brand-danger);">*</span>
+                        </p>
+                        <div class="upload-zone">
+                            <input type="file" name="file[]" id="studentid" accept=".pdf" onchange="return fileValidation('studentid')" required>
+                            <label for="studentid"><strong>Click to upload</strong> or drag and drop your Student ID</label>
+                        </div>
+                    </div>
 
-          <ul class="copyright">
-            <li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-          </ul>
-        </footer>
+                    <div class="form-group">
+                        <label>2. Official Academic Transcript</label>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                            Upload your most recent official university transcript, fee statement, or statement of results. <span style="color: var(--brand-danger);">*</span>
+                        </p>
+                        <div class="upload-zone">
+                            <input type="file" name="file[]" id="transcript" accept=".pdf" onchange="return fileValidation('transcript')" required>
+                            <label for="transcript"><strong>Click to upload</strong> or drag and drop your Transcript</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>3. Letter of Motivation / Recommendation</label>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                            Upload a signed letter explaining your financial need and academic goals, or a recommendation from a faculty member. <span style="color: var(--brand-danger);">*</span>
+                        </p>
+                        <div class="upload-zone">
+                            <input type="file" name="file[]" id="recommendation" accept=".pdf" onchange="return fileValidation('recommendation')" required>
+                            <label for="recommendation"><strong>Click to upload</strong> or drag and drop your Letter</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" name="apply" class="btn btn-primary" style="width: 100%; margin-top: var(--pad-sm);">Submit Application</button>
+                </form>
+            </div>
+        </main>
     </div>
 
-     <!-- Scripts -->
-      <script src="../js/jquery.min.js"></script>
-      <script src="../js/jquery.dropotron.min.js"></script>
-      <script src="../js/jquery.scrolly.min.js"></script>
-      <script src="../js/jquery.scrollgress.min.js"></script>
-      <script src="../js/skel.min.js"></script>
-      <script src="../js/util.js"></script>
-      <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-      <script src="../js/main.js"></script>
+    <script>
+        function fileValidation(inputId) {
+            const fileInput = document.getElementById(inputId);
+            const file = fileInput.files[0];
 
-  </body>
+            if (!file) return true;
+
+            // Check file type
+            if (file.type !== "application/pdf") {
+                alert("Please upload PDF files only.");
+                fileInput.value = ''; // Clear the input
+                return false;
+            }
+
+            // Check file size (8MB limit)
+            if (file.size > 8000000) { 
+                alert("File size is too large. Maximum allowed size is 8MB.");
+                fileInput.value = ''; // Clear the input
+                return false;
+            }
+
+            // UI Enhancement: Update the label text to show the selected filename
+            const label = fileInput.nextElementSibling;
+            label.innerHTML = `<strong>File selected:</strong> ${file.name}`;
+            return true;
+        }
+    </script>
+</body>
 </html>

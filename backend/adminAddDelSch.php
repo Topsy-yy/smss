@@ -44,12 +44,11 @@ require '../config.php';
 			$contact = $_POST['contact'];
 			$adminapproval = $_POST['adminapproval'];
 
-      //fetching input of array religion[]
-      $religion = count($_POST['religion']) ? $_POST['religion'] : array();
-      $religionn = implode(',',$religion);
+	// Religion field was removed from the form; keep empty value for current DB schema.
+	$religionn = '';
 
 
-			$sql = "INSERT INTO scholarship (sigID,schname, schlocation,schlocationfrom,degree, gender, religion, sch, appDeadline, granteesNum, funding, description, eligibility, benefits, apply, links, contact, adminapproval) VALUES ('$currentUserID','$name','$schlocation','$schlocationfrom','$degree','$gender','$religionn','$scholarshipp','$appdeadline','$granteesNum','$funding','$description','$eligibility','$benefits','$apply','$links','$contact','$adminapproval')";
+			$sql = "INSERT INTO scholarship (sigID,schname, schlocation,schlocationfrom,degree, gender, religion, sch, appDeadline, granteesNum, funding, description, eligibility, benefits, apply, links, contact, adminapproval, previous_adminapproval) VALUES ('$currentUserID','$name','$schlocation','$schlocationfrom','$degree','$gender','$religionn','$scholarshipp','$appdeadline','$granteesNum','$funding','$description','$eligibility','$benefits','$apply','$links','$contact','$adminapproval','$adminapproval')";
 
 			if ($conn->query($sql) === TRUE) {
         $query = "SELECT * FROM scholarship WHERE sigID = '".$currentUserID."' AND schname = '".$name."' AND description = '".$description."'";
@@ -152,9 +151,8 @@ require '../config.php';
 			$contact = $_POST['contact'];
 			$adminapproval = $_POST['adminapproval'];
 
-      //fetching input of array religion[]
-      $religion = count($_POST['religion']) ? $_POST['religion'] : array();
-      $religionn = implode(',',$religion);
+	// Religion field was removed from the form; keep empty value for current DB schema.
+	$religionn = '';
 
 
 			$sql = "UPDATE scholarship SET schlocation = '$schlocation',schlocationfrom = '$schlocationfrom',

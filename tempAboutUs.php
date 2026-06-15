@@ -54,6 +54,7 @@ $_SESSION['selectedAppID'] = 0;
 
       <!-- Bootstrap Core CSS -->
       <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/portal.css" rel="stylesheet">
 
       <!-- Custom CSS -->
       <link href="css/main.css" rel="stylesheet">

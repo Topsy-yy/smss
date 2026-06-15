@@ -22,6 +22,8 @@ $studentID = NULL;
 
       <!-- Custom CSS -->
       <link href="../css/main.css" rel="stylesheet">
+      <link href="../css/admin.css" rel="stylesheet">
+      <link href="../css/pages/admin.css" rel="stylesheet">
 
   </head>
 
@@ -191,14 +193,14 @@ $studentID = NULL;
 
             						</section><br>
                         <section style="text-align:center">
-                          <form name="blockform" method="post" onsubmit="confirmblock(this,'This will Block Student as well as All his Applications.\n Are your Sure?')" action="../backend/adminBlockUser.php">
+                          <form name="blockform" method="post" onsubmit="confirmblock(this,'This will Block Student as well as their Applications.\n Are you Sure?')" action="../backend/adminBlockUser.php">
                             <input type="hidden" name="ID" value="<?php echo $studentID; ?>">
                             <input type="submit"  name="blockUser" id="blockUserbtn" value="blockStudent" <?php if($status === "inactive"){
                               echo " style = 'color:#fff;display:none'";
                             } ?>>
                           </form><br>
 
-                          <form name="unblockform" action="../backend/adminUnblockUser.php" onsubmit="confirmunblock(this,'This will unblock Student as well as All his Applications.\n Are your Sure?')"  method="post">
+                          <form name="unblockform" action="../backend/adminUnblockUser.php" onsubmit="confirmunblock(this,'This will unblock Student as well as their Applications.\n Are you Sure?')"  method="post">
                             <input type="hidden" name="ID" value="<?php echo $studentID; ?>">
                             <input type="submit" name="unblockUser" id="unblockUserbtn" value="unblockStudent" <?php if($status === "active"){
                               echo " style = 'color:#fff;display:none;'";
@@ -342,14 +344,14 @@ $studentID = NULL;
                                 	?>
             						</section><br>
                         <section style="text-align:center">
-                          <form name="blockform" method="post" onsubmit="confirmblock(this,'This will Block Signatory, the Scholarships corresponding to them as well as All Applications.\n Are your Sure?')" action="../backend/adminBlockUser.php">
+                          <form name="blockform" method="post" onsubmit="confirmblock(this,'This will Block Signatory, the Scholarships corresponding to them as well as their Applications.\n Are you Sure?')" action="../backend/adminBlockUser.php">
                             <input type="hidden" name="ID" value="<?php echo $sigID; ?>">
                             <input type="submit"  name="blockUser" id="blockUserbtn" value="blockSig" <?php if($status === "inactive"){
                               echo " style = 'color:#fff;display:none'";
                             } ?>>
                           </form><br>
 
-                          <form name="unblockform" action="../backend/adminUnblockUser.php" onsubmit="confirmunblock(this,'This will Unblock Signatory, the Scholarships corresponding to them as well as All Applications.\n Are your Sure?')"  method="post">
+                          <form name="unblockform" action="../backend/adminUnblockUser.php" onsubmit="confirmunblock(this,'This will Unblock Signatory, the Scholarships corresponding to them as well as their Applications.\n Are you Sure?')"  method="post">
                             <input type="hidden" name="ID" value="<?php echo $sigID; ?>">
                             <input type="submit" name="unblockUser" id="unblockUserbtn" value="unblockSig" <?php if($status === "active"){
                               echo " style = 'color:#fff;display:none;'";
