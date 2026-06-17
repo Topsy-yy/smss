@@ -56,35 +56,25 @@ $_SESSION['selectedAppID'] = 0;
       <link href="../css/bootstrap.min.css" rel="stylesheet">
 
       <!-- Custom CSS -->
-      <link href="../css/main.css" rel="stylesheet">
       <link href="../css/user.css" rel="stylesheet">
       <link href="../css/pages/student.css" rel="stylesheet">
+      <link href="../css/pages/student-dashboard.css" rel="stylesheet">
 
   </head>
 
-  <body class = "no-sidebar">
-    <div id = "page-wrapper">
+  <body class="app-shell">
+    <div class="app-page">
 
       <!-- Header -->
-        <header id = "header">
-          <h1 id = "logo"><a href = "javascript:history.back()" class="button special">Back</a></h1>
-          <nav id = "nav">
-            <ul>
-              <li><a href = "tempUserHome.php">Home</a></li>
-              <li><a href = "tempUserProfile.php">User Profile</a></li>
-              <li class = "current"><a href = "tempUserApply.php">Apply</a></li>
-              <li><a href = "tempUserView.php">View Scholarship Status</a></li>
-              <li><?php echo $_SESSION['currentUserName']. " (ID:" . $_SESSION['currentUserID'] . ")"?></li>
-              <li><a href = "../backend/logout.php" class = "button special">Logout</a></li>
-            </ul>
-          </nav>
-        </header>
+        <?php
+          $studentNavCurrent = 'apply';
+          require '../includes/nav-student.php';
+        ?>
 
       <!-- Main -->
         <article id="main">
 
-          <header class="special container">
-            <span class="icon fa-mobile"></span>
+          <header class="page-hero container">
           </header>
 
           <!-- One -->
@@ -114,7 +104,7 @@ $_SESSION['selectedAppID'] = 0;
                   $contact = $sch->contact;
 
           ?>
-            <section class="wrapper style4 container">
+            <section class="content-card container">
 
               <!-- Content -->
                 <div class="content">
@@ -168,31 +158,14 @@ $_SESSION['selectedAppID'] = 0;
             </section>
         </article>
         <!-- Footer -->
-        <footer id="footer">
-
-          <ul class="icons">
-            <li><a href="#" class="icon circle fa-twitter"><span class="label">Twitter</span></a></li>
-            <li><a href="#" class="icon circle fa-facebook"><span class="label">Facebook</span></a></li>
-            <li><a href="#" class="icon circle fa-google-plus"><span class="label">Google+</span></a></li>
-            <li><a href="#" class="icon circle fa-github"><span class="label">Github</span></a></li>
-            <li><a href="#" class="icon circle fa-dribbble"><span class="label">Dribbble</span></a></li>
-          </ul>
-
-          <ul class="copyright">
-            <li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+        <footer id="footer"><ul class="copyright">
           </ul>
         </footer>
     </div>
 
      <!-- Scripts -->
       <script src="../js/jquery.min.js"></script>
-      <script src="../js/jquery.dropotron.min.js"></script>
-      <script src="../js/jquery.scrollgress.min.js"></script>
-      <script src="../js/jquery.scrolly.min.js"></script>
-      <script src="../js/skel.min.js"></script>
-      <script src="../js/util.js"></script>
-      <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-      <script src="../js/main.js"></script>
+      <script src="../js/student-dashboard.js"></script>
 
   </body>
 </html>

@@ -18,7 +18,6 @@ $pageStyles = isset($pageStyles) && is_array($pageStyles) ? $pageStyles : array(
 
     <link href="<?php echo $assetPrefix; ?>css/bootstrap.min.css" rel="stylesheet">
     <link href="<?php echo $assetPrefix; ?>css/tempuserhome.css" rel="stylesheet">
-    <link href="<?php echo $assetPrefix; ?>css/main.css" rel="stylesheet">
     <link href="<?php echo $assetPrefix; ?>css/app.css" rel="stylesheet">
 
 <?php foreach ($roleStyles as $stylePath): ?>

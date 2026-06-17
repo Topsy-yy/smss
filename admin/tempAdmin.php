@@ -13,7 +13,7 @@
 ?>
 
   <body class = "index">
-    <div id = "page-wrapper">
+    <div class="app-page">
 
       <?php require __DIR__ . '/../includes/nav-admin.php'; ?>
 
@@ -72,7 +72,7 @@
         </section>
 
         <article id = "main">
-          <header class = "special container">
+          <header class="page-hero container">
             <span class = "icon fa-bar-chart-o"></span>
             <h2>Administration center</h2>
             <p>Oversee user activity, scholarship quality, and application decisions from a central dashboard.</p>

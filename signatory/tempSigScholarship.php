@@ -60,54 +60,29 @@ foreach ($rows9 as $key => $value)
       <link href="../css/bootstrap.min.css" rel="stylesheet">
 
       <!-- Custom CSS -->
-      <link href="../css/main.css" rel="stylesheet">
       <link href="../css/sig.css" rel="stylesheet">
-	<link href="../css/pages/signatory.css" rel="stylesheet">
+	<link href="../css/pages/signatory-dashboard.css" rel="stylesheet">
 
   </head>
 
-  <body class = "no-sidebar">
-    <div id = "page-wrapper">
+  <body class="app-shell">
+    <div class="app-page">
 
-		<!-- Header -->
-        <header id = "header" >
-					<h1 id = "logo"><a href = "javascript:history.back()" class="button special">Back</a></h1>
-          <nav id = "nav">
-            <ul>
-               <li ><a href = "tempSigHome.php">Home</a></li>
-							 <li><a href = "tempSigProfile.php">User Profile</a></li>
-               <li class = "current submenu">
-                <a href = "#">Scholarships</a>
-                <ul>
-                  <li><a href = "tempSigScholarship.php">My Scholarships</a></li>
-                  <li><a href = "tempAddScholarship.php">Add Scholarships</a></li>
-                </ul>
-              </li>
-              <li class = "submenu">
-                <a href = "#">Applications</a>
-               <ul>
-                  <li><a href = "tempSigApplication.php?app=Pending">Pending applications</a></li>
-                  <li><a href = "tempSigApplication.php?app=Approved">Accepted Applicaitons</a></li>
-                  <li><a href = "tempSigApplication.php?app=Rejected">Rejected Applicaitons</a></li>
-                </ul>
-              </li>
-              <li><?php echo $_SESSION['currentUserName']. " (ID:" . $_SESSION['currentUserID'] . ")"?></li>
-              <li><a href = "../backend/logout.php" class = "button special">Logout</a></li>
-            </ul>
-          </nav>
-        </header>
+		<?php
+		  $sigNavActive = 'scholarships';
+		  require __DIR__ . '/../includes/nav-signatory.php';
+		?>
 
 
 
 			<!-- Main -->
 				<article id="main">
 
-					<header class="special container">
-						<span class="icon fa-mobile"></span>
+					<header class="page-hero container">
 					</header>
 
 					<!-- One -->
-						<section class="wrapper style4 container">
+						<section class="content-card container">
 
 							<!-- Content -->
 								<div class="content">
@@ -195,18 +170,7 @@ foreach ($rows9 as $key => $value)
 				</article>
 
 			<!-- Footer -->
-				<footer id="footer">
-
-					<ul class="icons">
-						<li><a href="#" class="icon circle fa-twitter"><span class="label">Twitter</span></a></li>
-						<li><a href="#" class="icon circle fa-facebook"><span class="label">Facebook</span></a></li>
-						<li><a href="#" class="icon circle fa-google-plus"><span class="label">Google+</span></a></li>
-						<li><a href="#" class="icon circle fa-github"><span class="label">Github</span></a></li>
-						<li><a href="#" class="icon circle fa-dribbble"><span class="label">Dribbble</span></a></li>
-					</ul>
-
-					<ul class="copyright">
-						<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+				<footer id="footer"><ul class="copyright">
 					</ul>
 
 				</footer>
@@ -215,13 +179,6 @@ foreach ($rows9 as $key => $value)
 
 		<!-- Scripts -->
       <script src="../js/jquery.min.js"></script>
-      <script src="../js/jquery.dropotron.min.js"></script>
-      <script src="../js/jquery.scrolly.min.js"></script>
-      <script src="../js/jquery.scrollgress.min.js"></script>
-      <script src="../js/skel.min.js"></script>
-      <script src="../js/util.js"></script>
-      <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-      <script src="../js/main.js"></script>
     <script src="../js/jquery.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
@@ -230,7 +187,6 @@ foreach ($rows9 as $key => $value)
     <!-- Plugin JavaScript -->
     <script src="../js/jquery.easing.min.js"></script>
     <script src="../js/jquery.fittext.js"></script>
-    <script src="../js/wow.min.js"></script>
 
     <!-- Custom Theme JavaScript -->
     <script src="../js/creative.js"></script>

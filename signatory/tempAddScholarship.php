@@ -1,305 +1,234 @@
 <?php
-
   session_start();
-require '../config.php';
-//check validity of the user
+  require '../config.php';
+
+  //check validity of the user
   $currentUserID=$_SESSION['currentUserID'];
   if($currentUserID==NULL){
     header("Location:../index.php");
   }
 
   // Connect to database
-    $conn = getDbConnection();
+  $conn = getDbConnection();
 
   // Checks Connection
-    if ($conn->connect_error) {
-      die("Connection failed: " . $conn->connect_error);
+  if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+  }
+
+  $getName = "select S.firstName, S.middleName, S.lastName from signatory S where S.sigID = '".$_SESSION['currentUserID']."'";
+  $nameResult = mysqli_query($conn,$getName);
+
+  while($rows9=mysqli_fetch_row($nameResult)){
+    foreach ($rows9 as $key => $value){
+      if($key == 0){ $_SESSION['currentUserName'] = $value; }
+      if($key == 1){ $_SESSION['currentUserName'] .= " " . $value; }
+      if($key == 2){ $_SESSION['currentUserName'] .= ". " . $value; }
     }
-
-$getName = "select S.firstName, S.middleName, S.lastName from signatory S where S.sigID = '".$_SESSION['currentUserID']."'";
-
-$nameResult = mysqli_query($conn,$getName);
-
-while($rows9=mysqli_fetch_row($nameResult))
-{
-foreach ($rows9 as $key => $value)
-	{
-	 	if($key == 0)
-		{
-			$_SESSION['currentUserName'] = $value;
-		}
-
-
-		if($key == 1)
-		{
-			$_SESSION['currentUserName'] = $_SESSION['currentUserName'] . " " . $value;
-		}
-
-
-	    if($key == 2)
-	    {
-			$_SESSION['currentUserName'] = $_SESSION['currentUserName'] . ". " . $value;
-		}
-	}
-}
+  }
 ?>
 <!DOCTYPE HTML>
-
 <html>
   <head>
-      <title>Home</title>
-
+      <title>Add Scholarship | ScholarConnect</title>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="description" content="">
-      <meta name="author" content="">
 
       <link href="../css/bootstrap.min.css" rel="stylesheet">
-
-      <link href="../css/main.css" rel="stylesheet">
       <link href="../css/sig.css" rel="stylesheet">
-	<link href="../css/pages/signatory.css" rel="stylesheet">
-
+      <link href="../css/pages/signatory-dashboard.css" rel="stylesheet">
   </head>
 
-  <body class = "no-sidebar">
+  <body class="app-shell">
 
   	<script type="text/javascript">
-          function fileValidation(name){
-              var fileInput = document.getElementById(name);
-              var filePath = fileInput.value;
-              var allowedExtensions = /(\.pdf)$/i;
-              if(!allowedExtensions.exec(filePath)){
-                  alert('Please upload file having extensions .pdf only.');
-                  fileInput.value = '';
-                  return false;
-              }else if(fileInput.files[0].size > 8000000){
-                alert('File size too large');
-                  fileInput.value = '';
-                  return false;
-              }
-              else{ }
-          }
-          </script>
+        function fileValidation(name){
+            var fileInput = document.getElementById(name);
+            var filePath = fileInput.value;
+            var allowedExtensions = /(\.pdf)$/i;
+            if(!allowedExtensions.exec(filePath)){
+                alert('Please upload file having extensions .pdf only.');
+                fileInput.value = '';
+                return false;
+            } else if(fileInput.files[0].size > 8000000){
+                alert('File size too large. Max is 8MB.');
+                fileInput.value = '';
+                return false;
+            }
+        }
+    </script>
 
-    <div id = "page-wrapper">
+    <div class="app-page">
 
-      <!-- Header -->
-        <header id = "header" >
-          <h1 id = "logo"><a href = "javascript:history.back()" class="button special">Back</a></h1>
-          <nav id = "nav">
-            <ul>
-              <li ><a href = "tempSigHome.php">Home</a></li>
-              <li><a href = "tempSigProfile.php">User Profile</a></li>
-               <li class = "current submenu">
-                <a href = "#">Scholarships</a>
-                <ul>
-                  <li><a href = "tempSigScholarship.php">My Scholarships</a></li>
-                  <li><a href = "tempAddScholarship.php">Add Scholarships</a></li>
-                </ul>
-              </li>
-              <li class = "submenu">
-                <a href = "#">Applications</a>
-                <ul>
-                  <li><a href = "tempSigApplication.php?app=Pending">Pending applications</a></li>
-                  <li><a href = "tempSigApplication.php?app=Approved">Accepted Applicaitons</a></li>
-                  <li><a href = "tempSigApplication.php?app=Rejected">Rejected Applicaitons</a></li>
-                </ul>
-              </li>
-              <li><?php echo $_SESSION['currentUserName']. " (ID:" . $_SESSION['currentUserID'] . ")"?></li>
-              <li><a href = "../backend/logout.php" class = "button special">Logout</a></li>
-            </ul>
-          </nav>
-        </header>
+        <?php
+            $sigNavActive = 'scholarships';
+            require __DIR__ . '/../includes/nav-signatory.php';
+        ?>
 
+        <!-- Main -->
+        <article id="main">
+            <header class="page-hero container"></header>
 
-			<!-- Main -->
-				<article id="main">
+            <!-- One -->
+            <section class="content-card container">
+                <!-- Content -->
+                <div class="content">
+                    <section>
+                        <header>
+                            <h2 style="text-align: center; color: var(--sig-navy); margin-bottom: 2rem;"><strong>Create New Scholarship</strong></h2>
+                        </header>
 
-					<header class="special container">
-						<span class="icon fa-mobile"></span>
-					</header>
+                        <form method="post" name="scholarshiplist" id="scholarshiplist" action="../backend/adminAddDelSch.php" enctype="multipart/form-data">
 
-					<!-- One -->
-						<section class="wrapper style4 container">
+                            <div class="form-group">
+                                <label><strong>Scholarship Title</strong></label>
+                                <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">This will be displayed as the main heading.</label>
+                                <input type="text" class="form-control" name="schname" placeholder="Eg: Tech Innovators Grant 2026" required>
+                            </div>
 
-							<!-- Content -->
-								<div class="content">
-									<section>
+                            <div class="row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label><strong>Study Location</strong></label>
+                                    <input type="text" class="form-control" name="schlocation" placeholder="Where must they study?">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label><strong>Target Origin Location</strong></label>
+                                    <input type="text" class="form-control" name="schlocationfrom" placeholder="Where must applicants be from?">
+                                </div>
+                            </div>
 
-										<header>
-											<h2 style="padding-left: 36%;"><strong><u>Add your Scholarship</u></strong></h2>
-										</header>
+                            <div class="row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label><strong>Minimum Education Requirement</strong></label>
+                                    <select name="degree" class="form-control" required>
+                                        <option value="select" selected disabled>Select Required Level</option>
+                                        <option value="high school">High School</option>
+                                        <option value="diploma">Diploma</option>
+                                        <option value="undergraduate">Undergraduate</option>
+                                        <option value="postgraduate">Postgraduate</option>
+                                        <option value="phd">PhD</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label><strong>Gender Restriction</strong></label>
+                                    <select name="gender" class="form-control" required>
+                                        <option value="select" selected disabled>Select Gender</option>
+                                        <option value="male">Male Only</option>
+                                        <option value="female">Female Only</option>
+                                        <option value="male+female">Open to All (Male + Female)</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                         				<form method = "post" name = "scholarshiplist" id = "scholarshiplist" action = "../backend/adminAddDelSch.php" enctype="multipart/form-data">
+                            <div class="row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <!-- NEW FINANCIAL NEED MATCHER INPUT -->
+                                <div class="form-group" style="flex: 1;">
+                                    <label><strong>Target Financial Need</strong> <span style="color: var(--sig-teal); font-size: 0.8rem;">(Used by Matching Engine)</span></label>
+                                    <select name="target_financial_need" class="form-control" required>
+                                        <option value="Any" selected>Any (Open to all)</option>
+                                        <option value="Low">Low Need</option>
+                                        <option value="Medium">Medium Need</option>
+                                        <option value="High">High Need</option>
+                                        <option value="Critical">Critical Need</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label><strong>Scholarship Type / Category</strong></label>
+                                    <select name="scholarship" class="form-control" required>
+                                        <option value="select" selected disabled>Select Category</option>
+                                        <option value="merit_based">Merit Based</option>
+                                        <option value="means_based">Means Based</option>
+                                        <option value="cultural_talent">Cultural / Arts</option>
+                                        <option value="visual_art">Visual Art</option>
+                                        <option value="sports_talent">Sports Talent</option>
+                                        <option value="science_maths_based">Science & Maths</option>
+                                        <option value="technology_based">Technology Based</option>
+                                    </select>
+                                </div>
+                            </div>
 
-				                            <label><strong>Scholarship Name</strong></label><br>
-				                            <label style="font-size: 15px;">This will be displayed and used for searching your scholarship</label>
-				                            <br><input type = "text" name = "schname" placeholder="Eg:Joint Japan/World Bank Graduate Scholarship Program 2019" required>
-				                            <br><br>
+                            <div class="row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label><strong>Application Deadline</strong></label>
+                                    <input type="date" class="form-control" name="appdeadline" required>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label><strong>Maximum Grantees (Cap)</strong></label>
+                                    <input type="number" class="form-control" name="granteesNum" placeholder="e.g. 50">
+                                </div>
+                            </div>
 
-								            <label><strong>Locations</strong></label><br>
-				                            <label style="font-size: 15px;">In which states or regions do the students need to study to be able to receive the scholarship?</label>
-				                            <br><input type = "text" name = "schlocation" placeholder="Select one or multiple">
-				                            <br><br>
+                            <div class="form-group">
+                                <label><strong>Funding Amount</strong></label>
+                                <input type="text" class="form-control" name="funding" placeholder="e.g. 100% Tuition or KES 50,000">
+                            </div>
 
-				                            <label><strong>Locations From</strong></label><br>
-				                            <label style="font-size: 15px;">Is this scholarship specific for students from a specific state or region?</label>
-				                            <br><input type = "text" name = "schlocationfrom" placeholder="Select one or multiple">
-				                            <br><br>
+                            <div class="form-group">
+                                <label><strong>Description</strong></label>
+                                <textarea name="description" class="form-control" rows="4" placeholder="Give a general overview of this scholarship."></textarea>
+                            </div>
 
-				                            <label><strong>Degrees</strong></label><br>
-				                            <label style="font-size: 15px;">This is a scholarship to study a ... (check all that apply)</label><br>
-				                            <select name="degree" style="padding-top: 10px;padding-bottom: 10px; padding-left: 5%">
-			                                    <option value="select" selected>Select</option>
-			                                    
-			                                    <option value="diploma">Diploma</option>
-			                                    <option value="undergraduate">Undergraduate</option>
-			                                    <option value="postgraduate">Post-Graduate</option>
-			                                    <option value="phd">PhD</option>
-			                                </select>
-				                            <br><br><br>
+                            <div class="form-group">
+                                <label><strong>Eligibility & Requirements</strong></label>
+                                <textarea name="eligibility" class="form-control" rows="3" placeholder="What must they achieve to be considered?"></textarea>
+                            </div>
 
-				                            <label><strong>Gender</strong></label><br>
-				                            <label style="font-size: 15px;">This is a scholarship for a particular gender ...</label><br>
-				                            <select name="gender" style="padding-top: 10px;padding-bottom: 10px; padding-left: 5%">
-			                                    <option value="select" selected>Select</option>
-			                                    <option value="male">Male</option>
-			                                    <option value="female">Female</option>
-			                                    
-			                                    <option value="prefer">Prefer Not to Say</option>
-			                                </select>
-			                                <br><br><br>
+                            <div class="form-group">
+                                <label><strong>Benefits Covered</strong></label>
+                                <textarea name="benefits" class="form-control" rows="3" placeholder="What does this grant actually pay for?"></textarea>
+                            </div>
 
-			                                
+                            <div class="form-group">
+                                <label><strong>Application Instructions</strong></label>
+                                <textarea name="apply" class="form-control" rows="3" placeholder="Step by step application instructions..."></textarea>
+                            </div>
 
-											<label><strong>Scholarship type</strong></label><br>
-				                            <label style="font-size: 15px;">Selct any Type of Scholarship from Below ...</label><br>
-				                            <select name="scholarship" style="padding-top: 10px;padding-bottom: 10px; padding-left: 10%">
-			                                    <option value="select" selected>Select</option>
-			                                    <option value="merit_based">Merit Based</option>
-			                                    <option value="means_based">Means Based</option>
-			                                    <option value="cultural_talent">Cultural Talent</option>
-			                                    <option value="visual_art">Visual Art</option>
-			                                    <option value="sports_talent">Sports Talent</option>
-			                                    <option value="science_maths_based">Science, Maths Based</option>
-			                                    <option value="technology_based">Technology Based</option>
-			                                  </select>
-			                                <br><br><br>
+                            <div class="form-group">
+                                <label><strong>Important Links</strong></label>
+                                <textarea name="links" class="form-control" rows="2" placeholder="Organization website, external application links..."></textarea>
+                            </div>
 
-				                            <label><strong>Application Deadline</strong></label><br>
-				                            <label style="font-size: 15px;">What is the deadline of application?</label>
-				                            <br><input type = "date" name = "appdeadline">
-				                            <br><br>
+                            <div class="form-group">
+                                <label><strong>Contact Details</strong></label>
+                                <textarea name="contact" class="form-control" rows="2" placeholder="Helpdesk email, phone numbers..."></textarea>
+                            </div>
 
-				                            <label><strong>Number of Applications maximum allowed</strong></label><br>
-				                            <label style="font-size: 15px;">You can limit the number of applicants[This wont be displayed]</label>
-				                            <br><input type = "text" name = "granteesNum">
-				                            <br><br>
+                            <div class="form-group" style="background: var(--sig-bg); padding: 1.5rem; border-radius: var(--radius-md); margin-top: 2rem;">
+                                <label><strong>Upload Validation Document</strong> <span style="color: var(--accent-red);">*</span></label>
+                                <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Provide an official soft copy letter from your organization authorizing this scholarship.</label>
+                                <input type="file" class="form-control" name="validate" id="validate" onchange="return fileValidation('validate')" accept=".pdf" required style="background: white;">
+                            </div>
 
-											<label><strong>Funding</strong></label><br>
-				                            <label style="font-size: 15px;">Short description about funding. e.g. "$5000,-" or "100% tuition fee"</label>
-				                            <br><input type = "text" name = "funding">
-				                            <br><br>
+                            <input type="hidden" name="adminapproval" value="Pending">
 
-											<label><strong>Description</strong></label><br>
-				                            <label style="font-size: 15px;">Give a general description of the scholarship. This is the first text that users will read.</label>
-				                            <br><textarea name = "description" rows="5"></textarea>
-				                            <br><br>
+                            <div class="text-center" style="margin-top: 2rem;">
+                                <button type="submit" name="deladd" class="btn-submit" style="width: 100%; max-width: 400px; padding: 1rem; font-size: 1.1rem;">Submit For Approval</button>
+                            </div>
+                        </form>
 
-											<label><strong>Eligibility</strong></label><br>
-				                            <label style="font-size: 15px;">What students are eligible? Are there any requirements?</label>
-				                            <br><textarea name = "eligibility" rows="5"></textarea>
-				                            <br><br>
+                        <div class="text-center" style="margin-top: 1rem;">
+                            <a href="tempSigScholarship.php" style="color: var(--text-muted); text-decoration: none; font-weight: 500;">Cancel and Go Back</a>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </article>
 
-											<label><strong>Benefits</strong></label><br>
-				                            <label style="font-size: 15px;">When a student gets the scholarship, what are their benefits?</label>
-				                            <br><textarea name = "benefits" rows="5"></textarea>
-				                            <br><br>
+        <!-- Footer -->
+        <footer id="footer"><ul class="copyright"></ul></footer>
 
-											<label><strong>How can you apply ?</strong></label><br>
-				                            <label style="font-size: 15px;">How should a student apply? What are the requirements for application?</label>
-				                            <br><textarea name = "apply" rows="5"></textarea>
-				                            <br><br>
+    </div>
 
-				                            <label><strong>Important Links</strong></label><br>
-				                            <label style="font-size: 15px;">Provide links for your organization and scholarship if any.</label>
-				                            <br><textarea name = "links" rows="5"></textarea>
-				                            <br><br>
-
-				                            <label><strong>Contact Details</strong></label><br>
-				                            <label style="font-size: 15px;">Email, website, contact info ...</label>
-				                            <br><textarea name = "contact" rows="5"></textarea>
-				                            <br><br>
-
-				                             <label><strong>Upload Document</strong></label>&nbsp;&nbsp;<label style="font-size: 15px;color: red; ">* This is compulsory.</label><br>
-				                            <label style="font-size: 15px;">Provide a soft copy of your scholarship so as to validate your scholarship.</label>
-				                            <br>
-				                            <input type="file" name="validate" id="validate" onchange=" return fileValidation('validate')" required><br>
-
-				                            <br><br>
-
-				                            <input type="hidden" name="adminapproval" value="Pending">
-
-                            				<div class = "text-center">
-                            					<input type = "submit" name = "deladd" value = "Submit Scholarship >">
-											</div>
-										</form>
-
-										<br>
-										<div class = "text-center">
-											<form action = "tempSigScholarship.php">
-												<input type = "submit" value = "Back">
-											</form>
-										</div>
-									</div>
-
-								</section>
-
-							</div>
-
-						</section>
-
-				</article>
-
-			<!-- Footer -->
-				<footer id="footer">
-
-					<ul class="icons">
-						<li><a href="#" class="icon circle fa-twitter"><span class="label">Twitter</span></a></li>
-						<li><a href="#" class="icon circle fa-facebook"><span class="label">Facebook</span></a></li>
-						<li><a href="#" class="icon circle fa-google-plus"><span class="label">Google+</span></a></li>
-						<li><a href="#" class="icon circle fa-github"><span class="label">Github</span></a></li>
-						<li><a href="#" class="icon circle fa-dribbble"><span class="label">Dribbble</span></a></li>
-					</ul>
-
-					<ul class="copyright">
-						<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-					</ul>
-
-				</footer>
-
-		</div>
-
-		<!-- Scripts -->
-      <script src="../js/jquery.min.js"></script>
-      <script src="../js/jquery.dropotron.min.js"></script>
-      <script src="../js/jquery.scrolly.min.js"></script>
-      <script src="../js/jquery.scrollgress.min.js"></script>
-      <script src="../js/skel.min.js"></script>
-      <script src="../js/util.js"></script>
-      <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-      <script src="../js/main.js"></script>
+    <!-- Scripts -->
+    <script src="../js/jquery.min.js"></script>
     <script type="text/javascript">
-    function selectAll(){
-      sel = document.getElementById("selSigList");
-      for (var i = 0; i < sel.options.length; i++){
-        sel.options[i].selected = true;
-      }
-    }
-
+        function selectAll(){
+            sel = document.getElementById("selSigList");
+            for (var i = 0; i < sel.options.length; i++){
+                sel.options[i].selected = true;
+            }
+        }
     </script>
   </body>
 </html>

@@ -1,26 +1,35 @@
-<header id="header" class="alt" style="background-color:#f3f6fa;color:black;height:4%">
-  <h1 id="logo"><a href="javascript:history.back()" class="button special">Back</a></h1>
-  <nav id="nav">
-    <ul>
-      <li class="current"><a href="#">Home</a></li>
-      <li><a href="tempSigProfile.php">User Profile</a></li>
-      <li class="submenu">
-        <a href="#">Scholarships</a>
-        <ul>
-          <li><a href="tempSigScholarship.php">My Scholarships</a></li>
-          <li><a href="tempAddScholarship.php">Add Scholarships</a></li>
-        </ul>
-      </li>
-      <li class="submenu">
-        <a href="tempSigApplication.php">Applications</a>
-        <ul>
-          <li><a href="tempSigApplication.php?app=Pending">Pending applications</a></li>
-          <li><a href="tempSigApplication.php?app=Approved">Accepted Applicaitons</a></li>
-          <li><a href="tempSigApplication.php?app=Rejected">Rejected Applicaitons</a></li>
-        </ul>
-      </li>
-      <li><?php echo $_SESSION['currentUserName'] . ' (ID:' . $_SESSION['currentUserID'] . ')'; ?></li>
-      <li><a href="../backend/logout.php" class="button special">Logout</a></li>
-    </ul>
-  </nav>
-</header>
+<?php
+$sigNavActive = isset($sigNavActive) ? $sigNavActive : 'home';
+$sigDisplayName = isset($sigDisplayName)
+  ? $sigDisplayName
+  : (($_SESSION['currentUserName'] ?? 'SIGNATORY') . ' (ID:' . ($_SESSION['currentUserID'] ?? '') . ')');
+?>
+<nav class="sig-navbar">
+  <div class="sig-nav-left">
+    <a href="tempSigHome.php" class="sig-nav-link <?php echo $sigNavActive === 'home' ? 'active' : ''; ?>">HOME</a>
+    <a href="tempSigProfile.php" class="sig-nav-link <?php echo $sigNavActive === 'profile' ? 'active' : ''; ?>">USER PROFILE</a>
+
+    <div class="dropdown">
+      <a class="sig-nav-link <?php echo $sigNavActive === 'scholarships' ? 'active' : ''; ?>">SCHOLARSHIPS ▾</a>
+      <div class="dropdown-menu">
+        <a href="tempSigScholarship.php" class="dropdown-item">Browse All</a>
+        <a href="tempAddScholarship.php" class="dropdown-item">Post New</a>
+        <a href="tempSigScholarship.php" class="dropdown-item">My Listings</a>
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <a class="sig-nav-link <?php echo $sigNavActive === 'applications' ? 'active' : ''; ?>">APPLICATIONS ▾</a>
+      <div class="dropdown-menu">
+        <a href="tempSigApplication.php?app=Pending" class="dropdown-item">Pending Review</a>
+        <a href="tempSigApplication.php?app=Approved" class="dropdown-item">Accepted Applications</a>
+        <a href="tempSigApplication.php?app=All" class="dropdown-item">All Applications</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sig-nav-right">
+    <span style="font-weight: 600; font-size: 1.8rem;"><?php echo htmlspecialchars($sigDisplayName, ENT_QUOTES, 'UTF-8'); ?></span>
+    <a href="../backend/logout.php" class="btn-logout">LOGOUT</a>
+  </div>
+</nav>

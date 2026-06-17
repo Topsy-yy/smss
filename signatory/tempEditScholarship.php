@@ -58,13 +58,12 @@ foreach ($rows9 as $key => $value)
 
       <link href="../css/bootstrap.min.css" rel="stylesheet">
 
-      <link href="../css/main.css" rel="stylesheet">
       <link href="../css/sig.css" rel="stylesheet">
-	<link href="../css/pages/signatory.css" rel="stylesheet">
+	<link href="../css/pages/signatory-dashboard.css" rel="stylesheet">
 
   </head>
 
-  <body class = "no-sidebar">
+  <body class="app-shell">
 
   	<script type="text/javascript">
           function fileValidation(name){
@@ -84,42 +83,18 @@ foreach ($rows9 as $key => $value)
           }
           </script>
 
-    <div id = "page-wrapper">
+    <div class="app-page">
 
-      <!-- Header -->
-        <header id = "header" >
-          <h1 id = "logo"><a href = "javascript:history.back()" class="button special">Back</a></h1>
-          <nav id = "nav">
-            <ul>
-              <li ><a href = "tempSigHome.php">Home</a></li>
-              <li><a href = "tempSigProfile.php">User Profile</a></li>
-               <li class = "current submenu">
-                <a href = "#">Scholarships</a>
-                <ul>
-                  <li><a href = "tempSigScholarship.php">My Scholarships</a></li>
-                  <li><a href = "tempAddScholarship.php">Add Scholarships</a></li>
-                </ul>
-              </li>
-              <li class = "submenu">
-                <a href = "#">Applications</a>
-                <ul>
-                  <li><a href = "tempSigApplication.php?app=Pending">Pending applications</a></li>
-                  <li><a href = "tempSigApplication.php?app=Approved">Accepted Applicaitons</a></li>
-                  <li><a href = "tempSigApplication.php?app=Rejected">Rejected Applicaitons</a></li>
-                </ul>
-              </li>
-              <li><?php echo $_SESSION['currentUserName']. " (ID:" . $_SESSION['currentUserID'] . ")"?></li>
-              <li><a href = "../backend/logout.php" class = "button special">Logout</a></li>
-            </ul>
-          </nav>
-        </header>
+			<?php
+				$sigNavActive = 'scholarships';
+				require __DIR__ . '/../includes/nav-signatory.php';
+			?>
 
 
 			<!-- Main -->
 				<article id="main">
 
-					<header class="special container">
-						<span class="icon fa-mobile"></span>
+					<header class="page-hero container">
 					</header>
 
           <?php
@@ -133,8 +108,10 @@ foreach ($rows9 as $key => $value)
             	if ($conn->connect_error) {
               		die("Connection failed: " . $conn->connect_error);
             	}
-              $schname = $schlocation = $schlocationfrom = $degree = $gender = $scholarshipp = $appdeadline = NULL;
+			  $schname = $schlocation = $schlocationfrom = $degree = $gender = $scholarshipp = $appdeadline = NULL;
               $granteesNum = $funding = $description = $eligibility = $benefits = $apply = $links = $contact = $adminapproval = NULL;
+			  $target_financial_need = 'Any';
+			  $religion = array();
               if(isset($_POST['view'])){
                 $schID = $_POST['scholarshipID'];
 
@@ -159,6 +136,7 @@ foreach ($rows9 as $key => $value)
                 			$links = $row["links"];
                 			$contact = $row["contact"];
                 			$adminapproval = $row["adminapproval"];
+		                      $target_financial_need = $row["target_financial_need"] ?? 'Any';
 
                       $religion = explode(',',$row['religion']);
 
@@ -169,7 +147,7 @@ foreach ($rows9 as $key => $value)
         ?>
 
 					<!-- One -->
-						<section class="wrapper style4 container">
+						<section class="content-card container">
 
 							<!-- Content -->
 								<div class="content">
@@ -200,21 +178,10 @@ foreach ($rows9 as $key => $value)
 				                            <label style="font-size: 15px;">This is a scholarship to study a ... (check all that apply)</label><br>
 				                            <select name="degree" style="padding-top: 10px;padding-bottom: 10px; padding-left: 3% ; padding-right: 3%">
 			                                    <option value="select" <?php if($degree === "select") echo "selected" ?>>Select</option>
-			                                    <option value="class1" <?php if($degree === "class1") echo "selected" ?>>Class 1</option>
-			                                    <option value="class2" <?php if($degree === "class2") echo "selected" ?>>Class 2</option>
-			                                    <option value="class3" <?php if($degree === "class3") echo "selected" ?>>Class 3</option>
-			                                    <option value="class4" <?php if($degree === "class4") echo "selected" ?>>Class 4</option>
-			                                    <option value="class5" <?php if($degree === "class5") echo "selected" ?>>Class 5</option>
-			                                    <option value="class6" <?php if($degree === "class6") echo "selected" ?>>Class 6</option>
-			                                    <option value="class7" <?php if($degree === "class7") echo "selected" ?>>Class 7</option>
-			                                    <option value="class8" <?php if($degree === "class8") echo "selected" ?>>Class 8</option>
-			                                    <option value="class9" <?php if($degree === "class9") echo "selected" ?>>Class 9</option>
-			                                    <option value="class10" <?php if($degree === "class10") echo "selected" ?>>Class 10</option>
-			                                    <option value="class11" <?php if($degree === "class11") echo "selected" ?>>Class 11</option>
-			                                    <option value="class12passed" <?php if($degree === "class12passed") echo "selected" ?>>Class 12 Passed</option>
+			                                  
 			                                    <option value="diploma" <?php if($degree === "diploma") echo "selected" ?>>Diploma</option>
-			                                    <option value="graduation" <?php if($degree === "graduation") echo "selected" ?>>Graduation</option>
-			                                    <option value="postgraduation" <?php if($degree === "postgraduation") echo "selected" ?>>Post-Graduation</option>
+			                                    <option value="graduation" <?php if($degree === "graduation") echo "selected" ?>>Under Graduate</option>
+			                                    <option value="postgraduation" <?php if($degree === "postgraduation") echo "selected" ?>>Post-Graduate</option>
 			                                    <option value="phd" <?php if($degree === "phd") echo "selected" ?>>PhD</option>
 			                                </select>
 				                            <br><br><br>
@@ -226,20 +193,22 @@ foreach ($rows9 as $key => $value)
 			                                    <option value="male" <?php if($gender === "male") echo "selected" ?>>Male</option>
 			                                    <option value="female" <?php if($gender === "female") echo "selected" ?>>Female</option>
 			                                    <option value="male+female" <?php if($gender === "male+female") echo "selected" ?>>Both</option>
-			                                    <option value="transgender" <?php if($gender === "transgender") echo "selected" ?>>Transgender</option>
+			                                    
 			                                </select>
 			                                <br><br><br>
 
-			                                <label><strong>Religion </strong></label><br>
-				                            <label style="font-size: 15px;">This is a scholarship for a particular gender ...</label><br>
-				                            <input type="checkbox" name="religion[]" value="buddhism" <?php echo in_array('buddhism',$religion) ? 'checked="checked"' : ''; ?> />Buddhism<br>
-				                            <input type="checkbox" name="religion[]" value="christian" <?php echo in_array('christian',$religion) ? 'checked="checked"' : ''; ?> />Christian<br>
-				                            <input type="checkbox" name="religion[]" value="hindu" <?php echo in_array('hindu',$religion) ? 'checked="checked"' : ''; ?>>Hindu<br>
-				                            <input type="checkbox" name="religion[]" value="jain" <?php echo in_array('jain',$religion) ? 'checked="checked"' : ''; ?>>Jain<br>
-				                            <input type="checkbox" name="religion[]" value="Muslim" <?php echo in_array('Muslim',$religion) ? 'checked="checked"' : ''; ?>>Muslim<br>
-				                            <input type="checkbox" name="religion[]" value="Parsi" <?php echo in_array('Parsi',$religion) ? 'checked="checked"' : ''; ?>>Parsi<br>
-				                            <input type="checkbox" name="religion[]" value="Sikh" <?php echo in_array('Sikh',$religion) ? 'checked="checked"' : ''; ?>>Sikh<br>
-											<br><br>
+										  <label><strong>Target Financial Need</strong></label><br>
+										  <label style="font-size: 15px;">Used by the Matching Engine.</label><br>
+										  <select name="target_financial_need" style="padding-top: 10px;padding-bottom: 10px; padding-left: 5%">
+											  <option value="Any" <?php if($target_financial_need === 'Any') echo 'selected'; ?>>Any (Open to all)</option>
+											  <option value="Low" <?php if($target_financial_need === 'Low') echo 'selected'; ?>>Low Need</option>
+											  <option value="Medium" <?php if($target_financial_need === 'Medium') echo 'selected'; ?>>Medium Need</option>
+											  <option value="High" <?php if($target_financial_need === 'High') echo 'selected'; ?>>High Need</option>
+											  <option value="Critical" <?php if($target_financial_need === 'Critical') echo 'selected'; ?>>Critical Need</option>
+										  </select>
+										  <br><br><br>
+
+			                                
 
 											<label><strong>Scholarship type</strong></label><br>
 				                            <label style="font-size: 15px;">Selct any Type of Scholarship from Below ...</label><br>
@@ -332,18 +301,7 @@ foreach ($rows9 as $key => $value)
 				</article>
 
 			<!-- Footer -->
-				<footer id="footer">
-
-					<ul class="icons">
-						<li><a href="#" class="icon circle fa-twitter"><span class="label">Twitter</span></a></li>
-						<li><a href="#" class="icon circle fa-facebook"><span class="label">Facebook</span></a></li>
-						<li><a href="#" class="icon circle fa-google-plus"><span class="label">Google+</span></a></li>
-						<li><a href="#" class="icon circle fa-github"><span class="label">Github</span></a></li>
-						<li><a href="#" class="icon circle fa-dribbble"><span class="label">Dribbble</span></a></li>
-					</ul>
-
-					<ul class="copyright">
-						<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+				<footer id="footer"><ul class="copyright">
 					</ul>
 
 				</footer>
@@ -352,13 +310,6 @@ foreach ($rows9 as $key => $value)
 
 		<!-- Scripts -->
       <script src="../js/jquery.min.js"></script>
-      <script src="../js/jquery.scrolly.min.js"></script>
-      <script src="../js/jquery.dropotron.min.js"></script>
-      <script src="../js/jquery.scrollgress.min.js"></script>
-      <script src="../js/skel.min.js"></script>
-      <script src="../js/util.js"></script>
-      <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-      <script src="../js/main.js"></script>
     <script type="text/javascript">
     function selectAll(){
       sel = document.getElementById("selSigList");

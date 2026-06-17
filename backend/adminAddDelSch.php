@@ -22,42 +22,79 @@ require '../config.php';
       		die("Connection failed: " . $conn->connect_error);
     	}
 
+		$postOrEmpty = function($key) {
+			return trim($_POST[$key] ?? '');
+		};
+
+		$action = trim($_POST['deladd'] ?? '');
+		$hasScholarshipId = !empty($_POST['scholarshipID']);
+		$isAddAction = ($action === 'Submit Scholarship >' || $action === 'Submit For Approval' || $action === 'on' || ($action === '' && !$hasScholarshipId));
+		$isEditAction = ($action === 'EDIT Scholarship >');
+
 		/*If the add button was clicked*/
-		if($_POST['deladd'] == 'Submit Scholarship >'){
+		if($isAddAction){
 
 			$flag=0;
-			$name = $_POST['schname'];
-			$schlocation = $_POST['schlocation'];
-			$schlocationfrom = $_POST['schlocationfrom'];
-			$degree = $_POST['degree'];
-			$gender = $_POST['gender'];
+			$name = $postOrEmpty('schname');
+			$schlocation = $postOrEmpty('schlocation');
+			$schlocationfrom = $postOrEmpty('schlocationfrom');
+			$degree = $postOrEmpty('degree');
+			$gender = $postOrEmpty('gender');
+			$targetFinancialNeed = $postOrEmpty('target_financial_need');
 			// $religion = $_POST['religion'];
-			$scholarshipp=$_POST['scholarship'];
-			$appdeadline = $_POST['appdeadline'];
-			$granteesNum = $_POST['granteesNum'];
-			$funding = $_POST['funding'];
-			$description = $_POST['description'];
-			$eligibility = $_POST['eligibility'];
-			$benefits = $_POST['benefits'];
-			$apply = $_POST['apply'];
-			$links = $_POST['links'];
-			$contact = $_POST['contact'];
-			$adminapproval = $_POST['adminapproval'];
+			$scholarshipp=$postOrEmpty('scholarship');
+			$appdeadline = $postOrEmpty('appdeadline');
+			$granteesNum = (int) $postOrEmpty('granteesNum');
+			$funding = $postOrEmpty('funding');
+			$description = $postOrEmpty('description');
+			$eligibility = $postOrEmpty('eligibility');
+			$benefits = $postOrEmpty('benefits');
+			$apply = $postOrEmpty('apply');
+			$links = $postOrEmpty('links');
+			$contact = $postOrEmpty('contact');
+			$adminapproval = $postOrEmpty('adminapproval');
+			$schID = 0;
 
 	// Religion field was removed from the form; keep empty value for current DB schema.
 	$religionn = '';
 
 
-			$sql = "INSERT INTO scholarship (sigID,schname, schlocation,schlocationfrom,degree, gender, religion, sch, appDeadline, granteesNum, funding, description, eligibility, benefits, apply, links, contact, adminapproval, previous_adminapproval) VALUES ('$currentUserID','$name','$schlocation','$schlocationfrom','$degree','$gender','$religionn','$scholarshipp','$appdeadline','$granteesNum','$funding','$description','$eligibility','$benefits','$apply','$links','$contact','$adminapproval','$adminapproval')";
+			$sql = "INSERT INTO scholarship (sigID,schname, schlocation,schlocationfrom,degree, gender, religion, target_financial_need, sch, appDeadline, granteesNum, funding, description, eligibility, benefits, apply, links, contact, adminapproval, previous_adminapproval) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+			$stmt = $conn->prepare($sql);
+			if ($stmt === false) {
+				$flag = 0;
+				echo "Error preparing statement: " . $conn->error;
+			} else {
+				$stmt->bind_param(
+					"isssssssssisssssssss",
+					$currentUserID,
+					$name,
+					$schlocation,
+					$schlocationfrom,
+					$degree,
+					$gender,
+					$religionn,
+					$targetFinancialNeed,
+					$scholarshipp,
+					$appdeadline,
+					$granteesNum,
+					$funding,
+					$description,
+					$eligibility,
+					$benefits,
+					$apply,
+					$links,
+					$contact,
+					$adminapproval,
+					$adminapproval
+				);
 
-			if ($conn->query($sql) === TRUE) {
-        $query = "SELECT * FROM scholarship WHERE sigID = '".$currentUserID."' AND schname = '".$name."' AND description = '".$description."'";
-        $result = $conn->query($query);
-        if ($result->num_rows > 0) {
-          while($row = $result->fetch_assoc()) {
-            $schID = $row['scholarshipID'];
-          }
+				if ($stmt->execute()) {
+					$schID = $conn->insert_id;
         }
+      }
+
+			if (!empty($schID)) {
         $xml = new DOMDocument("1.0","UTF-8");
 			  $xml->load("scholarship_data.xml");
   			$rootTag = $xml->getElementsByTagName("scholarships")->item(0);
@@ -69,6 +106,7 @@ require '../config.php';
         $schlocationfromtag = $xml->createElement("schlocationfrom",$schlocationfrom);
         $degreetag = $xml->createElement("degree",$degree);
         $gendertag = $xml->createElement("gender",$gender);
+		$targetFinancialNeedTag = $xml->createElement("target_financial_need",$targetFinancialNeed);
         $religiontag = $xml->createElement("religion",$religionn);
         $schtag = $xml->createElement("sch",$scholarshipp);
         $appDeadlinetag = $xml->createElement("appDeadline",$appdeadline);
@@ -87,6 +125,7 @@ require '../config.php';
         $dataTag -> appendChild($schlocationfromtag);
         $dataTag -> appendChild($degreetag);
         $dataTag -> appendChild($gendertag);
+		$dataTag -> appendChild($targetFinancialNeedTag);
         $dataTag -> appendChild($religiontag);
         $dataTag -> appendChild($schtag);
         $dataTag -> appendChild($appDeadlinetag);
@@ -107,7 +146,10 @@ require '../config.php';
     		$flag=1;
 			} else {
 				$flag=0;
-    			echo "Error: " . $sql . "<br>" . $conn->error;
+	    		echo "Error inserting scholarship: " . ((isset($stmt) && $stmt instanceof mysqli_stmt) ? $stmt->error : $conn->error);
+			}
+			if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+				$stmt->close();
 			}
 			if($flag==1){
 			$folder=$schID;
@@ -128,39 +170,67 @@ require '../config.php';
   			}
   		}
 		}
-		else if($_POST['deladd'] == 'EDIT Scholarship >'){
+		else if($isEditAction){
 			//Update Query [Same as insert]
 
       $flag=0;
-      $schID = $_POST['scholarshipID'];
-			$name = $_POST['schname'];
-			$schlocation = $_POST['schlocation'];
-			$schlocationfrom = $_POST['schlocationfrom'];
-			$degree = $_POST['degree'];
-			$gender = $_POST['gender'];
+	$schID = (int) ($_POST['scholarshipID'] ?? 0);
+			$name = $postOrEmpty('schname');
+			$schlocation = $postOrEmpty('schlocation');
+			$schlocationfrom = $postOrEmpty('schlocationfrom');
+			$degree = $postOrEmpty('degree');
+			$gender = $postOrEmpty('gender');
+			$targetFinancialNeed = $postOrEmpty('target_financial_need');
 			// $religion = $_POST['religion'];
-			$scholarshipp=$_POST['scholarship'];
-			$appdeadline = $_POST['appdeadline'];
-			$granteesNum = $_POST['granteesNum'];
-			$funding = $_POST['funding'];
-			$description = $_POST['description'];
-			$eligibility = $_POST['eligibility'];
-			$benefits = $_POST['benefits'];
-			$apply = $_POST['apply'];
-			$links = $_POST['links'];
-			$contact = $_POST['contact'];
-			$adminapproval = $_POST['adminapproval'];
+			$scholarshipp=$postOrEmpty('scholarship');
+			$appdeadline = $postOrEmpty('appdeadline');
+			$granteesNum = (int) $postOrEmpty('granteesNum');
+			$funding = $postOrEmpty('funding');
+			$description = $postOrEmpty('description');
+			$eligibility = $postOrEmpty('eligibility');
+			$benefits = $postOrEmpty('benefits');
+			$apply = $postOrEmpty('apply');
+			$links = $postOrEmpty('links');
+			$contact = $postOrEmpty('contact');
+			$adminapproval = $postOrEmpty('adminapproval');
 
 	// Religion field was removed from the form; keep empty value for current DB schema.
 	$religionn = '';
 
 
-			$sql = "UPDATE scholarship SET schlocation = '$schlocation',schlocationfrom = '$schlocationfrom',
-              degree = '$degree',gender = '$gender', religion = '$religionn', sch = '$scholarshipp', appDeadline = '$appdeadline',
-              granteesNum = '$granteesNum', funding = '$funding', description = '$description', eligibility = '$eligibility',
-              benefits = '$benefits', apply = '$apply', links = '$links', contact = '$contact', adminapproval = '$adminapproval'
-              WHERE scholarshipID = '$schID' ";
-			if ($conn->query($sql) === TRUE) {
+			$sql = "UPDATE scholarship SET schlocation = ?,schlocationfrom = ?,
+			  degree = ?,gender = ?, religion = ?, target_financial_need = ?, sch = ?, appDeadline = ?,
+              granteesNum = ?, funding = ?, description = ?, eligibility = ?,
+              benefits = ?, apply = ?, links = ?, contact = ?, adminapproval = ?
+              WHERE scholarshipID = ? ";
+			$stmt = $conn->prepare($sql);
+			if ($stmt === false) {
+				$flag = 0;
+				echo "Error preparing update statement: " . $conn->error;
+			} else {
+				$stmt->bind_param(
+					"ssssssssissssssssi",
+					$schlocation,
+					$schlocationfrom,
+					$degree,
+					$gender,
+					$religionn,
+					$targetFinancialNeed,
+					$scholarshipp,
+					$appdeadline,
+					$granteesNum,
+					$funding,
+					$description,
+					$eligibility,
+					$benefits,
+					$apply,
+					$links,
+					$contact,
+					$adminapproval,
+					$schID
+				);
+
+				if ($stmt->execute()) {
         $xml=simplexml_load_file("scholarship_data.xml") or die("Error: Cannot create object");
         foreach($xml->children() as $scholarship){
             if($scholarship['scholarshipID'] == $schID){
@@ -169,6 +239,7 @@ require '../config.php';
               $scholarship->{'degree'} = $degree;
               $scholarship->{'gender'} = $gender;
               $scholarship->{'religion'} = $religionn;
+			  $scholarship->{'target_financial_need'} = $targetFinancialNeed;
               $scholarship->{'sch'} = $scholarshipp;
               $scholarship->{'appDeadline'} = $appdeadline;
               $scholarship->{'granteesNum'} = $granteesNum;
@@ -183,10 +254,12 @@ require '../config.php';
           }
           $xml->asXml('scholarship_data.xml');
 
-    		$flag=1;
-			} else {
-				$flag=0;
-    			echo "Error: " . $sql . "<br>" . $conn->error;
+	    			$flag=1;
+				} else {
+					$flag=0;
+	    			echo "Error updating scholarship: " . $stmt->error;
+				}
+				$stmt->close();
 			}
 
 			if($flag==1){

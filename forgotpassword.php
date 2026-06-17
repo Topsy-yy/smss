@@ -13,9 +13,7 @@
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/login.css" rel="stylesheet">
   <link href="css/portal.css" rel="stylesheet">
-  <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet">
   <link href="css/general.css" rel="stylesheet">
-  <link href="css/style.css" rel="stylesheet">
 </head>
 <body id="home" class="auth-page">
 
@@ -118,7 +116,5 @@
   <!-- JavaScript -->
   <script src="js/jquery-1.10.2.js"></script>
   <script src="js/bootstrap.js"></script>
-  <script src="js/owl.carousel.js"></script>
-  <script src="js/script.js"></script>
 </body>
 </html>

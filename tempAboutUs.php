@@ -57,24 +57,23 @@ $_SESSION['selectedAppID'] = 0;
   <link href="css/portal.css" rel="stylesheet">
 
       <!-- Custom CSS -->
-      <link href="css/main.css" rel="stylesheet">
       <link href="css/tempAboutUS.css" rel="stylesheet">
   </head>
 
-  <body class = "no-sidebar">
-    <div id = "page-wrapper">
+  <body class="app-shell">
+    <div class="app-page">
 
       <!-- Header -->
-        <header id = "header">
-          <h1 id = "logo"><a href = "tempUserHome.php">Scholarships <span>that matter</span></a></h1>
-          <nav id = "nav">
+        <header class="app-header">
+          <h1 class="app-logo"><a href = "tempUserHome.php">Scholarships <span>that matter</span></a></h1>
+          <nav class="app-nav">
             <ul>
               <li><a href = "tempUserHome.php">Home</a></li>
               <li><a href = "tempUserProfile.php">User Profile</a></li>
               <li><a href = "tempUserApply.php">Apply</a></li>
               <li><a href = "tempUserView.php">View Scholarship Status</a></li>
               <li><?php echo $_SESSION['currentUserName']. " (ID:" . $_SESSION['currentUserID'] . ")"?></li>
-              <li><a href = "backend/logout.php" class = "button special">Logout</a></li>
+              <li><a href = "backend/logout.php" class="app-btn">Logout</a></li>
             </ul>
           </nav>
         </header>
@@ -132,17 +131,7 @@ $_SESSION['selectedAppID'] = 0;
 </div>
 
 <!-- Footer -->
-  <footer id="footer">
-
-    <ul class="icons">
-      <li><a href="#" class="icon circle fa-twitter"><span class="label">Twitter</span></a></li>
-      <li><a href="#" class="icon circle fa-facebook"><span class="label">Facebook</span></a></li>
-      <li><a href="#" class="icon circle fa-google-plus"><span class="label">Google+</span></a></li>
-      <li><a href="#" class="icon circle fa-github"><span class="label">Github</span></a></li>
-      <li><a href="#" class="icon circle fa-dribbble"><span class="label">Dribbble</span></a></li>
-    </ul>
-
-    <ul class="copyright">
+  <footer id="footer"><ul class="copyright">
       <li>&copy; Scholarship Management System</li><li>Design: <a href="#">Team SMS</a></li>
     </ul>
 
@@ -155,12 +144,5 @@ $_SESSION['selectedAppID'] = 0;
       <!-- Bootstrap Core JavaScript -->
       <script src="js/bootstrap.min.js"></script>
         <script src="js/jquery.min.js"></script>
-        <script src="js/jquery.dropotron.min.js"></script>
-        <script src="js/jquery.scrolly.min.js"></script>
-        <script src="js/jquery.scrollgress.min.js"></script>
-        <script src="js/skel.min.js"></script>
-        <script src="js/util.js"></script>
-        <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-        <script src="js/main.js"></script>
   </body>
 </html>

@@ -58,40 +58,30 @@ foreach ($rows9 as $key => $value)
       <link href="../css/bootstrap.min.css" rel="stylesheet">
 
       <!-- Custom CSS -->
-      <link href="../css/main.css" rel="stylesheet">
       <link href="../css/user.css" rel="stylesheet">
       <link href="../css/pages/student.css" rel="stylesheet">
+      <link href="../css/pages/student-dashboard.css" rel="stylesheet">
 
   </head>
 
-  <body class = "no-sidebar">
-    <div id = "page-wrapper">
+  <body class="app-shell">
+    <div class="app-page">
 
       <!-- Header -->
-        <header id = "header">
-          <h1 id = "logo"><a href = "javascript:history.back()" class="button special">Back</a></h1>
-          <nav id = "nav">
-            <ul>
-              <li><a href = "tempUserHome.php">Home</a></li>
-              <li><a href = "tempUserProfile.php">User Profile</a></li>
-              <li class = "current"><a href = "#">Apply</a></li>
-              <li><a href = "tempUserView.php">View Scholarship Status</a></li>
-              <li><?php echo $_SESSION['currentUserName']. " (ID:" . $_SESSION['currentUserID'] . ")"?></li>
-              <li><a href = "../backend/logout.php" class = "button special">Logout</a></li>
-            </ul>
-          </nav>
-        </header>
+        <?php
+          $studentNavCurrent = 'apply';
+          require '../includes/nav-student.php';
+        ?>
 
 
       <!-- Main -->
         <article id="main">
 
-          <header class="special container">
-            <span class="icon fa-mobile"></span>
+          <header class="page-hero container">
           </header>
 
           <!-- One -->
-          <section class="wrapper style4 container">
+          <section class="content-card container">
                           <h1 style="padding-left: 40%"><strong>Apply for Scholarship</strong></h1>
                           <h1>Select Filters</h1>
                           <table>
@@ -99,7 +89,7 @@ foreach ($rows9 as $key => $value)
                                <tr>
                                  <th>Class</th>
                                  <th style="padding-left: 4%">Gender</th>
-                                 <th style="padding-left: 4%">Religion</th>
+                                 
                                  <th style="padding-left: 4%">Scholarship</th>
                                 </tr>
                             </thead>
@@ -109,21 +99,11 @@ foreach ($rows9 as $key => $value)
                                   <td >
                                   <select name="class" style="display: inline;">
                                     <option value="select" selected>Select</option>
-                                    <option value="class1">Class 1</option>
-                                    <option value="class2">Class 2</option>
-                                    <option value="class3">Class 3</option>
-                                    <option value="class4">Class 4</option>
-                                    <option value="class5">Class 5</option>
-                                    <option value="class6">Class 6</option>
-                                    <option value="class7">Class 7</option>
-                                    <option value="class8">Class 8</option>
-                                    <option value="class9">Class 9</option>
-                                    <option value="class10">Class 10</option>
-                                    <option value="class11">Class 11</option>
-                                    <option value="class12passed">Class 12 Passed</option>
+                                    
+                                    
                                     <option value="diploma">Diploma</option>
-                                    <option value="graduation">Graduation</option>
-                                    <option value="postgraduation">Post-Graduation</option>
+                                    <option value="undergraduate">UnderGraduate</option>
+                                    <option value="postgraduate">Post-Graduate</option>
                                     <option value="phd">PhD</option>
                                   </select>
                                  </td>
@@ -132,21 +112,11 @@ foreach ($rows9 as $key => $value)
                                     <option value="select" selected>Select</option>
                                     <option value="male">Male</option>
                                     <option value="female">Female</option>
-                                    <option value="both">Both</option>
-                                    <option value="transgender">Transgender</option>
+                                    <option value="prefer_not_to_say">Prefer not to say</option>
+                                    
                                   </select>
                                  </td>
-                                 <td style="padding-left: 4%">
-                                  <select name="religion" style="display: inline;">
-                                    <option value="select" selected>Select</option>
-                                    <option value="buddhism">Buddhism</option>
-                                    <option value="christian">Christian</option>
-                                    <option value="hindu">Hindu</option>
-                                    <option value="jain">Jain</option>
-                                    <option value="muslim">Muslim</option>
-                                    <option value="parsi">Parsi</option>
-                                    <option value="sikh">Sikh</option>
-                                  </select>
+                                 
                                 </td>
                                 <td style="padding-left: 4%">
                                   <select name="scholarship" style="display: inline;">
@@ -170,7 +140,7 @@ foreach ($rows9 as $key => $value)
         </section>
 
           <!-- Two -->
-            <section class="wrapper style4 container">
+            <section class="content-card container">
                 <div class="content">
                   <section> <!-- start -->
                     <?php
@@ -296,7 +266,7 @@ foreach ($rows9 as $key => $value)
             </section>
 
           <!-- Two -->
-            <section class="wrapper style1 container special">
+            <section class="content-strip container">
               <div class="row">
                 <div class="4u 12u(narrower)">
 
@@ -349,18 +319,7 @@ foreach ($rows9 as $key => $value)
         </article>
 
       <!-- Footer -->
-        <footer id="footer">
-
-          <ul class="icons">
-            <li><a href="#" class="icon circle fa-twitter"><span class="label">Twitter</span></a></li>
-            <li><a href="#" class="icon circle fa-facebook"><span class="label">Facebook</span></a></li>
-            <li><a href="#" class="icon circle fa-google-plus"><span class="label">Google+</span></a></li>
-            <li><a href="#" class="icon circle fa-github"><span class="label">Github</span></a></li>
-            <li><a href="#" class="icon circle fa-dribbble"><span class="label">Dribbble</span></a></li>
-          </ul>
-
-          <ul class="copyright">
-            <li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+        <footer id="footer"><ul class="copyright">
           </ul>
 
         </footer>
@@ -374,13 +333,7 @@ foreach ($rows9 as $key => $value)
     <!-- Bootstrap Core JavaScript -->
     <script src="../js/bootstrap.min.js"></script>
       <script src="../js/jquery.min.js"></script>
-      <script src="../js/jquery.dropotron.min.js"></script>
-      <script src="../js/jquery.scrolly.min.js"></script>
-      <script src="../js/jquery.scrollgress.min.js"></script>
-      <script src="../js/skel.min.js"></script>
-      <script src="../js/util.js"></script>
-      <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-      <script src="../js/main.js"></script>
+      <script src="../js/student-dashboard.js"></script>
 
     <script type="text/javascript">
     $(document).ready(function(){

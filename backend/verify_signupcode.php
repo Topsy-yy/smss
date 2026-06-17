@@ -51,9 +51,7 @@ try {
   <link href="../css/bootstrap.min.css" rel="stylesheet">
   <link href="../css/login.css" rel="stylesheet">
       <link href="../css/portal.css" rel="stylesheet">
-  <link href="../font-awesome/css/font-awesome.min.css" rel="stylesheet">
   <link href="../css/general.css" rel="stylesheet">
-  <link href="../css/style.css" rel="stylesheet">
 </head>
 <body id="home" class="auth-page">
   <div class="intro-header">

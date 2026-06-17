@@ -20,14 +20,8 @@ $pageStyles = isset($pageStyles) && is_array($pageStyles) ? $pageStyles : array(
     <link href="<?php echo $assetPrefix; ?>css/login.css" rel="stylesheet">
     <link href="<?php echo $assetPrefix; ?>css/general.css" rel="stylesheet">
     <link href="<?php echo $assetPrefix; ?>css/custom.css" rel="stylesheet">
-    <link href="<?php echo $assetPrefix; ?>css/owl.carousel.css" rel="stylesheet">
-    <link href="<?php echo $assetPrefix; ?>css/owl.theme.css" rel="stylesheet">
-    <link href="<?php echo $assetPrefix; ?>css/style.css" rel="stylesheet">
-    <link href="<?php echo $assetPrefix; ?>css/animate.css" rel="stylesheet">
-    <link href="<?php echo $assetPrefix; ?>css/magnific-popup.css" rel="stylesheet">
     <link href="<?php echo $assetPrefix; ?>css/app.css" rel="stylesheet">
 
-    <link href="<?php echo $assetPrefix; ?>font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Arvo:400,700" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Exo:100,200,400" rel="stylesheet" type="text/css">
@@ -36,5 +30,4 @@ $pageStyles = isset($pageStyles) && is_array($pageStyles) ? $pageStyles : array(
     <link href="<?php echo $assetPrefix . $stylePath; ?>" rel="stylesheet">
 <?php endforeach; ?>
 
-    <script src="<?php echo $assetPrefix; ?>js/modernizr-2.8.3.min.js"></script>
   </head>

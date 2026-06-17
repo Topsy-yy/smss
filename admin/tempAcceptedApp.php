@@ -16,19 +16,18 @@
       <link href="../css/bootstrap.min.css" rel="stylesheet">
 
       <!-- Custom CSS -->
-      <link href="../css/main.css" rel="stylesheet">
       <link href="../css/admin.css" rel="stylesheet">
       <link href="../css/pages/admin.css" rel="stylesheet">
 
   </head>
 
-  <body class = "no-sidebar">
-    <div id = "page-wrapper">
+  <body class="app-shell">
+    <div class="app-page">
 
       <!-- Header -->
-        <header id = "header">
-          <h1 id = "logo"><a href = "javascript:history.back()" class="button special">Back</a></h1>
-          <nav id = "nav">
+        <header class="app-header">
+          <h1 class="app-logo"><a href = "javascript:history.back()" class="app-btn">Back</a></h1>
+          <nav class="app-nav">
             <ul>
               <li class = ""><a href = "tempAdmin.php">Home</a></li>
               <li class = "submenu current">
@@ -54,7 +53,7 @@
                   <li><a href = "tempStudentShow.php">Students</a></li>
                 </ul>
               </li>
-              <li><a href = "../backend/logout.php" class = "button special">Logout</a></li>
+              <li><a href = "../backend/logout.php" class="app-btn">Logout</a></li>
             </ul>
           </nav>
         </header>
@@ -63,12 +62,11 @@
 			<!-- Main -->
 				<article id="main">
 
-					<header class="special container">
-						<span class="icon fa-mobile"></span>
+					<header class="page-hero container">
 					</header>
 
 					<!-- One -->
-						<section class="wrapper style4 container">
+						<section class="content-card container">
 
 							<!-- Content -->
 								<div class="content">
@@ -161,18 +159,7 @@ require '../config.php';
 				</article>
 
 			<!-- Footer -->
-				<footer id="footer">
-
-					<ul class="icons">
-						<li><a href="#" class="icon circle fa-twitter"><span class="label">Twitter</span></a></li>
-						<li><a href="#" class="icon circle fa-facebook"><span class="label">Facebook</span></a></li>
-						<li><a href="#" class="icon circle fa-google-plus"><span class="label">Google+</span></a></li>
-						<li><a href="#" class="icon circle fa-github"><span class="label">Github</span></a></li>
-						<li><a href="#" class="icon circle fa-dribbble"><span class="label">Dribbble</span></a></li>
-					</ul>
-
-					<ul class="copyright">
-						<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+				<footer id="footer"><ul class="copyright">
 					</ul>
 
 				</footer>
@@ -181,12 +168,5 @@ require '../config.php';
 
 		<!-- Scripts -->
       <script src="../js/jquery.min.js"></script>
-      <script src="../js/jquery.dropotron.min.js"></script>
-      <script src="../js/jquery.scrolly.min.js"></script>
-      <script src="../js/jquery.scrollgress.min.js"></script>
-      <script src="../js/skel.min.js"></script>
-      <script src="../js/util.js"></script>
-      <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-      <script src="../js/main.js"></script>
 	</body>
 </html>

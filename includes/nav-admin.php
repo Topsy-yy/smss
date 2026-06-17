@@ -1,6 +1,6 @@
-<header id="header" class="alt" style="background-color:#f3f6fa;color:black;height:4%">
-  <h1 id="logo"><a href="javascript:history.back()" class="button special">Back</a></h1>
-  <nav id="nav">
+<header class="app-header">
+  <h1 class="app-logo"><a href="javascript:history.back()" class="app-btn">Back</a></h1>
+  <nav class="app-nav">
     <ul>
       <li class="current"><a href="#">Home</a></li>
       <li class="submenu">
@@ -27,7 +27,7 @@
           <li><a href="tempStudentShow.php">Students</a></li>
         </ul>
       </li>
-      <li><a href="../backend/logout.php" class="button special">Logout</a></li>
+      <li><a href="../backend/logout.php" class="app-btn">Logout</a></li>
     </ul>
   </nav>
 </header>

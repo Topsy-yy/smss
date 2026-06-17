@@ -1,303 +1,273 @@
 <?php
-  session_start();
-  require '../config.php';
-  require '../backend/security.php';
-  require_login(1);
-  $_SESSION['selectedAppID'] = 0;
+session_start();
+require '../config.php';
+require '../backend/MatchingEngine.php'; // Inject the newly built algorithm
 
-  $_SESSION['appList'] = NULL;
+// Legacy Auth Check
+$currentUserID = $_SESSION['currentUserID'] ?? null;
+if ($currentUserID == NULL) {
+   header("Location: ../index.php");
+   exit();
+}
 
-  $currentUserID = $_SESSION['currentUserID'];
-  $conn = getDbConnection();
-  $getName = $conn->prepare("SELECT firstName, middleName, lastName FROM student WHERE studentID = ?");
-  $getName->bind_param("i", $currentUserID);
-  $getName->execute();
-  $nameResult = $getName->get_result();
+$conn = getDbConnection();
 
-  // Get every row of the table formed from the query
-    while($rows9=mysqli_fetch_row($nameResult)){
-      foreach ($rows9 as $key => $value){
-	 	    if($key == 0){
-          $_SESSION['currentUserName'] = $value;
-		    }
-    		if($key == 1){
-    			$_SESSION['currentUserName'] = $_SESSION['currentUserName'] . " " . $value;
-    		}
-        if($key == 2){
-          $_SESSION['currentUserName'] = $_SESSION['currentUserName'] . ". " . $value;
-  		  }
-	    }
+// Fetch Student Profile Completion check
+$studentQuery = "SELECT current_level, financial_need, career_interests FROM student WHERE studentID = ?";
+$stmt = $conn->prepare($studentQuery);
+$stmt->bind_param("i", $currentUserID);
+$stmt->execute();
+$stuRes = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+$studentName = $_SESSION['currentUserName'] ?? "Student";
+
+// Calculate Profile Completion (Basic Example)
+$fieldsFilled = 0;
+if (!empty($stuRes['current_level'])) $fieldsFilled++;
+if (!empty($stuRes['financial_need'])) $fieldsFilled++;
+if (!empty($stuRes['career_interests'])) $fieldsFilled++;
+$profileCompletion = round(($fieldsFilled / 3) * 100);
+
+// ==========================================
+// THE MATCHING ENGINE IN ACTION
+// ==========================================
+$opportunities = MatchingEngine::getMatches($currentUserID);
+
+// Live Stats Calculation
+$stats = [
+    'total_matches' => 0,
+    'active_apps' => 0,
+    'draft_apps' => 0,
+    'deadlines' => 0
+];
+
+foreach ($opportunities as $opp) {
+    if ($opp['match'] >= 50) $stats['total_matches']++;
+    if ($opp['urgent']) $stats['deadlines']++;
+}
+
+// Fetch Real Applications
+$applications = [];
+$appSql = "SELECT A.applicationID, S.schname as opp_title, SI.firstName as org, A.appstatus as status, A.appDate as date, A.verifiedBySignatory
+           FROM application A
+           JOIN scholarship S ON A.scholarshipID = S.scholarshipID
+           LEFT JOIN signatory SI ON S.sigID = SI.sigID
+           WHERE A.studentID = ?";
+$appStmt = $conn->prepare($appSql);
+$appStmt->bind_param("i", $currentUserID);
+$appStmt->execute();
+$appRes = $appStmt->get_result();
+while ($row = $appRes->fetch_assoc()) {
+    if (strtolower($row['status']) === 'active' || strtolower($row['status']) === 'processing') {
+        $stats['active_apps']++;
+    } elseif (strtolower($row['status']) === 'draft') {
+        $stats['draft_apps']++;
     }
+    $applications[] = $row;
+}
+$appStmt->close();
+$conn->close();
+
+// Helper Function for Deadline formatting
+function formatDeadlineMsg($dateStr) {
+    $diff = (strtotime($dateStr) - time()) / (60 * 60 * 24);
+    if ($diff < 0) return "Closed";
+    if ($diff < 7) return "<span class='badge-urgent'>Closes in " . ceil($diff) . " days</span>";
+    if ($diff < 14) return "<span style='color: var(--warning);'>Closes in " . ceil($diff) . " days</span>";
+    return "Closes " . date("M d, Y", strtotime($dateStr));
+}
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | ScholarConnect</title>
+    <link rel="stylesheet" href="../css/pages/student-dashboard.css">
+</head>
+<body>
 
-<?php
-$pageTitle = 'Student Home';
-$assetPrefix = '../';
-$roleStyles = array('css/user.css');
-$pageStyles = array('css/pages/student.css');
-require __DIR__ . '/../includes/head-dashboard.php';
-?>
-
-  <body class = "index">
-    <div id = "page-wrapper">
-
-      <?php require __DIR__ . '/../includes/nav-student.php'; ?>
-
-        <!-- Banner -->
-        <section id="test">
-        <div class="slideshow-container">
-
-        <div class="mySlides fade">
-          <div class="numbertext">1 / 3</div>
-          <img src="../images/refresh/hero-1.svg">
-          <div class="text">Discover global scholarships that align with your goals.</div>
+<div class="dashboard-wrapper">
+    
+    <!-- HEADER ROW -->
+    <header class="header-row">
+        <div>
+            <h1>Welcome, <?php echo htmlspecialchars($studentName); ?></h1>
+            <p>Discover opportunities tailored for you</p>
         </div>
-
-        <div class="mySlides fade">
-          <div class="numbertext">2 / 3</div>
-          <img src="../images/refresh/hero-2.svg">
-          <div class="text">Compare opportunities faster with clear eligibility details.</div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <a href="tempUserProfile.php" style="font-size: 0.9rem; color: var(--text-muted); text-decoration: none; font-weight: 600;">Edit Profile</a>
+            <button class="btn-icon" aria-label="Notifications">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            </button>
+            <a href="../backend/logout.php" class="btn-icon" style="text-decoration: none; padding: 0.4rem 1rem; border-radius: var(--radius-md); background: #f3f4f6; color: var(--text-main); font-size: 0.85rem; font-weight: 600;">Logout</a>
         </div>
+    </header>
 
-        <div class="mySlides fade">
-          <div class="numbertext">3 / 3</div>
-          <img src="../images/refresh/hero-3.svg">
-          <div class="text">Track every application from submission to final decision.</div>
-        </div>
-
-        </div>
-        <br>
-
-        <div style="text-align:center">
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-        </div>
-
-        <script>
-        var slideIndex = 0;
-        showSlides();
-
-        function showSlides() {
-          var i;
-          var slides = document.getElementsByClassName("mySlides");
-          var dots = document.getElementsByClassName("dot");
-          for (i = 0; i < slides.length; i++) {
-            slides[i].style.display = "none";
-          }
-          slideIndex++;
-          if (slideIndex > slides.length) {slideIndex = 1}
-          for (i = 0; i < dots.length; i++) {
-            dots[i].className = dots[i].className.replace(" active", "");
-          }
-          slides[slideIndex-1].style.display = "block";
-          dots[slideIndex-1].className += " active";
-          setTimeout(showSlides, 2000); // Change image every 2 seconds
-        }
-        </script>
-        </section>
-
-
-
-        <!-- About (To be shifted on about page) -->
-        <article id = "main">
-          <header class = "special container">
-            <span class = "icon fa-bar-chart-o"></span>
-            <h2>Graph based info</h2>
-            <p><u>From Database</u></p>
-
-          </header>
-
-          <section class="wrapper style2 container special-alt">
-            <div class="row 50%">
-              <div class="8u 12u(narrower)">
-
-                <header>
-                  <h2>A MODERN SCHOLARSHIP PLATFORM</h2>
-                </header>
-                <p>Make education funding more accessible with a streamlined application experience and transparent status updates.</p>
-                <footer>
-                  <ul class="buttons">
-                    <li><a href="tempUserApply.php" class="button">Browse Scholarships</a></li>
-                  </ul>
-                </footer>
-
-              </div>
+    <!-- PROFILE COMPLETION ALERT -->
+    <?php if ($profileCompletion < 100): ?>
+    <div class="alert-warning">
+        <div class="alert-content">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <div>
+                <h3>Complete Your Profile</h3>
+                <p>Add your Financial Need and Career Interests to unlock your matching score.</p>
             </div>
-          </section>
-
-          <section class="wrapper style3 container special">
-
-            <header class="major">
-              <h2><strong>Find the best-fit scholarship</strong></h2>
-              <h4>Choosing the right scholarship is a daunting task. Pick relevant scholarships and stand a chance to win.</h4>
-            </header>
-
-            <div class="row">
-              <div class="6u 12u(narrower)">
-
-                <section>
-                  <a href="#" class="image featured"><img src="../images/scholarships/merit-based-scholarship.jpg" alt="" /></a>
-                  <header>
-                    <h3>Scholarships for merit students</h3>
-                  </header>
-                  <p>Merit scholarships reward strong academic or extracurricular performance and are offered by universities, organizations, and private sponsors.</p>
-                </section>
-
-              </div>
-
-              <div class="6u 12u(narrower)">
-
-                <section>
-                  <a href="#" class="image featured"><img src="../images/scholarships/PHYSICALLY-CHALLENGED-SCHOLARSHIPS.jpg" alt="" /></a>
-                  <header>
-                    <h3>Need based scholarships</h3>
-                  </header>
-                  <p>Need-based scholarships support learners facing financial barriers, helping cover tuition, living costs, and essential learning resources.</p>
-                </section>
-
-              </div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-label">
+                <span>Profile Progress</span>
+                <span><?php echo $profileCompletion; ?>%</span>
             </div>
-
-            <div class="row">
-              <div class="6u 12u(narrower)">
-
-                <section>
-                  <a href="#" class="image featured"><img src="../images/scholarships/MINORITIES-SCHOLARSHIPS.jpg" alt="" /></a>
-                  <header>
-                    <h3>Student specific scholarship</h3>
-                  </header>
-                  <p>Student-specific scholarships are tailored for distinct backgrounds, profiles, or circumstances to improve access and inclusion.</p>
-                </section>
-
-              </div>
-
-              <div class="6u 12u(narrower)">
-
-                <section>
-                  <a href="#" class="image featured"><img src="../images/scholarships/STUDY-BASED-SCHOLARSHIPS.jpg" alt="" /></a>
-                  <header>
-                    <h3>Career-specific scholarships</h3>
-                  </header>
-                  <p>Career-focused scholarships target learners pursuing fields such as technology, healthcare, research, education, and creative disciplines.</p>
-                </section>
-
-              </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: <?php echo $profileCompletion; ?>%;"></div>
             </div>
-
-            <footer class="major">
-              <ul class="buttons">
-                <li><a href="#" class="button">See Suggested Matches</a></li>
-              </ul>
-            </footer>
-
-          </section>
-
-
-
-          <section class="wrapper style5 container special">
-            <header>
-              <h2><strong>Popular Regions</Strong></h2>
-            <header>
-
-            <div class="row1">
-              <div class="column1">
-                <a href="#">
-                  <img src="../images/refresh/city-1.svg" alt="North America" style="width:100%" >
-                  <span style="display:block;">Scholarships in </span><b>North America</b>
-                </a>
-              </div>
-              <div class="column1">
-                <a href="#">
-                  <img src="../images/refresh/city-2.svg" alt="Europe" style="width:100%">
-                  <span style="display:block;">Scholarships in </span><b>Europe</b>
-                </a>
-              </div>
-              <div class="column1">
-               <a href="#">
-                 <img src="../images/refresh/city-3.svg" alt="Asia Pacific" style="width:100%">
-                 <span style="display:block;">Scholarships in </span><b>Asia Pacific</b>
-               </a>
-             </div>
-            </div>
-        </section>
-
-
-          <section class="wrapper style1 container special">
-              <div class="row">
-
-                <div class="4u 12u(narrower)">
-                  <section>
-                    <header>
-                      <h3>REGION-WISE SCHOLARSHIPS</h3>
-                    </header>
-                    <footer style="padding-left: 50px; text-align: left;">
-                      <ul>
-                        <li><a href="#">Top Scholarships in North America</a></li>
-                        <li><a href="#">Top Scholarships in Europe</a></li>
-                        <li><a href="#">Top Scholarships in Asia Pacific</a></li>
-                        <li><a href="#">Top Scholarships in the Middle East</a></li>
-                        <li><a href="#">Top Scholarships in Africa</a></li>
-                        <li><a href="#">Top Scholarships in Latin America</a></li>
-                        <li><a href="#">Top Remote / Online Scholarships</a></li>
-                        <li><a href="#">Top International Mobility Grants</a></li>
-                      </ul>
-                    </footer>
-                  </section>
-                </div>
-
-                <div class="4u 12u(narrower)">
-                  <section>
-                    <header>
-                      <h3>STUDY LEVEL SCHOLARSHIPS</h3>
-                    </header>
-                    <footer style="padding-left: 50px; text-align: left;">
-                      <ul>
-                        <li><a href="#">Top Scholarships for High School</a></li>
-                        <li><a href="#">Top Scholarships for Undergraduate Study</a></li>
-                        <li><a href="#">Top Scholarships for Graduate Study</a></li>
-                        <li><a href="#">Top Scholarships for Doctoral Research</a></li>
-                        <li><a href="#">Top Scholarships for Diplomas</a></li>
-                        <li><a href="#">Top Scholarships for Certificates</a></li>
-                        <li><a href="#">Top Scholarships for Exchange Programs</a></li>
-                        <li><a href="#">Top Scholarships for Continuing Education</a></li>
-                      </ul>
-                    </footer>
-                  </section>
-                </div>
-
-                <div class="4u 12u(narrower)">
-                  <section>
-                    <header>
-                      <h3>CATEGORY-BASED SCHOLARSHIPS</h3>
-                    </header>
-                    <footer style="padding-left: 50px; text-align: left;">
-                      <ul>
-                        <li><a href="#">Top Scholarships for Women</a></li>
-                        <li><a href="#">Top Merit-Based Scholarships</a></li>
-                        <li><a href="#">Top Need-Based Scholarships</a></li>
-                        <li><a href="#">Top Inclusion Scholarships</a></li>
-                        <li><a href="#">Top Talent Scholarships</a></li>
-                        <li><a href="#">Top Public Scholarships</a></li>
-                        <li><a href="#">Top Health & Medical Scholarships</a></li>
-                        <li><a href="#">Top STEM Scholarships</a></li>
-
-                      </ul>
-                    </footer>
-                  </section>
-                </div>
-
-              </div>
-            </section>
-
-        </article>
-
-<?php
-$ctaTitle = 'Ready to find your <strong>next opportunity</strong>?';
-$ctaText = 'Explore trusted scholarships, apply with confidence, and manage everything in one place.';
-require __DIR__ . '/../includes/footer-dashboard.php';
-?>
-
-
+        </div>
+        <a href="tempUserProfile.php" class="btn-solid" style="background: #ea580c; flex: 0 0 auto;">Update Profile</a>
     </div>
-<?php require __DIR__ . '/../includes/scripts-dashboard.php'; ?>
+    <?php endif; ?>
+
+    <!-- STATS ROW -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h4>Total Matches</h4>
+            <div class="value"><?php echo $stats['total_matches']; ?></div>
+            <p>Opportunities ≥ 50% match</p>
+        </div>
+        <div class="stat-card">
+            <h4>Active Applications</h4>
+            <div class="value"><?php echo $stats['active_apps']; ?></div>
+            <p>Currently under review</p>
+        </div>
+        <div class="stat-card">
+            <h4>Drafts</h4>
+            <div class="value"><?php echo $stats['draft_apps']; ?></div>
+            <p>Incomplete applications</p>
+        </div>
+        <div class="stat-card">
+            <h4>Deadlines</h4>
+            <div class="value" style="color: var(--danger);"><?php echo $stats['deadlines']; ?></div>
+            <p>Closing within 7 days</p>
+        </div>
+    </div>
+
+    <!-- TABBED CONTENT AREA -->
+    <div class="tab-header">
+        <button class="tab-btn active" data-target="tab-opportunities">Opportunities</button>
+        <button class="tab-btn" data-target="tab-applications">My Applications</button>
+    </div>
+
+    <!-- TAB A: OPPORTUNITIES -->
+    <div id="tab-opportunities" class="tab-content active">
+        
+        <div class="filter-bar">
+            <div class="search-input">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">  <line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="searchOpps" placeholder="Search title or organization...">
+            </div>
+            <div class="filter-toggles">
+                <button class="filter-pill active" data-filter="all">All Matches</button>
+                <button class="filter-pill" data-filter="merit_based">Merit Based</button>
+                <button class="filter-pill" data-filter="means_based">Means Based</button>
+                <button class="filter-pill" data-filter="technology_based">Tech/STEM</button>
+            </div>
+        </div>
+
+        <div id="emptyStateOpps" class="empty-state" style="display: <?php echo empty($opportunities) ? 'block' : 'none'; ?>;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <h3>No matching opportunities found</h3>
+            <p style="color: var(--text-muted);">Ensure your profile education level is set correctly to unlock scholarships.</p>
+        </div>
+
+        <!-- Grid of Cards -->
+        <div class="opp-grid">
+            <?php foreach ($opportunities as $opp): ?>
+                <?php $highMatchClass = ($opp['match'] >= 70) ? 'card-high-match' : ''; ?>
+                
+                <div class="opp-card <?php echo $highMatchClass; ?>" 
+                     data-title="<?php echo htmlspecialchars($opp['title']); ?>" 
+                     data-org="<?php echo htmlspecialchars($opp['org']); ?>" 
+                     data-category="<?php echo htmlspecialchars($opp['category']); ?>">
+                    
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title"><?php echo htmlspecialchars($opp['title']); ?></div>
+                            <div class="card-org">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                <?php echo htmlspecialchars($opp['org']); ?>
+                            </div>
+                        </div>
+                        <?php if ($profileCompletion == 100): ?>
+                            <span class="badge badge-match"><?php echo $opp['match']; ?>% Match</span>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="card-desc"><?php echo htmlspecialchars($opp['desc']); ?></div>
+
+                    <ul class="req-list">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Funding: <strong><?php echo htmlspecialchars($opp['amount']); ?></strong></span></li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <span><?php echo formatDeadlineMsg($opp['deadline']); ?></span></li>
+                    </ul>
+
+                    <div class="card-actions">
+                        <?php if ($opp['applied']): ?>
+                            <button class="btn-disabled">✓ Applied</button>
+                        <?php else: ?>
+                            <a href="tempschdesc.php?id=<?php echo $opp['id']; ?>" class="btn-solid">Apply Now</a>
+                        <?php endif; ?>
+                        <a href="tempschdesc.php?id=<?php echo $opp['id']; ?>" class="btn-outline">Details</a>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- TAB B: MY APPLICATIONS -->
+    <div id="tab-applications" class="tab-content">
+        <?php if (empty($applications)): ?>
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <h3>No Applications Yet</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">You haven't started any applications.</p>
+                <button id="btnBrowseOpps" class="btn-solid">Browse Opportunities</button>
+            </div>
+        <?php else: ?>
+            <div class="opp-grid">
+                <?php foreach ($applications as $app): ?>
+                    <div class="app-card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title"><?php echo htmlspecialchars($app['opp_title']); ?></div>
+                                <div class="card-org"><?php echo htmlspecialchars($app['org']); ?></div>
+                            </div>
+                            <?php if (strtolower($app['status']) == 'active'): ?>
+                                <span class="badge badge-status-submitted">Submitted</span>
+                            <?php else: ?>
+                                <span class="badge badge-status-draft"><?php echo htmlspecialchars($app['status']); ?></span>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="card-meta">Applied on <?php echo htmlspecialchars($app['date']); ?></div>
+
+                        <div class="req-list">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                Signatory Decision: <strong style="color: <?php echo ($app['verifiedBySignatory'] == 'Approved') ? 'var(--success)' : 'var(--text-main)'; ?>"><?php echo htmlspecialchars($app['verifiedBySignatory']); ?></strong>
+                            </li>
+                        </div>
+
+                        <div class="card-actions">
+                            <a href="tempUserView.php" class="btn-outline">Track Application Status</a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+</div>
+
+<script src="../js/student-dashboard.js"></script>
+</body>
+</html>

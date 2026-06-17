@@ -1,70 +1,79 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
-    <?php
-    session_start();
+<?php
+session_start();
 require '../config.php';
-$selAppID = $_SESSION["selectedAppID"];
 
-    $currentUserID=$_SESSION['currentUserID'];
-      if($currentUserID==NULL){
-        header("Location:../index.php");
-      }
+if (!isset($_SESSION['currentUserID'])) {
+    header("Location: ../index.php");
+    exit();
+}
 
+$conn = getDbConnection();
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
-      // Connect to database
-        $conn = getDbConnection();
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $studentID = (int) $_SESSION['currentUserID'];
 
-      // Checks Connection
-        if ($conn->connect_error) {
-          die("Connection failed: " . $conn->connect_error);
-    	}
+    // Core profile fields from student edit form.
+    $lastName = trim($_POST['lastName'] ?? '');
+    $firstName = trim($_POST['firstName'] ?? '');
+    $middleName = trim($_POST['middleName'] ?? '');
+    $gender = trim($_POST['gender'] ?? '');
+    $contactNo = trim($_POST['contactNo'] ?? '');
 
+    // Matching fields used by recommendation logic.
+    $current_level = trim($_POST['current_level'] ?? '');
+    $financial_need = trim($_POST['financial_need'] ?? '');
+    $careerInterestRaw = $_POST['career_interests'] ?? [];
+    if (is_array($careerInterestRaw)) {
+        $careerInterestRaw = array_filter(array_map('trim', $careerInterestRaw), function ($value) {
+            return $value !== '';
+        });
+        $career_interests = implode(', ', $careerInterestRaw);
+    } else {
+        $career_interests = trim((string) $careerInterestRaw);
+    }
 
+    $sql = "UPDATE student SET
+            lastName = ?,
+            firstName = ?,
+            middleName = ?,
+            gender = ?,
+            contactNo = ?,
+            current_level = ?,
+            financial_need = ?,
+            career_interests = ?
+            WHERE studentID = ?";
 
-    	//inserting Record to the database
-    	$firstName = $_POST['firstName'];
-    	$lastName = $_POST['lastName'];
-    	$middleName = $_POST['middleName'];
-    	$nationality = $_POST['nationality'];
-    	$gender = $_POST['gender'];
-    	$birthDate = $_POST['birthDate'];
-    	$birthPlace = $_POST['birthPlace'];
-    	$presStreetAddr = $_POST['presStreetAddr'];
-    	$presProvCity = $_POST['presProvCity'];
-    	$presRegion = $_POST['presRegion'];
-    	$permStreetAddr = $_POST['permStreetAddr'];
-    	$permProvCity = $_POST['permProvCity'];
-    	$permRegion = $_POST['permRegion'];
-    	$contactNo = $_POST['contactNo'];
-    	$dept = $_POST['dept'];
-    	$college = $_POST['college'];
+    $stmt = $conn->prepare($sql);
 
-    	$sql = "UPDATE student set firstName='$firstName', lastName='$lastName', middleName='$middleName', nationality='$nationality', gender='$gender', birthDate='$birthDate', birthPlace='$birthPlace', presStreetAddr='$presStreetAddr', presProvCity='$presProvCity', presRegion='$presRegion', permStreetAddr='$permStreetAddr', permProvCity='$permProvCity', permRegion='$permRegion', contactNo='$contactNo', dept='$dept', college='$college' where studentID = '$currentUserID'";
+    if ($stmt === false) {
+        echo "<script>alert('Error preparing profile update.'); window.history.back();</script>";
+    } else {
+        $stmt->bind_param(
+            "ssssssssi",
+            $lastName,
+            $firstName,
+            $middleName,
+            $gender,
+            $contactNo,
+            $current_level,
+            $financial_need,
+            $career_interests,
+            $studentID
+        );
 
-    	if($conn->query($sql)){
-      ?>
-    	     <script type="text/javascript">
-    				alert('Updated Record Successfully!');
-    				location.replace('../student/tempUserProfile.php')
-    			</script>
-      <?php
-    	}
-    	else{
-        ?>
-      	     <script type="text/javascript">
-      				alert('Error updating Record');
-      				location.replace('../student/tempUserProfile.php')
-      			</script>
-        <?php
+        if ($stmt->execute()) {
+            $_SESSION['currentUserName'] = trim($firstName . ' ' . $lastName);
+            echo "<script>alert('Profile Updated Successfully!'); window.location.href='../student/tempUserProfile.php';</script>";
+        } else {
+            echo "<script>alert('Error updating profile.'); window.history.back();</script>";
+        }
 
-    	}
-    	$conn->close();
-    ?>
+        $stmt->close();
+    }
+}
 
-  </body>
-</html>
+$conn->close();
+?>

@@ -1,0 +1,521 @@
+/* ==========================================================================
+   SIGNATORY PORTAL CSS
+   Vibrant, professional, and animated UI for scholarship providers
+   ========================================================================== */
+
+:root {
+    /* Color Palette: Navy & Teal for Authority/Provider feel */
+    --sig-bg: #f8fafc;
+    --sig-card-bg: #ffffff;
+    --sig-navy: #0f172a;
+    --sig-navy-light: #1e293b;
+    --sig-teal: #0d9488;
+    --sig-teal-light: #14b8a6;
+    --sig-accent: #f59e0b; /* Amber for highlights */
+    
+    --text-dark: #334155;
+    --text-muted: #64748b;
+    
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-lg: 0 15px 30px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   BASE & LAYOUT
+   ========================================================================== */
+body.app-shell, body.index {
+    background-color: var(--sig-bg);
+    color: var(--text-dark);
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.app-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Landing-style signatory navbar shared across all signatory pages */
+.sig-navbar {
+    background-color: var(--sig-navy);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.sig-nav-left, .sig-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.sig-nav-link {
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.7rem;
+    transition: var(--transition);
+    position: relative;
+    cursor: pointer;
+}
+
+.sig-nav-link:hover,
+.sig-nav-link.active {
+    color: #ffffff;
+}
+
+.dropdown { position: relative; }
+
+.dropdown-menu {
+    display: flex;
+    position: absolute;
+    top: calc(100% - 2px);
+    left: 0;
+    background: #ffffff;
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-md);
+    flex-direction: column;
+    min-width: 190px;
+    padding: 0.5rem 0;
+    margin-top: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition: var(--transition);
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown:focus-within .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    color: var(--text-dark);
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    font-size: 1.5rem;
+}
+
+.dropdown-item:hover {
+    background: var(--sig-bg);
+    color: var(--sig-teal);
+}
+
+.btn-logout {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 1.5rem;
+    transition: var(--transition);
+}
+
+.btn-logout:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+#main {
+    width: 100%;
+    padding: 0 0 2rem;
+}
+
+/* ==========================================================================
+   HEADER & NAVIGATION (.app-header)
+   ========================================================================== */
+.app-header {
+    background: linear-gradient(135deg, var(--sig-navy) 0%, var(--sig-teal) 100%);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.app-logo a.app-btn {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+    background: rgba(255,255,255,0.15);
+    padding: 0.5rem 1.2rem;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+.app-logo a.app-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-1px); }
+
+.app-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+    margin: 0;
+    align-items: center;
+    padding: 0;
+}
+
+.app-nav ul li a {
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    position: relative;
+    padding-bottom: 0.25rem;
+}
+
+.app-nav ul li.current > a, .app-nav ul li a:hover { color: #ffffff; }
+
+.app-nav ul li.current > a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0; width: 100%; height: 2px;
+    background-color: var(--sig-accent);
+    border-radius: 2px;
+}
+
+/* Submenu Styling */
+.app-nav ul li.submenu { position: relative; }
+.app-nav ul li.submenu ul {
+    display: none;
+    position: absolute;
+    top: 100%; left: 0;
+    background: var(--sig-card-bg);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-md);
+    padding: 0.5rem 0;
+    min-width: 200px;
+    flex-direction: column;
+    gap: 0;
+}
+.app-nav ul li.submenu:hover ul { display: flex; animation: slideUpFade 0.2s ease forwards; }
+.app-nav ul li.submenu ul li a {
+    color: var(--text-dark);
+    padding: 0.75rem 1.5rem;
+    display: block;
+    border-bottom: 1px solid #f1f5f9;
+}
+.app-nav ul li.submenu ul li a:hover { background: #f8fafc; color: var(--sig-teal); padding-left: 1.75rem; }
+
+/* ==========================================================================
+   HERO BANNER & SLIDESHOW (tempSigHome.php)
+   ========================================================================== */
+.page-hero {
+    background: url('https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+    position: relative;
+    height: 220px;
+    border-radius: var(--radius-lg);
+    margin: 2rem auto;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    animation: slideDownFade 0.6s ease-out forwards;
+}
+
+.page-hero.container {
+    width: min(1100px, calc(100% - 2rem));
+    margin: 1.5rem auto 1.25rem;
+    height: 200px;
+}
+
+.page-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to right, rgba(15, 23, 42, 0.85), rgba(13, 148, 136, 0.7));
+}
+.page-hero > * { position: relative; z-index: 2; text-align: center; }
+.page-hero h2 { font-size: 2rem; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
+/* Slideshow Container */
+.slideshow-container {
+    max-width: 1100px; margin: 2rem auto; position: relative;
+    border-radius: var(--radius-lg); overflow: hidden;
+    box-shadow: var(--shadow-lg); background: var(--sig-card-bg);
+}
+.mySlides img { width: 100%; height: 400px; object-fit: cover; }
+.mySlides .text {
+    position: absolute; bottom: 0; left: 0; width: 100%;
+    background: linear-gradient(to top, rgba(15,23,42,0.9), transparent);
+    color: white; padding: 2rem; font-size: 1.25rem; font-weight: 600;
+}
+.dot { height: 10px; width: 10px; margin: 0 4px; background-color: #cbd5e1; border-radius: 50%; display: inline-block; transition: var(--transition); }
+.dot.active { background-color: var(--sig-teal); transform: scale(1.3); }
+.fade { animation: fadeEffect 1.5s; }
+
+/* Feature Images */
+.image.featured img { border-radius: var(--radius-md); transition: var(--transition); width: 100%; }
+.image.featured:hover img { transform: scale(1.03); box-shadow: var(--shadow-sm); }
+
+/* ==========================================================================
+   CONTENT CARDS & MAIN STRUCTURE
+   ========================================================================== */
+.content-card {
+    background: var(--sig-card-bg);
+    border-radius: var(--radius-lg);
+    padding: clamp(1.25rem, 2.4vw, 2rem);
+    margin: 0 auto 2rem auto;
+    max-width: 1100px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0; transform: translateY(20px);
+    animation: slideUpFade 0.6s ease-out 0.2s forwards;
+}
+
+.content-card.container {
+    width: min(980px, calc(100% - 2rem));
+    max-width: 980px;
+}
+
+.content-card h1, .content-card h2, .content-card h3 { color: var(--sig-navy); margin-bottom: 1rem; }
+
+/* ==========================================================================
+   LANDING GRID (wrapper style3) - tempSigHome
+   ========================================================================== */
+.wrapper.style3.container.special {
+    width: min(940px, calc(100% - 2rem));
+    margin: 1rem auto 1.75rem;
+    padding: 1.25rem 0 0.75rem;
+}
+
+.wrapper.style3 .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 0 0 1rem;
+}
+
+.wrapper.style3 .row > div {
+    flex: 1 1 calc(50% - 1rem);
+    min-width: 260px;
+}
+
+.wrapper.style3 section {
+    background: var(--sig-card-bg);
+    border: 1px solid #e7eef5;
+    border-radius: var(--radius-md);
+    padding: 0.9rem;
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+}
+
+.wrapper.style3 section .image.featured {
+    display: block;
+    border-radius: 10px;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: #e2e8f0;
+    margin-bottom: 0.75rem;
+}
+
+.wrapper.style3 section .image.featured img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.wrapper.style3 section header h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.45rem;
+}
+
+.wrapper.style3 section p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+/* ==========================================================================
+   FORMS & INPUTS (tempAddScholarship, tempEditScholarship)
+   ========================================================================== */
+form label strong { color: var(--sig-navy-light); font-size: 1.45rem; display: block; margin-top: 1rem; }
+form label[style*="15px"] { color: var(--text-muted); font-size: 1.45rem !important; margin-bottom: 0.5rem; display: block; }
+
+input[type="text"], input[type="date"], input[type="email"], input[type="name"], select, textarea {
+    width: 100%; padding: 0.8rem 1rem;
+    border: 1px solid #cbd5e1; border-radius: var(--radius-md);
+    background: #f8fafc; color: var(--text-dark); font-size: 1rem;
+    transition: var(--transition); font-family: inherit;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: var(--sig-teal); background: #ffffff; outline: none;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+input:disabled { background: #e2e8f0; cursor: not-allowed; opacity: 0.8; }
+
+input[type="file"] {
+    background: #f1f5f9; padding: 1rem; border: 2px dashed #94a3b8; border-radius: var(--radius-md);
+    width: 100%; cursor: pointer; transition: var(--transition);
+}
+input[type="file"]:hover { border-color: var(--sig-teal); background: #f0fdf4; }
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+input[type="submit"], button, .button {
+    background: linear-gradient(135deg, var(--sig-teal), var(--sig-teal-light));
+    color: white; border: none; padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md); font-weight: 600; font-size: 1rem;
+    cursor: pointer; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2);
+    transition: var(--transition); text-transform: uppercase; letter-spacing: 0.5px;
+}
+input[type="submit"]:hover, button:hover, .button:hover {
+    transform: translateY(-2px); box-shadow: 0 6px 12px rgba(13, 148, 136, 0.3); background: var(--sig-teal);
+}
+input[type="submit"]:disabled, button[disabled] { background: #cbd5e1 !important; box-shadow: none; cursor: not-allowed; transform: none; }
+
+/* Specialized buttons */
+button[value="Reject"] { background: linear-gradient(135deg, #ef4444, #f87171); box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2); }
+button[value="blockapp"] { background: #64748b; box-shadow: none; }
+button[value="View"], .btn-info { background: #3b82f6; }
+
+/* ==========================================================================
+   TABLES (tempSigScholarship, tempSigApplication, sigAppView)
+   ========================================================================== */
+table.table {
+    width: 100%; border-collapse: collapse; margin-top: 1.5rem;
+    background: #ffffff; border-radius: var(--radius-md); overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+table.table thead { background: var(--sig-navy); color: #ffffff; }
+table.table th { padding: 1.2rem 1rem; font-weight: 600; text-align: left; font-size: 0.95rem; text-transform: uppercase; color: var(--text-muted); }
+table.table td { padding: 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 1rem; }
+table.table tbody tr { transition: var(--transition); }
+table.table tbody tr:hover { background: #f0fdf4; transform: scale(1.005); }
+
+/* ==========================================================================
+   ANIMATIONS & EFFECTS
+   ========================================================================== */
+@keyframes slideUpFade {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDownFade {
+    0% { opacity: 0; transform: translateY(-30px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeEffect {
+    from { opacity: 0.4 } to { opacity: 1 }
+}
+
+.stagger-item { opacity: 0; animation: slideUpFade 0.5s ease-out forwards; }
+
+/* Footer override */
+#footer { text-align: center; padding: 2rem; background: var(--sig-navy); color: white; margin-top: 3rem; }
+#footer ul { list-style: none; padding: 0; margin: 0; }
+
+/* Readability pass for non-landing signatory pages */
+article#main,
+article#main p,
+article#main li,
+article#main label,
+article#main .form-control,
+article#main input,
+article#main select,
+article#main textarea,
+article#main table td,
+article#main table th,
+.content,
+.content p {
+    font-size: 1.5rem;
+}
+
+article#main h1 { font-size: 1.9rem; }
+article#main h2 { font-size: 1.55rem; }
+article#main h3 { font-size: 1.2rem; }
+
+article#main .button,
+article#main input[type="submit"],
+article#main button {
+    font-size: 1.7rem;
+}
+
+@media (max-width: 900px) {
+    .sig-navbar {
+        padding: 0.9rem 1rem;
+    }
+
+    .sig-nav-left, .sig-nav-right {
+        gap: 0.9rem;
+    }
+
+    .sig-nav-link {
+        font-size: 1.9rem;
+    }
+
+    .page-hero.container {
+        width: min(1100px, calc(100% - 1.25rem));
+        height: 180px;
+        margin: 1.1rem auto 1rem;
+    }
+
+    .content-card.container {
+        width: min(980px, calc(100% - 1.25rem));
+    }
+
+    .wrapper.style3.container.special {
+        width: min(940px, calc(100% - 1.25rem));
+    }
+}
+
+@media (max-width: 600px) {
+    .sig-navbar {
+        flex-wrap: wrap;
+        row-gap: 0.65rem;
+    }
+
+    .sig-nav-left,
+    .sig-nav-right {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .page-hero.container {
+        height: 150px;
+        border-radius: 12px;
+    }
+
+    .content-card.container {
+        width: calc(100% - 0.9rem);
+        border-radius: 12px;
+        margin-bottom: 1.25rem;
+    }
+
+    .wrapper.style3.container.special {
+        width: calc(100% - 0.9rem);
+        margin: 0.75rem auto 1.2rem;
+        padding-top: 0.75rem;
+    }
+
+    .wrapper.style3 .row > div {
+        flex-basis: 100%;
+        min-width: 0;
+    }
+}

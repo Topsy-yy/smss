@@ -37,6 +37,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apply for Scholarship</title>
+    <link href="../css/pages/student-dashboard.css" rel="stylesheet">
     <style>
         /* ==========================================================================
            1. DESIGN TOKENS (VARIABLES) & RESET
@@ -185,7 +186,12 @@
         }
     </style>
 </head>
-<body>
+<body class="app-shell">
+    <div class="app-page">
+        <?php
+          $studentNavCurrent = 'apply';
+          require '../includes/nav-student.php';
+        ?>
     <div class="app-container">
         <main class="app-content">
             <div class="form-container">
@@ -234,6 +240,7 @@
             </div>
         </main>
     </div>
+    </div>
 
     <script>
         function fileValidation(inputId) {
@@ -262,5 +269,6 @@
             return true;
         }
     </script>
+    <script src="../js/student-dashboard.js"></script>
 </body>
 </html>
