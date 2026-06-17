@@ -92,6 +92,7 @@ $conn = getDbConnection();
                                   <th style="width:7%"></th>
                                   <th style="width:7%"></th>
                                   <th style="width:7%"></th>
+                                  <th style="width:7%"></th>
                               </tr>
                           </thead>
                           <tbody>
@@ -135,6 +136,13 @@ $conn = getDbConnection();
                                       echo "disabled";
                                       echo " style = 'color:#fff'";
                                     } ?>>UnBlock</button>
+                                  </form>
+                                </td>
+                                <td>
+                                  <form action="../backend/adminDeleteUser.php" method="post" onsubmit="return confirm('Delete this signatory profile permanently? This will remove their scholarships and related applications.');">
+                                    <input type="hidden" name="ID" value="<?php echo $sigID; ?>">
+                                    <input type="hidden" name="userType" value="signatory">
+                                    <button type="submit" style="background:#ef4444;color:#fff;">Delete</button>
                                   </form>
                                 </td>
                               </tr>

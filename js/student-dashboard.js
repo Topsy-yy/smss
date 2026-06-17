@@ -134,6 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
         editDiv.style.transform = 'translateY(0)';
       }, 280);
     });
+
+    if (params.get('force_edit') === '1' || params.get('onboarding') === '1') {
+      setTimeout(() => showDivButton.click(), 120);
+    }
   }
 
   /* ── 6. PROGRESS BAR ANIMATION ──────────────────────── */

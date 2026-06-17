@@ -35,6 +35,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $career_interests = trim((string) $careerInterestRaw);
     }
 
+    if (
+        $lastName === '' ||
+        $firstName === '' ||
+        $middleName === '' ||
+        $gender === '' ||
+        $contactNo === '' ||
+        $current_level === '' ||
+        $financial_need === '' ||
+        $career_interests === ''
+    ) {
+        echo "<script>alert('Please fill in all required profile fields before submitting.'); window.history.back();</script>";
+        $conn->close();
+        exit();
+    }
+
     $sql = "UPDATE student SET
             lastName = ?,
             firstName = ?,
@@ -66,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($stmt->execute()) {
             $_SESSION['currentUserName'] = trim($firstName . ' ' . $lastName);
-            echo "<script>alert('Profile Updated Successfully!'); window.location.href='../student/tempUserProfile.php';</script>";
+            echo "<script>alert('Profile Updated Successfully!'); window.location.href='../student/tempUserHome.php';</script>";
         } else {
             echo "<script>alert('Error updating profile.'); window.history.back();</script>";
         }

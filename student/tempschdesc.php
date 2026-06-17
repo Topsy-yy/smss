@@ -80,29 +80,62 @@ $_SESSION['selectedAppID'] = 0;
           <!-- One -->
           <?php
             $conn = getDbConnection();
-            $schid=$_GET['sch'];
-            $sigID = NULL;
-            $xml=simplexml_load_file("../backend/scholarship_data.xml") or die("Error: Cannot create object");
-            foreach($xml->children() as $sch){
-                if($sch['scholarshipID'] == $schid){
-                  $sigID = $sch->sigID;
-                  $schname = $sch->schname;
-                  $schlocation = $sch->schlocation;
-                  $schlocationfrom = $sch->schlocationfrom;
-                  $degree = $sch->degree;
-                  $gender = $sch->gender;
-                  $religion = $sch->religion;
-                  $scholarshipp = $sch->sch;
-                  $appDeadline = $sch->appDeadline;
-                  $granteesNum = $sch->granteesNum;
-                  $funding = $sch->funding;
-                  $description = $sch->description;
-                  $eligibility = $sch->eligibility;
-                  $benefits = $sch->benefits;
-                  $apply = $sch->apply;
-                  $links = $sch->links;
-                  $contact = $sch->contact;
+            $schid = 0;
+            if (isset($_GET['sch'])) {
+              $schid = (int)$_GET['sch'];
+            } elseif (isset($_GET['id'])) {
+              $schid = (int)$_GET['id'];
+            }
+            $sigID = '';
+            $schFound = false;
 
+            $schname = $description = $eligibility = $benefits = $apply = $links = $contact = '';
+
+            // Primary source: database (same source used by listing page)
+            if ($schid > 0) {
+              $schStmt = $conn->prepare("SELECT * FROM scholarship WHERE scholarshipID = ? LIMIT 1");
+              if ($schStmt) {
+                $schStmt->bind_param("i", $schid);
+                $schStmt->execute();
+                $schRow = $schStmt->get_result()->fetch_assoc();
+                $schStmt->close();
+
+                if ($schRow) {
+                  $schFound = true;
+                  $sigID = (string)($schRow['sigID'] ?? '');
+                  $schname = (string)($schRow['schname'] ?? '');
+                  $description = (string)($schRow['description'] ?? '');
+                  $eligibility = (string)($schRow['eligibility'] ?? '');
+                  $benefits = (string)($schRow['benefits'] ?? '');
+                  $apply = (string)($schRow['apply'] ?? '');
+                  $links = (string)($schRow['links'] ?? '');
+                  $contact = (string)($schRow['contact'] ?? '');
+                }
+              }
+            }
+
+            // Fallback source: legacy XML mirror
+            if (!$schFound && $schid > 0) {
+              $xml = simplexml_load_file("../backend/scholarship_data.xml");
+              if ($xml !== false) {
+                foreach($xml->children() as $sch){
+                  if ((int)$sch['scholarshipID'] === $schid) {
+                    $schFound = true;
+                    $sigID = (string)$sch->sigID;
+                    $schname = (string)$sch->schname;
+                    $description = (string)$sch->description;
+                    $eligibility = (string)$sch->eligibility;
+                    $benefits = (string)$sch->benefits;
+                    $apply = (string)$sch->apply;
+                    $links = (string)$sch->links;
+                    $contact = (string)$sch->contact;
+                    break;
+                  }
+                }
+              }
+            }
+
+            if ($schFound) {
           ?>
             <section class="content-card container">
 
@@ -145,17 +178,33 @@ $_SESSION['selectedAppID'] = 0;
                   <br><hr><br>
                   <section>
                     <h1><b>Contact Details</b></h1>
-                    <p><?php echo $contact; } } $conn->close(); ?></p>
+                    <p><?php echo $contact; ?></p>
                   </section>
                   <br><hr><br>
-                  <form action="apply.php" method="post">
-                      <?php $_SESSION['schid']=$schid; ?>
-                      <input type="hidden" name="sigID" value = "<?php echo $sigID; ?>">
-                      <input type="submit" name="apply" value="Apply >>">
-                  </form>
+                    <?php $_SESSION['schid'] = $schid; ?>
+                    <?php if ((int)$sigID > 0) { ?>
+                      <form action="apply.php" method="post">
+                          <input type="hidden" name="sigID" value="<?php echo (int)$sigID; ?>">
+                          <input type="submit" name="apply" value="Apply >>">
+                      </form>
+                    <?php } else { ?>
+                      <p style="color:#b91c1c; font-weight:600;">This scholarship is missing signatory ownership data, so applications are temporarily unavailable.</p>
+                      <a href="tempUserApply.php" class="button">Back to Scholarships</a>
+                    <?php } ?>
                 </div>
 
             </section>
+            <?php } else { ?>
+              <section class="content-card container">
+                <div class="content">
+                  <h2>Scholarship not found</h2>
+                  <p>The selected scholarship record could not be loaded. Please go back and try again.</p>
+                  <a href="tempUserApply.php" class="button">Back to Scholarships</a>
+                </div>
+              </section>
+            <?php }
+              $conn->close();
+            ?>
         </article>
         <!-- Footer -->
         <footer id="footer"><ul class="copyright">

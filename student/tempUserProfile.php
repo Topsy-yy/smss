@@ -69,6 +69,8 @@
   }
 
   $careerInterestSelections = array_filter(array_map('trim', explode(',', (string) $career_interests)));
+  $isProfileComplete = !empty($current_level) && !empty($financial_need) && !empty($career_interests);
+  $isOnboardingMode = (isset($_GET['onboarding']) && $_GET['onboarding'] == '1') || !$isProfileComplete;
 ?>
 
 <!DOCTYPE HTML>
@@ -92,10 +94,10 @@
     <div class="app-page">
 
       <!-- Header -->
-        <?php
+        <?php if(!$isOnboardingMode){
           $studentNavCurrent = 'profile';
           require '../includes/nav-student.php';
-        ?>
+        } ?>
 
       <!-- Main -->
         <article id="main">
@@ -106,7 +108,12 @@
               <!-- Content -->
                 <div class="content">
                   <section>
-                    <header><h1><b style="margin: 10% 0% 0% 42%;">User Profile</b></h1></header>
+                    <header><h1><b style="font-size: 1.2rem; margin: 10% 0% 0% 42%;">User Profile</b></h1></header>
+                    <?php if($isOnboardingMode){ ?>
+                      <div class="alert alert-warning" style="margin: 1rem 0; border-radius: 8px;">
+                        Please complete your profile.
+                      </div>
+                    <?php } ?>
                     
                     <!-- DISPLAY MODE -->
                     <div id="display">
@@ -183,7 +190,10 @@
 
                     <!-- EDIT MODE -->
                     <div id="editDiv" style="display:none">
-                        <form method="POST" action="../backend/userdata.php" class="form-horizontal" role="form">
+                        <form method="POST" action="../backend/userdata.php" class="form-horizontal" role="form" id="studentProfileForm">
+                            <?php if($isOnboardingMode){ ?>
+                              <input type="hidden" name="onboarding_mode" value="1">
+                            <?php } ?>
                             
                             <div class="form-group">
                               <label class="control-label col-sm-2">Email:</label>
@@ -194,13 +204,13 @@
                             <div class="form-group">
                               <label class="control-label col-sm-2">Last Name:</label>
                               <div class="col-sm-10">
-                                <input type="text" class="form-control" name="lastName" value="<?php echo $lastName;?>">
+                                <input type="text" class="form-control" name="lastName" value="<?php echo $lastName;?>" required>
                               </div>
                             </div>
                             <div class="form-group">
                               <label class="control-label col-sm-2">First Name:</label>
                               <div class="col-sm-10">
-                                <input type="text" class="form-control" name="firstName" value="<?php echo $firstName?>">
+                                <input type="text" class="form-control" name="firstName" value="<?php echo $firstName?>" required>
                               </div>
                             </div>
                             <div class="form-group">
@@ -219,7 +229,7 @@
                             <div class="form-group">
                               <label class="control-label col-sm-2">Education Level:</label>
                               <div class="col-sm-10">
-                                <select class="form-control" name="current_level" style="height: auto;">
+                                <select class="form-control" name="current_level" style="height: auto;" required>
                                     <option value="">Select Level</option>
                                     <option value="high school" <?php echo (strtolower($current_level)=='high school')?'selected':'';?>>High School</option>
                                     <option value="diploma" <?php echo (strtolower($current_level)=='diploma')?'selected':'';?>>Diploma</option>
@@ -233,7 +243,7 @@
                             <div class="form-group">
                               <label class="control-label col-sm-2">Financial Need:</label>
                               <div class="col-sm-10">
-                                <select class="form-control" name="financial_need" style="height: auto;">
+                                <select class="form-control" name="financial_need" style="height: auto;" required>
                                     <option value="">Select Need Level</option>
                                     <option value="Low" <?php echo ($financial_need=='Low')?'selected':'';?>>Low Need</option>
                                     <option value="Medium" <?php echo ($financial_need=='Medium')?'selected':'';?>>Medium Need</option>
@@ -247,7 +257,7 @@
                               <label class="control-label col-sm-2">Career Interests:</label>
                               <div class="col-sm-10">
                                 <div style="border: 1px solid #d8dee6; border-radius: 6px; padding: 10px 14px; background: #fff;">
-                                  <label style="display:block; font-weight: 500;"><input type="checkbox" name="career_interests[]" value="Cultural / Arts" <?php echo in_array('Cultural / Arts', $careerInterestSelections) ? 'checked' : ''; ?>> Cultural / Arts</label>
+                                  <label style="display:block; font-weight: 500;"><input type="checkbox" name="career_interests[]" value="Cultural / Arts" <?php echo in_array('Cultural / Arts', $careerInterestSelections) ? 'checked' : ''; ?> > Cultural / Arts</label>
                                   <label style="display:block; font-weight: 500;"><input type="checkbox" name="career_interests[]" value="Visual Art" <?php echo in_array('Visual Art', $careerInterestSelections) ? 'checked' : ''; ?>> Visual Art</label>
                                   <label style="display:block; font-weight: 500;"><input type="checkbox" name="career_interests[]" value="Sports Talent" <?php echo in_array('Sports Talent', $careerInterestSelections) ? 'checked' : ''; ?>> Sports Talent</label>
                                   <label style="display:block; font-weight: 500;"><input type="checkbox" name="career_interests[]" value="Science & Maths" <?php echo in_array('Science & Maths', $careerInterestSelections) ? 'checked' : ''; ?>> Science & Maths</label>
@@ -262,7 +272,7 @@
                             <div class="form-group">
                               <label class="control-label col-sm-2">Gender:</label>
                               <div class="col-sm-10">
-                                <select class="form-control" name="gender" style="height: auto;">
+                                <select class="form-control" name="gender" style="height: auto;" required>
                                     <option value="">Select Gender</option>
                                     <option value="male" <?php echo (strtolower($gender)=='male')?'selected':'';?>>Male</option>
                                     <option value="female" <?php echo (strtolower($gender)=='female')?'selected':'';?>>Female</option>
@@ -274,7 +284,7 @@
                             <div class="form-group">
                               <label class="control-label col-sm-2">Contact Number:</label>
                               <div class="col-sm-10">
-                                <input type="text" class="form-control" name="contactNo" value="<?php if($contactNo!='0') { echo $contactNo; } ?>">
+                                <input type="text" class="form-control" name="contactNo" value="<?php if($contactNo!='0') { echo $contactNo; } ?>" required>
                               </div>
                             </div>
 
@@ -299,5 +309,35 @@
     <!-- Scripts -->
       <script src="../js/jquery.min.js"></script>
       <script src="../js/student-dashboard.js"></script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          var form = document.getElementById('studentProfileForm');
+          if (!form) return;
+
+          var interestInputs = form.querySelectorAll('input[name="career_interests[]"]');
+          function validateCareerInterests() {
+            var checked = Array.prototype.some.call(interestInputs, function (input) {
+              return input.checked;
+            });
+            var message = checked ? '' : 'Please select at least one career interest.';
+            if (interestInputs.length) {
+              interestInputs[0].setCustomValidity(message);
+            }
+            return checked;
+          }
+
+          Array.prototype.forEach.call(interestInputs, function (input) {
+            input.addEventListener('change', validateCareerInterests);
+          });
+
+          form.addEventListener('submit', function (event) {
+            var interestsOk = validateCareerInterests();
+            if (!form.checkValidity() || !interestsOk) {
+              event.preventDefault();
+              form.reportValidity();
+            }
+          });
+        });
+      </script>
   </body>
 </html>

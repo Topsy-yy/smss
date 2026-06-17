@@ -56,10 +56,23 @@
               exit;
           }
         }
-        $DBH = null;
         if($flag != 0){
           clear_attempts('login');
-          if (isset($_SESSION['currentUserTYPE']) && $_SESSION['currentUserTYPE'] == 1) header('Location: ../student/tempUserHome.php');
+          if (isset($_SESSION['currentUserTYPE']) && $_SESSION['currentUserTYPE'] == 1) {
+            $profileStmt = $DBH->prepare("SELECT current_level, financial_need, career_interests FROM student WHERE studentID = :studentID LIMIT 1");
+            $profileStmt->execute(array('studentID' => $_SESSION['currentUserID']));
+            $studentProfile = $profileStmt->fetch(PDO::FETCH_ASSOC);
+
+            $hasLevel = !empty($studentProfile['current_level'] ?? '');
+            $hasNeed = !empty($studentProfile['financial_need'] ?? '');
+            $hasInterests = !empty($studentProfile['career_interests'] ?? '');
+
+            if (!($hasLevel && $hasNeed && $hasInterests)) {
+              header('Location: ../student/tempUserProfile.php?force_edit=1&onboarding=1');
+            } else {
+              header('Location: ../student/tempUserHome.php');
+            }
+          }
           elseif (isset($_SESSION['currentUserTYPE']) && $_SESSION['currentUserTYPE'] == 2) header('Location: ../admin/tempAdmin.php');
           elseif (isset($_SESSION['currentUserTYPE']) && $_SESSION['currentUserTYPE'] == 3) header('Location: ../signatory/tempSigHome.php');
           else {
@@ -69,6 +82,7 @@
           }
           exit;
         }
+        $DBH = null;
     } catch(PDOException $e)
     {
         app_log('error', 'Login failed with PDO exception', array('error' => $e->getMessage()));

@@ -118,7 +118,7 @@
 
         .form-group label {
             display: block;
-            font-size: 0.95rem;
+            font-size: 1.7rem;
             font-weight: 600;
             color: var(--text-main);
         }
@@ -152,7 +152,7 @@
 
         .upload-zone label {
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 1.7rem;
             font-weight: 400;
             cursor: pointer;
             display: block;
@@ -167,7 +167,7 @@
             align-items: center;
             justify-content: center;
             padding: 0.85rem var(--pad-sm);
-            font-size: 1rem;
+            font-size: 1.5rem;
             font-weight: 600;
             border-radius: var(--radius-sm);
             border: none;
@@ -204,7 +204,7 @@
 
                     <div class="form-group">
                         <label>1. Student ID Copy</label>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                        <p style="font-size: 1.7rem; color: var(--text-muted); margin-bottom: 0.5rem;">
                             Upload a scanned copy of your valid university student ID. Both front and back sides collated into one PDF. <span style="color: var(--brand-danger);">*</span>
                         </p>
                         <div class="upload-zone">
@@ -215,7 +215,7 @@
 
                     <div class="form-group">
                         <label>2. Official Academic Transcript</label>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                        <p style="font-size: 1.7rem; color: var(--text-muted); margin-bottom: 0.5rem;">
                             Upload your most recent official university transcript, fee statement, or statement of results. <span style="color: var(--brand-danger);">*</span>
                         </p>
                         <div class="upload-zone">

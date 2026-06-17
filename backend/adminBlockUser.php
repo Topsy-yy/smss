@@ -7,6 +7,7 @@
   <body>
       <?php
 require '../config.php';
+    require_once 'notification_mailer.php';
 $conn = getDbConnection();
       if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
@@ -14,10 +15,23 @@ $conn = getDbConnection();
 
         if(isset($_POST['blockUser']) AND $_POST['blockUser'] == "blockStudent"){
             $studentID = $_POST['ID'];
+            $notifyEmail = '';
+            $notifyName = 'Student';
+            $infoSql = "SELECT upMail, firstName, lastName FROM student WHERE studentID = '$studentID' LIMIT 1";
+            $infoRes = $conn->query($infoSql);
+            if ($infoRes && $infoRes->num_rows > 0) {
+              $infoRow = $infoRes->fetch_assoc();
+              $notifyEmail = $infoRow['upMail'];
+              $notifyName = trim(($infoRow['firstName'] ?? '') . ' ' . ($infoRow['lastName'] ?? ''));
+              if ($notifyName === '') { $notifyName = 'Student'; }
+            }
             $student_sql = "UPDATE student SET status = 'inactive' WHERE studentID = '$studentID'";
             if ($conn->query($student_sql) === TRUE) {
               $app_sql = "UPDATE application SET previous_appstatus=appstatus, appstatus = 'inactive',previous_verifiedBySignatory=verifiedBySignatory, verifiedBySignatory = 'currently blocked' WHERE studentID = '$studentID'";
               if ($conn->query($app_sql) === TRUE) {
+                $subject = 'Account Blocked - ScholarConnect';
+                $message = '<h3>Account Status Update</h3><p>Hello ' . htmlspecialchars($notifyName, ENT_QUOTES, 'UTF-8') . ',</p><p>Your account has been <strong>blocked</strong> by Admin. Any active applications tied to your account were also suspended.</p><p>Please contact support/admin for assistance.</p>';
+                sendNotificationEmail($notifyEmail, $subject, $message);
               ?>
                 <script type="text/javascript">
                   alert('Successfully Blocked the Student and corresponding Applicaitons');
@@ -44,12 +58,25 @@ $conn = getDbConnection();
 
         } else if(isset($_POST['blockUser']) AND $_POST['blockUser'] == "blockSig"){
           $sigID = $_POST['ID'];
+          $notifyEmail = '';
+          $notifyName = 'Signatory';
+          $infoSql = "SELECT upMail, firstName, lastName FROM signatory WHERE sigID = '$sigID' LIMIT 1";
+          $infoRes = $conn->query($infoSql);
+          if ($infoRes && $infoRes->num_rows > 0) {
+            $infoRow = $infoRes->fetch_assoc();
+            $notifyEmail = $infoRow['upMail'];
+            $notifyName = trim(($infoRow['firstName'] ?? '') . ' ' . ($infoRow['lastName'] ?? ''));
+            if ($notifyName === '') { $notifyName = 'Signatory'; }
+          }
           $sig_sql = "UPDATE signatory SET status = 'inactive' WHERE sigID = '$sigID'";
           if ($conn->query($sig_sql) === TRUE) {
             $sch_sql = "UPDATE scholarship SET previous_adminapproval = adminapproval, adminapproval = 'currently blocked', schstatus = 'inactive' WHERE sigID = '$sigID'";
             if ($conn->query($sch_sql) === TRUE) {
                 $app_sql = "UPDATE application SET previous_appstatus=appstatus, appstatus = 'inactive',previous_verifiedBySignatory=verifiedBySignatory, verifiedBySignatory = 'currently blocked' WHERE sigID = '$sigID'";
                 if ($conn->query($app_sql) === TRUE) {
+                  $subject = 'Account Blocked - ScholarConnect';
+                  $message = '<h3>Account Status Update</h3><p>Hello ' . htmlspecialchars($notifyName, ENT_QUOTES, 'UTF-8') . ',</p><p>Your signatory account has been <strong>blocked</strong> by Admin. Your scholarships and related applications were also blocked.</p><p>Please contact support/admin for reinstatement details.</p>';
+                  sendNotificationEmail($notifyEmail, $subject, $message);
                   ?>
                   <script type="text/javascript">
                     alert('Successfully Blocked the Signatory, corresponding Scholarships and Applications');

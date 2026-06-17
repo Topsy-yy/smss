@@ -83,25 +83,38 @@ $_SESSION['selectedAppID'] = 0;
           <section class="content-card container">
 
           <?php
-          	$conn = getDbConnection();
-            $schid=$_SESSION["schid"];
-            $sigID = $_POST['sigID'];
-            $_SESSION['sigID'] = $sigID;
-    		    $sql="SELECT * FROM application where scholarshipID=$schid AND studentID=$currentUserID AND sigID = $sigID";
-    		    $result = $conn->query($sql);
-    			  if($result->num_rows > 0){
-               	while($row = $result->fetch_assoc()){
-          ?>
-             <script type="text/javascript">
-              alert("You Have Already Applied for this scholarship!");
-              location.replace("tempUserView.php")
-            </script>
+            $conn = getDbConnection();
+            $schid = isset($_SESSION['schid']) ? (int)$_SESSION['schid'] : 0;
+            $sigID = isset($_POST['sigID']) ? (int)$_POST['sigID'] : 0;
 
-           <?php
-      			   }
-    		    }
-            else{
-            ?>
+            if ($schid <= 0 || $sigID <= 0) {
+              $conn->close();
+          ?>
+              <script type="text/javascript">
+                alert("Invalid scholarship selection. Please try applying again.");
+                location.replace("tempUserApply.php");
+              </script>
+          <?php
+            } else {
+              $_SESSION['sigID'] = $sigID;
+              $sql = "SELECT applicationID FROM application WHERE scholarshipID = ? AND studentID = ? AND sigID = ? LIMIT 1";
+              $stmt = $conn->prepare($sql);
+              if ($stmt) {
+                $stmt->bind_param("iii", $schid, $currentUserID, $sigID);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result && $result->num_rows > 0) {
+                  $stmt->close();
+                  $conn->close();
+          ?>
+                  <script type="text/javascript">
+                    alert("You have already applied for this scholarship.");
+                    location.replace("tempUserView.php");
+                  </script>
+          <?php
+                } else {
+                  $stmt->close();
+          ?>
                 <h1>Dear&nbsp;&nbsp;<b><?php echo $_SESSION['currentUserName'] ?></b>,</h1>
                 <h1>Make sure you have your Profile Completed.<br>Your Profile details will be submitted in this application.<br></h1>
                 <form style="padding-left: 20%; display: inline;" method="post">
@@ -111,10 +124,18 @@ $_SESSION['selectedAppID'] = 0;
 
                    </form>
             <?php
-        }
-    		$conn->close();
-
+                }
+              } else {
             ?>
+                <script type="text/javascript">
+                  alert("Unable to process your application right now. Please try again.");
+                  location.replace("tempUserApply.php");
+                </script>
+            <?php
+              }
+              $conn->close();
+            }
+          ?>
 
             </section>
         </article>

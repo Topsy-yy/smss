@@ -29,6 +29,11 @@ if (!empty($stuRes['financial_need'])) $fieldsFilled++;
 if (!empty($stuRes['career_interests'])) $fieldsFilled++;
 $profileCompletion = round(($fieldsFilled / 3) * 100);
 
+if ($profileCompletion < 100) {
+    header("Location: tempUserProfile.php?force_edit=1&onboarding=1");
+    exit();
+}
+
 // ==========================================
 // THE MATCHING ENGINE IN ACTION
 // ==========================================
@@ -86,7 +91,12 @@ function formatDeadlineMsg($dateStr) {
     <title>Student Dashboard | ScholarConnect</title>
     <link rel="stylesheet" href="../css/pages/student-dashboard.css">
 </head>
-<body>
+<body class="app-shell">
+
+<?php
+    $studentNavCurrent = 'home';
+    require '../includes/nav-student.php';
+?>
 
 <div class="dashboard-wrapper">
     
@@ -214,9 +224,9 @@ function formatDeadlineMsg($dateStr) {
                         <?php if ($opp['applied']): ?>
                             <button class="btn-disabled">✓ Applied</button>
                         <?php else: ?>
-                            <a href="tempschdesc.php?id=<?php echo $opp['id']; ?>" class="btn-solid">Apply Now</a>
+                            <a href="tempschdesc.php?sch=<?php echo (int)$opp['id']; ?>" class="btn-solid">Apply Now</a>
                         <?php endif; ?>
-                        <a href="tempschdesc.php?id=<?php echo $opp['id']; ?>" class="btn-outline">Details</a>
+                        <a href="tempschdesc.php?sch=<?php echo (int)$opp['id']; ?>" class="btn-outline">Details</a>
                     </div>
                 </div>
             <?php endforeach; ?>

@@ -307,7 +307,7 @@ section.content-card.container {
 }
 .sms-row:last-child { border-bottom: none; }
 .sms-row:hover { background: #f8faff; }
-.sms-time { font-size: .78rem; color: var(--text-muted); white-space: nowrap; }
+.sms-time { font-size: .10rem; color: var(--text-muted); white-space: nowrap; }
 
 /* ── 9. TABS ─────────────────────────────────────────────── */
 .tab-header {
