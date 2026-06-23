@@ -72,10 +72,10 @@
 
 							<!-- Content -->
 								<div class="content">
-									<section>
+                  <section class="applications-list-page">
 
 										<header>
-											<h3><strong>Applications of Pending Students</strong></h3>
+                      <h3 class="section-title"><strong>Applications of Pending Students</strong></h3>
 										</header>
                     <?php
 require '../config.php';
@@ -91,7 +91,7 @@ require '../config.php';
                         $sql_result = mysqli_query($conn,$to_query);
                         if(mysqli_num_rows($sql_result) > 0){
                           ?>
-                          <table class="table table-bordered">
+                          <table class="table table-bordered app-list-table">
                             <thead>
                               <tr>
 
@@ -131,21 +131,23 @@ require '../config.php';
                                         }
                                         if($key == 4)
                                         {
-                          				?><td><?php echo $value;?></td><?php
+							?><td class="col-date"><?php echo $value;?></td><?php
                                         }
                                     if ($key == 5)
                                     {
-                                      ?><td><?php echo $value;?></td><?php
+                                      $statusClass = strtolower(preg_replace('/[^a-z0-9]+/i', '-', trim((string)$value)));
+                                      ?><td><span class="status-chip status-chip-app status-app-<?php echo $statusClass; ?>"><?php echo $value;?></span></td><?php
                                     }
                                     if($key == 6){
+                                      $statusClass = strtolower(preg_replace('/[^a-z0-9]+/i', '-', trim((string)$value)));
                                       ?>
-                                        <td><?php echo $value;?></td>
+                                        <td><span class="status-chip status-chip-approval status-approval-<?php echo $statusClass; ?>"><?php echo $value;?></span></td></tr>
                                 <?php
                                     }
                                   }
                             }
                           } else{
-                              echo "No Pending Applications";
+                              echo '<div class="empty-list-state">No Pending Applications</div>';
                           }
                         mysqli_close($conn);
                         ?>

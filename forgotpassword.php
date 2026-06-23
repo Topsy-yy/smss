@@ -21,12 +21,12 @@
   <?php
     if(isset($_POST['submit'])){
       validate_csrf_or_redirect('forgot_password_form', 'forgotpassword.php');
-      $email = $_POST['email'];
+      $email = trim((string)($_POST['email'] ?? ''));
       $conn = getDbConnection();
 
       try{
-        $lookup = $conn->prepare("SELECT upMail,1 AS role FROM student WHERE upMail = ? UNION SELECT upMail,2 AS role FROM signatory WHERE upMail = ?");
-        $lookup->bind_param("ss", $email, $email);
+        $lookup = $conn->prepare("SELECT upMail, 1 AS role FROM student WHERE LOWER(upMail) = LOWER(?) UNION ALL SELECT upMail, 2 AS role FROM admin WHERE LOWER(upMail) = LOWER(?) UNION ALL SELECT upMail, 3 AS role FROM signatory WHERE LOWER(upMail) = LOWER(?) LIMIT 1");
+        $lookup->bind_param("sss", $email, $email, $email);
         $lookup->execute();
         $result = $lookup->get_result();
         if ($result->num_rows > 0) {

@@ -18,6 +18,8 @@
       if($role == 1){
         $stmt =  $conn->prepare("UPDATE student SET password = ? WHERE upMail = ?");
       }else if($role == 2){
+        $stmt = $conn->prepare("UPDATE admin SET password = ? WHERE upMail = ?");
+      }else if($role == 3){
         $stmt = $conn->prepare("UPDATE signatory SET password = ? WHERE upMail = ?");
       }
       if($stmt){

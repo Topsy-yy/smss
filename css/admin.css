@@ -283,3 +283,272 @@ article#main .image.featured:hover img {
         margin-right: 0.75rem;
     }
 }
+
+/* ========================================================================== 
+   ADMIN APP SHELL (shared across admin/*.php)
+   ========================================================================== */
+body.app-shell {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 8% 4%, rgba(15, 118, 110, 0.12), transparent 22%),
+        radial-gradient(circle at 90% 2%, rgba(34, 197, 94, 0.12), transparent 20%),
+        #f1f5f9;
+    color: #0f172a;
+}
+
+.app-page {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+.app-header {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 1.25rem 1rem 1.5rem;
+    background: linear-gradient(180deg, #102b46 0%, #0b1f34 100%);
+    border-right: 1px solid rgba(148, 163, 184, 0.16);
+    box-shadow: 10px 0 30px rgba(2, 6, 23, 0.18);
+}
+
+.app-logo {
+    margin: 0;
+    padding: 0 0.25rem 1rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(226, 232, 240, 0.34);
+    background: rgba(255, 255, 255, 0.07);
+    color: #e2e8f0;
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.7rem;
+    border-radius: 10px;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.app-btn:hover {
+    color: #ffffff;
+    border-color: rgba(226, 232, 240, 0.62);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.app-nav {
+    margin-top: 1rem;
+}
+
+.app-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.app-nav > ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.app-nav > ul > li > a {
+    display: block;
+    border-radius: 12px;
+    padding: 0.65rem 0.75rem;
+    color: #dbe7f4;
+    text-decoration: none;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.25;
+    border: 1px solid transparent;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.app-nav > ul > li > a:hover {
+    color: #ffffff;
+    background: rgba(148, 163, 184, 0.16);
+    border-color: rgba(148, 163, 184, 0.24);
+}
+
+.app-nav > ul > li.current > a,
+.app-nav > ul > li > a.app-active {
+    color: #ffffff;
+    background: linear-gradient(135deg, #0f766e 0%, #22c55e 100%);
+    border-color: transparent;
+    box-shadow: 0 10px 20px rgba(15, 118, 110, 0.35);
+}
+
+.app-nav > ul > li.submenu {
+    padding: 0.15rem 0;
+}
+
+.app-nav > ul > li.submenu > ul {
+    margin: 0.45rem 0 0.15rem;
+    padding-left: 0.4rem;
+    border-left: 2px solid rgba(148, 163, 184, 0.24);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.app-nav > ul > li.submenu > ul li a {
+    display: block;
+    color: #b9ccdf;
+    text-decoration: none;
+    font-size: 1.3rem;
+    font-weight: 600;
+    padding: 0.42rem 0.62rem;
+    border-radius: 8px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.app-nav > ul > li.submenu > ul li a:hover {
+    color: #ffffff;
+    background: rgba(15, 118, 110, 0.25);
+}
+
+.app-nav > ul > li:last-child {
+    margin-top: 0.55rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+article#main {
+    grid-column: 2;
+    width: 100%;
+    padding: 1.5rem 1.5rem 0;
+}
+
+.page-hero.container {
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.content-card.container,
+section.content-card.container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(3px);
+    border: 1px solid #dbe4ef;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    padding: 1.25rem;
+}
+
+.content-card .content {
+    overflow-x: auto;
+}
+
+.content-card h1,
+.content-card h2,
+.content-card h3,
+.content-card h4 {
+    color: #0f172a;
+}
+
+.content-card table {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.content-card .table > thead > tr > th {
+    background: #f8fafc;
+    color: #334155;
+    border-bottom: 1px solid #dbe4ef;
+}
+
+.content-card .table > tbody > tr > td,
+.content-card .table > tbody > tr > th {
+    border-top: 1px solid #edf2f7;
+}
+
+.content-card button,
+.content-card input[type="submit"] {
+    border: none;
+    border-radius: 8px;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.83rem;
+    font-weight: 600;
+    background: #0f766e;
+    color: #ffffff;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.content-card button:hover,
+.content-card input[type="submit"]:hover {
+    background: #115e59;
+    transform: translateY(-1px);
+}
+
+footer#footer {
+    grid-column: 2;
+    margin: 0;
+    padding: 1rem 1.6rem 1.4rem;
+    color: #64748b;
+    background: transparent;
+}
+
+@media (max-width: 1100px) {
+    .app-page {
+        grid-template-columns: 240px minmax(0, 1fr);
+    }
+
+    article#main {
+        padding: 1rem 1rem 0;
+    }
+
+    .content-card.container,
+    section.content-card.container {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 860px) {
+    .app-page {
+        display: block;
+    }
+
+    .app-header {
+        position: static;
+        height: auto;
+        padding: 0.85rem 0.8rem;
+        border-right: 0;
+        box-shadow: 0 10px 24px rgba(2, 6, 23, 0.16);
+    }
+
+    .app-logo {
+        border-bottom: 0;
+        padding-bottom: 0.45rem;
+    }
+
+    .app-nav > ul {
+        gap: 0.35rem;
+    }
+
+    .app-nav > ul > li.submenu > ul {
+        margin-top: 0.3rem;
+    }
+
+    article#main,
+    footer#footer {
+        padding-left: 0.8rem;
+        padding-right: 0.8rem;
+    }
+
+    .content-card.container,
+    section.content-card.container {
+        border-radius: 14px;
+    }
+}

@@ -15,17 +15,24 @@
         $flag = 1;
         $DBH = getPdoConnection();
 
-        $email = $_POST['email'];
-        $pass = $_POST['password'];
+        $email = trim((string)($_POST['email'] ?? ''));
+        $pass = (string)($_POST['password'] ?? '');
+
+        if ($email === '' || $pass === '') {
+          register_attempt('login');
+          $_SESSION['errMsg'] = "UserName or Password Incorrect!";
+          header('Location: ../index.php');
+          exit;
+        }
 
         $data = array('email' => $email);
 
-        $STH = $DBH->prepare("SELECT * FROM (SELECT studentID AS ID, upMail, password, status, 1 AS roleID FROM student UNION SELECT adminID AS ID, upMail, password, status, 2 AS roleID FROM admin UNION SELECT sigID AS ID, upMail, password, status, 3 AS roleID FROM signatory) t WHERE upMail = :email");
+        $STH = $DBH->prepare("SELECT * FROM (SELECT studentID AS ID, upMail, password, status, 1 AS roleID FROM student UNION ALL SELECT adminID AS ID, upMail, password, status, 2 AS roleID FROM admin UNION ALL SELECT sigID AS ID, upMail, password, status, 3 AS roleID FROM signatory) t WHERE LOWER(upMail) = LOWER(:email) ORDER BY roleID DESC LIMIT 1");
         $STH->execute($data);
         $users = $STH->fetchAll(PDO::FETCH_OBJ);
 
 
-        if(isset($users[0]) AND password_verify($_POST['password'], $users[0]->password))
+        if(isset($users[0]) AND password_verify($pass, $users[0]->password))
         {
           if($users[0]->status == 'active'){
 

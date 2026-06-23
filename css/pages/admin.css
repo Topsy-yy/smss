@@ -28,3 +28,147 @@
 /* ===== Source: css/pages/admin/tempStudentShow.css ===== */
 /* Page-specific overrides for admin/tempStudentShow.php */
 
+/* ===== Applications Listing Tables (Pending / Accepted / Rejected) ===== */
+.applications-list-page {
+	padding: 0.35rem 0.15rem 0.1rem;
+}
+
+.applications-list-page .section-title {
+	margin: 0 0 1.1rem;
+	font-size: 1.26rem;
+	font-weight: 800;
+	color: #0f172a;
+	letter-spacing: 0.01em;
+}
+
+.app-list-table {
+	margin-bottom: 0;
+	border: 1px solid #d7e3ef;
+	border-radius: 14px;
+	overflow: hidden;
+	box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+	background: #ffffff;
+}
+
+.app-list-table > thead > tr > th {
+	background: linear-gradient(180deg, #f8fbff 0%, #f1f6fd 100%);
+	color: #334155;
+	font-size: 0.75rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	border-bottom: 1px solid #dbe5f1;
+	border-top: 0;
+	padding: 0.82rem 0.78rem;
+	vertical-align: middle;
+}
+
+.app-list-table > tbody > tr > td {
+	border-top: 1px solid #e9eff6;
+	padding: 0.72rem 0.78rem;
+	vertical-align: middle;
+	color: #1e293b;
+	font-size: 0.89rem;
+}
+
+.app-list-table > tbody > tr:nth-child(even) {
+	background: #fbfdff;
+}
+
+.app-list-table > tbody > tr:hover {
+	background: #f1f7ff;
+}
+
+.app-list-table td:first-child {
+	font-weight: 700;
+	color: #0f172a;
+}
+
+.app-list-table .col-date {
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+	color: #475569;
+}
+
+.status-chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	padding: 0.2rem 0.62rem;
+	font-size: 0.74rem;
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: 0.02em;
+	border: 1px solid transparent;
+	white-space: nowrap;
+}
+
+.status-chip-app,
+.status-chip-approval {
+	min-width: 92px;
+}
+
+.status-app-pending,
+.status-approval-pending {
+	background: #fff7e8;
+	color: #92400e;
+	border-color: #f6d9a8;
+}
+
+.status-app-processing {
+	background: #e8f2ff;
+	color: #1d4ed8;
+	border-color: #b9d3ff;
+}
+
+.status-app-approved,
+.status-approval-approved {
+	background: #eafaf0;
+	color: #166534;
+	border-color: #b6ebca;
+}
+
+.status-app-rejected,
+.status-approval-rejected,
+.status-app-inactive,
+.status-approval-currently-blocked {
+	background: #fff1f1;
+	color: #b91c1c;
+	border-color: #f7c9c9;
+}
+
+.status-app-unknown,
+.status-approval-unknown {
+	background: #f1f5f9;
+	color: #334155;
+	border-color: #d5dee8;
+}
+
+.empty-list-state {
+	margin: 0.7rem 0 0.25rem;
+	border: 1px dashed #cbd5e1;
+	background: #f8fafc;
+	color: #475569;
+	font-size: 0.92rem;
+	font-weight: 600;
+	text-align: center;
+	border-radius: 12px;
+	padding: 1rem 1.1rem;
+}
+
+@media (max-width: 980px) {
+	.applications-list-page {
+		padding: 0.2rem 0;
+	}
+
+	.app-list-table {
+		min-width: 920px;
+	}
+
+	.app-list-table > thead > tr > th,
+	.app-list-table > tbody > tr > td {
+		padding: 0.64rem 0.62rem;
+	}
+}
+
