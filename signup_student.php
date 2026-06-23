@@ -1,6 +1,7 @@
 <?php session_start();
   require 'config.php';
   require 'backend/security.php';
+  require_once 'backend/email_templates.php';
   require 'PHPMailer/PHPMailerAutoload.php';
  ?>
 <!DOCTYPE html>
@@ -96,17 +97,9 @@
                   // $mail->addBCC('bcc@example.com');
                   $mail->isHTML(true);  // Set email format to HTML
 
-                  $bodyContent = '
-
-                  Thanks for signing up!
-                  <h1>Your account has been created</h1>You can <strong>login</strong> with the following credentials after you have activated your account by pressing the url below.
-
-
-                  Use the following code to Login To Our WebSite:<br/>'.$sixdigitnum.'<br/><br/>
-                  Thank You For Using Our WebSite!
-                  '; // Our message above including the
-                  $mail->Subject = 'Signup | Verification';
-                  $mail->Body    = $bodyContent;
+                  $emailTemplate = email_tpl_signup_verification($sixdigitnum);
+                  $mail->Subject = $emailTemplate['subject'];
+                  $mail->Body    = $emailTemplate['body'];
 
                    if(!$mail->send()) {
                        app_log('warning', 'Student verification email failed', array('email' => $email, 'error' => $mail->ErrorInfo));

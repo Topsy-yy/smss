@@ -9,6 +9,7 @@
     session_start();
 require '../config.php';
   require_once 'notification_mailer.php';
+  require_once 'email_templates.php';
 $currentUserID=$_SESSION['currentUserID'];
       if($currentUserID==NULL){
         header("Location:../index.php");
@@ -34,8 +35,9 @@ $currentUserID=$_SESSION['currentUserID'];
             }
             $app_sql = "UPDATE application SET previous_appstatus=appstatus, appstatus = 'inactive',previous_verifiedBySignatory=verifiedBySignatory, verifiedBySignatory = 'currently blocked' WHERE applicationID = '$appID'";
             if ($conn->query($app_sql) === TRUE) {
-              $subject = 'Application Blocked - ' . $notifyScholarship;
-              $message = '<h3>Application Blocked</h3><p>Hello ' . htmlspecialchars($notifyStudentName, ENT_QUOTES, 'UTF-8') . ',</p><p>Your application for <strong>' . htmlspecialchars($notifyScholarship, ENT_QUOTES, 'UTF-8') . '</strong> has been temporarily blocked by the signatory.</p>';
+              $emailTemplate = email_tpl_application_blocked($notifyStudentName, $notifyScholarship);
+              $subject = $emailTemplate['subject'];
+              $message = $emailTemplate['body'];
               sendNotificationEmail($notifyEmail, $subject, $message);
               ?>
               <script type="text/javascript">
@@ -67,8 +69,9 @@ $currentUserID=$_SESSION['currentUserID'];
           }
           $app_sql = "UPDATE application SET appstatus = previous_appstatus, verifiedBySignatory = previous_verifiedBySignatory WHERE applicationID = '$appID'";
           if ($conn->query($app_sql) === TRUE) {
-            $subject = 'Application Restored - ' . $notifyScholarship;
-            $message = '<h3>Application Restored</h3><p>Hello ' . htmlspecialchars($notifyStudentName, ENT_QUOTES, 'UTF-8') . ',</p><p>Your application for <strong>' . htmlspecialchars($notifyScholarship, ENT_QUOTES, 'UTF-8') . '</strong> has been restored by the signatory.</p>';
+            $emailTemplate = email_tpl_application_restored($notifyStudentName, $notifyScholarship);
+            $subject = $emailTemplate['subject'];
+            $message = $emailTemplate['body'];
             sendNotificationEmail($notifyEmail, $subject, $message);
             ?>
             <script type="text/javascript">

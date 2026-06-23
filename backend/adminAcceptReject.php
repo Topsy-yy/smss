@@ -7,6 +7,7 @@
 <?php
 require '../config.php';
 require_once 'notification_mailer.php';
+require_once 'email_templates.php';
 try{
 		/*Open a connection to mySQL*/
 		// Connect to database
@@ -31,8 +32,9 @@ try{
 			}
 			$sql = "UPDATE `scholarship` SET `adminapproval` = 'Approved' WHERE `scholarship`.`scholarshipID` = $schID;";
 			if ($conn->query($sql) === TRUE) {
-				$subject = 'Scholarship Approved - ' . $notifyScholarship;
-				$message = '<h3>Scholarship Approved</h3><p>Your scholarship <strong>' . htmlspecialchars($notifyScholarship, ENT_QUOTES, 'UTF-8') . '</strong> has been approved by Admin and is now visible to students.</p><p>You can sign in to review applications.</p>';
+				$emailTemplate = email_tpl_scholarship_approved($notifyScholarship);
+				$subject = $emailTemplate['subject'];
+				$message = $emailTemplate['body'];
 				sendNotificationEmail($notifyEmail, $subject, $message);
 		 ?>
 			<script type="text/javascript">
@@ -65,8 +67,9 @@ try{
 			}
 			$sql = "UPDATE `scholarship` SET `adminapproval` = 'Rejected' WHERE `scholarship`.`scholarshipID` = $schID;";
 			if ($conn->query($sql) === TRUE) {
-				$subject = 'Scholarship Rejected - ' . $notifyScholarship;
-				$message = '<h3>Scholarship Rejected</h3><p>Your scholarship <strong>' . htmlspecialchars($notifyScholarship, ENT_QUOTES, 'UTF-8') . '</strong> was rejected by Admin.</p><p>Please review and update the listing before re-submitting.</p>';
+				$emailTemplate = email_tpl_scholarship_rejected($notifyScholarship);
+				$subject = $emailTemplate['subject'];
+				$message = $emailTemplate['body'];
 				sendNotificationEmail($notifyEmail, $subject, $message);
 		 ?>
 			<script type="text/javascript">

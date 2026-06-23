@@ -20,7 +20,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $firstName = trim($_POST['firstName'] ?? '');
     $middleName = trim($_POST['middleName'] ?? '');
     $gender = trim($_POST['gender'] ?? '');
+    $nationality = trim($_POST['nationality'] ?? '');
+    $birthDate = trim($_POST['birthDate'] ?? '');
+    $birthPlace = trim($_POST['birthPlace'] ?? '');
     $contactNo = trim($_POST['contactNo'] ?? '');
+    $college = trim($_POST['college'] ?? '');
+    $dept = trim($_POST['dept'] ?? '');
+    $status = trim($_POST['status'] ?? '');
+    $presStreetAddr = trim($_POST['presStreetAddr'] ?? '');
+    $presProvCity = trim($_POST['presProvCity'] ?? '');
+    $presRegion = trim($_POST['presRegion'] ?? '');
+    $permStreetAddr = trim($_POST['permStreetAddr'] ?? '');
+    $permProvCity = trim($_POST['permProvCity'] ?? '');
+    $permRegion = trim($_POST['permRegion'] ?? '');
 
     // Matching fields used by recommendation logic.
     $current_level = trim($_POST['current_level'] ?? '');
@@ -38,9 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (
         $lastName === '' ||
         $firstName === '' ||
-        $middleName === '' ||
         $gender === '' ||
+        $nationality === '' ||
+        $birthDate === '' ||
         $contactNo === '' ||
+        $college === '' ||
+        $dept === '' ||
+        $status === '' ||
+        $presStreetAddr === '' ||
+        $presProvCity === '' ||
+        $presRegion === '' ||
         $current_level === '' ||
         $financial_need === '' ||
         $career_interests === ''
@@ -55,7 +74,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             firstName = ?,
             middleName = ?,
             gender = ?,
+            nationality = ?,
+            birthDate = ?,
+            birthPlace = ?,
+            college = ?,
+            dept = ?,
+            status = ?,
             contactNo = ?,
+            presStreetAddr = ?,
+            presProvCity = ?,
+            presRegion = ?,
+            permStreetAddr = ?,
+            permProvCity = ?,
+            permRegion = ?,
             current_level = ?,
             financial_need = ?,
             career_interests = ?
@@ -67,12 +98,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<script>alert('Error preparing profile update.'); window.history.back();</script>";
     } else {
         $stmt->bind_param(
-            "ssssssssi",
+            "ssssssssssssssssssssi",
             $lastName,
             $firstName,
             $middleName,
             $gender,
+            $nationality,
+            $birthDate,
+            $birthPlace,
+            $college,
+            $dept,
+            $status,
             $contactNo,
+            $presStreetAddr,
+            $presProvCity,
+            $presRegion,
+            $permStreetAddr,
+            $permProvCity,
+            $permRegion,
             $current_level,
             $financial_need,
             $career_interests,

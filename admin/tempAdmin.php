@@ -214,16 +214,17 @@ require __DIR__ . '/../includes/head-dashboard.php';
 
     <div class="admin-container">
 
-      <header class="admin-header">
-        <div>
-          <h1>Admin Dashboard</h1>
+      <section class="banner-section" style="border-radius: var(--radius-lg); margin-top: 1rem;">
+        <div class="banner-overlay" style="border-radius: var(--radius-lg);"></div>
+        <div class="banner-content">
+          <h2>Admin Dashboard</h2>
           <p>Manage opportunities and verify listings</p>
+          <button id="btnOpenModal" class="btn-primary" type="button" style="border: 2px solid white; color: white; background: transparent;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add Opportunity
+          </button>
         </div>
-        <button id="btnOpenModal" class="btn-primary" type="button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Add Opportunity
-        </button>
-      </header>
+      </section>
 
       <div class="stats-grid">
         <div class="stat-card">
@@ -492,7 +493,7 @@ require __DIR__ . '/../includes/head-dashboard.php';
     <?php
     $ctaTitle = 'Ready to keep the platform <strong>running smoothly</strong>?';
     $ctaText = 'Continue managing approvals, users, and scholarships with confidence.';
-    require __DIR__ . '/../includes/footer-dashboard.php';
+    // require __DIR__ . '/../includes/footer-dashboard.php';
     ?>
 
   </div>

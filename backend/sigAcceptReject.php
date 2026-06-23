@@ -8,6 +8,7 @@
 	session_start();
 require '../config.php';
 require_once 'notification_mailer.php';
+require_once 'email_templates.php';
 $currentUserID=$_SESSION['currentUserID'];
   	if($currentUserID==NULL){
     	header("Location:../index.php");
@@ -58,8 +59,9 @@ $currentUserID=$_SESSION['currentUserID'];
 			if($appstatus !== 'inactive'){
 					$sql = "UPDATE `application` SET `appstatus` = 'Processing', `verifiedBySignatory` = 'Approved' WHERE `application`.`applicationID` = $appID;";
 					if ($conn->query($sql) === TRUE) {
-						$subject = 'Application Approved - ' . $notifyScholarship;
-						$message = '<h3>Application Approved</h3><p>Hello ' . htmlspecialchars($notifyStudentName, ENT_QUOTES, 'UTF-8') . ',</p><p>Your application for <strong>' . htmlspecialchars($notifyScholarship, ENT_QUOTES, 'UTF-8') . '</strong> has been approved by the signatory and is now in processing.</p>';
+						$emailTemplate = email_tpl_application_approved($notifyStudentName, $notifyScholarship);
+						$subject = $emailTemplate['subject'];
+						$message = $emailTemplate['body'];
 						sendNotificationEmail($notifyEmail, $subject, $message);
 				 ?>
 					<script type="text/javascript">
@@ -121,8 +123,9 @@ $currentUserID=$_SESSION['currentUserID'];
 			if($appstatus !== 'inactive'){
 					$sql = "UPDATE `application` SET `appstatus` = 'Rejected', `verifiedBySignatory` = 'Rejected' WHERE `application`.`applicationID` = $appID;";
 					if ($conn->query($sql) === TRUE) {
-						$subject = 'Application Rejected - ' . $notifyScholarship;
-						$message = '<h3>Application Rejected</h3><p>Hello ' . htmlspecialchars($notifyStudentName, ENT_QUOTES, 'UTF-8') . ',</p><p>Your application for <strong>' . htmlspecialchars($notifyScholarship, ENT_QUOTES, 'UTF-8') . '</strong> has been rejected by the signatory.</p><p>You may review other opportunities and apply again where eligible.</p>';
+						$emailTemplate = email_tpl_application_rejected($notifyStudentName, $notifyScholarship);
+						$subject = $emailTemplate['subject'];
+						$message = $emailTemplate['body'];
 						sendNotificationEmail($notifyEmail, $subject, $message);
 				 ?>
 					<script type="text/javascript">

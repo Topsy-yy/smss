@@ -100,20 +100,14 @@ function formatDeadlineMsg($dateStr) {
 
 <div class="dashboard-wrapper">
     
-    <!-- HEADER ROW -->
-    <header class="header-row">
-        <div>
-            <h1>Welcome, <?php echo htmlspecialchars($studentName); ?></h1>
+    <!-- HERO BANNER -->
+    <section class="banner-section" style="border-radius: var(--radius-lg); margin-top: 1rem;">
+        <div class="banner-overlay" style="border-radius: var(--radius-lg);"></div>
+        <div class="banner-content">
+            <h2>Welcome, <?php echo htmlspecialchars($studentName); ?></h2>
             <p>Discover opportunities tailored for you</p>
         </div>
-        <div style="display: flex; gap: 1rem; align-items: center;">
-            <a href="tempUserProfile.php" style="font-size: 0.9rem; color: var(--text-muted); text-decoration: none; font-weight: 600;">Edit Profile</a>
-            <button class="btn-icon" aria-label="Notifications">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            </button>
-            <a href="../backend/logout.php" class="btn-icon" style="text-decoration: none; padding: 0.4rem 1rem; border-radius: var(--radius-md); background: #f3f4f6; color: var(--text-main); font-size: 0.85rem; font-weight: 600;">Logout</a>
-        </div>
-    </header>
+    </section>
 
     <!-- PROFILE COMPLETION ALERT -->
     <?php if ($profileCompletion < 100): ?>
@@ -158,7 +152,7 @@ function formatDeadlineMsg($dateStr) {
         <div class="stat-card">
             <h4>Deadlines</h4>
             <div class="value" style="color: var(--danger);"><?php echo $stats['deadlines']; ?></div>
-            <p>Closing within 7 days</p>
+            <p>Closing Soon</p>
         </div>
     </div>
 

@@ -2,11 +2,11 @@
    ADMIN DASHBOARD CSS
    ========================================================================== */
 :root {
-    --admin-primary: #4f46e5;
-    --admin-primary-hover: #4338ca;
-    --admin-bg: #f8fafc;
+    --admin-primary: #4a8fa0;
+    --admin-primary-hover: #1a2b45;
+    --admin-bg: #f3f6f8;
     --admin-card: #ffffff;
-    --text-main: #0f172a;
+    --text-main: #334155;
     --text-muted: #64748b;
     --border-color: #e2e8f0;
 
@@ -19,11 +19,11 @@
 
     --radius-md: 8px;
     --radius-lg: 12px;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.08);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
-    --transition: all 0.2s ease-in-out;
+    --transition: all 0.3s ease;
 }
 
 .admin-container {
@@ -32,23 +32,19 @@
     padding: 2rem;
 }
 
-.admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* Full Bleed Banner */
+.banner-section {
+    background: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1600&q=80') center/cover;
+    position: relative;
+    padding: 4rem 2rem;
+    text-align: center;
+    color: white;
     margin-bottom: 2rem;
 }
-
-.admin-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.admin-header p {
-    color: var(--text-muted);
-    font-size: 1rem;
-}
+.banner-overlay { position: absolute; inset: 0; background: rgba(26, 43, 69, 0.85); }
+.banner-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;}
+.banner-content h2 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; text-shadow: 0 2px 8px rgba(0,0,0,0.45); }
+.banner-content p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 1.5rem; }
 
 .btn-primary {
     background: var(--admin-primary);

@@ -1,6 +1,7 @@
 <?php session_start();
   require 'config.php';
   require 'backend/security.php';
+  require_once 'backend/email_templates.php';
   require 'PHPMailer/PHPMailerAutoload.php';
  ?>
 <!DOCTYPE html>
@@ -54,16 +55,9 @@
             // $mail->addBCC('bcc@example.com');
             $mail->isHTML(true);  // Set email format to HTML
 
-            $bodyContent = '
-
-            Hey There,
-            <h1>We have got a Password Reset Request for your Account</h1><br/>
-
-            Use the following code to Reset Password :<br/>'.$sixdigitnum.'<br/><br/>
-            Thank You For Using Our WebSite!
-            '; // Our message above including the
-            $mail->Subject = 'Password Reset Request';
-            $mail->Body    = $bodyContent;
+            $emailTemplate = email_tpl_password_reset($sixdigitnum);
+            $mail->Subject = $emailTemplate['subject'];
+            $mail->Body    = $emailTemplate['body'];
 
             if(!$mail->send()) {
                 app_log('warning', 'Reset password email failed', array('email' => $email, 'error' => $mail->ErrorInfo));

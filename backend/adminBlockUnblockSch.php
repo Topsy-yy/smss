@@ -8,6 +8,7 @@
     <?php
 require '../config.php';
   require_once 'notification_mailer.php';
+  require_once 'email_templates.php';
 $conn = getDbConnection();
         if ($conn->connect_error) {
           die("Connection failed: " . $conn->connect_error);
@@ -28,8 +29,9 @@ $conn = getDbConnection();
           if ($conn->query($sch_sql) === TRUE) {
               $app_sql = "UPDATE application SET previous_appstatus=appstatus, appstatus = 'inactive',previous_verifiedBySignatory=verifiedBySignatory, verifiedBySignatory = 'currently blocked' WHERE scholarshipID = '$schID'";
               if ($conn->query($app_sql) === TRUE) {
-                $subject = 'Scholarship Blocked - ' . $notifyScholarship;
-                $message = '<h3>Scholarship Blocked</h3><p>Your scholarship <strong>' . htmlspecialchars($notifyScholarship, ENT_QUOTES, 'UTF-8') . '</strong> has been <strong>blocked</strong> by Admin. Related applications were also suspended.</p>';
+                $emailTemplate = email_tpl_scholarship_blocked($notifyScholarship);
+                $subject = $emailTemplate['subject'];
+                $message = $emailTemplate['body'];
                 sendNotificationEmail($notifyEmail, $subject, $message);
                 ?>
                 <script type="text/javascript">
@@ -69,8 +71,9 @@ $conn = getDbConnection();
           if ($conn->query($sch_sql) === TRUE) {
               $app_sql = "UPDATE application SET appstatus = previous_appstatus, verifiedBySignatory = previous_verifiedBySignatory WHERE scholarshipID = '$schID'";
               if ($conn->query($app_sql) === TRUE) {
-                $subject = 'Scholarship Restored - ' . $notifyScholarship;
-                $message = '<h3>Scholarship Restored</h3><p>Your scholarship <strong>' . htmlspecialchars($notifyScholarship, ENT_QUOTES, 'UTF-8') . '</strong> has been <strong>unblocked</strong> by Admin. Related applications were restored.</p>';
+                $emailTemplate = email_tpl_scholarship_restored($notifyScholarship);
+                $subject = $emailTemplate['subject'];
+                $message = $emailTemplate['body'];
                 sendNotificationEmail($notifyEmail, $subject, $message);
                 ?>
                 <script type="text/javascript">
