@@ -1,120 +1,159 @@
--- phpMyAdmin SQL Dump
--- version 4.8.4
--- https://www.phpmyadmin.net/
+/*M!999999\- enable the sandbox mode */ 
+-- MariaDB dump 10.19-12.3.2-MariaDB, for Linux (x86_64)
 --
--- Host: 127.0.0.1
--- Generation Time: Jun 07, 2019 at 02:04 PM
--- Server version: 10.1.37-MariaDB
--- PHP Version: 7.3.1
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
-START TRANSACTION;
-SET time_zone = "+00:00";
-
+-- Host: 127.0.0.1    Database: sms
+-- ------------------------------------------------------
+-- Server version	12.3.2-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*M!100616 SET @OLD_NOTE_VERBOSITY=@@NOTE_VERBOSITY, NOTE_VERBOSITY=0 */;
 
 --
--- Database: `sms`
+-- Current Database: `sms`
 --
-CREATE DATABASE IF NOT EXISTS `sms` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `sms` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
+
 USE `sms`;
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `admin`
 --
 
+DROP TABLE IF EXISTS `admin`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `admin` (
-  `adminID` int(11) NOT NULL,
+  `adminID` int(11) NOT NULL AUTO_INCREMENT,
   `upMail` varchar(255) NOT NULL,
   `password` text NOT NULL,
   `firstName` varchar(255) NOT NULL,
   `middleName` varchar(255) NOT NULL,
   `lastName` varchar(255) NOT NULL,
   `contact` varchar(12) NOT NULL,
-  `status` varchar(20) NOT NULL DEFAULT 'active'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `status` varchar(20) NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`adminID`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `admin`
 --
 
-INSERT INTO `admin` (`adminID`, `upMail`, `password`, `firstName`, `middleName`, `lastName`, `contact`, `status`) VALUES
-(2, 'admin@gmail.com', '$2y$10$iox6BT09JzfhnxQHSDvqruZfsso8dC9G6dKZLE3s9fKLSHAt7mFl6', 'Rahul', 'C', 'Bindrani', '', 'active');
-
--- --------------------------------------------------------
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `admin` WRITE;
+/*!40000 ALTER TABLE `admin` DISABLE KEYS */;
+INSERT INTO `admin` VALUES
+(2,'admin@gmail.com','$2y$12$reuFVMELN8s..xlrZIyzXuz.IbXnnrred4d4hsmkJ4vn8QMHHcfri','Rahul','C','Bindrani','','active');
+/*!40000 ALTER TABLE `admin` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `application`
 --
 
+DROP TABLE IF EXISTS `application`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `application` (
-  `applicationID` int(11) NOT NULL,
+  `applicationID` int(11) NOT NULL AUTO_INCREMENT,
   `studentID` int(11) NOT NULL,
   `sigID` int(11) DEFAULT NULL,
   `scholarshipID` int(11) NOT NULL,
-  `appDate` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+  `appDate` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp(),
   `appstatus` varchar(20) NOT NULL DEFAULT 'Pending',
   `verifiedBySignatory` varchar(20) NOT NULL DEFAULT 'Pending',
   `previous_appstatus` varchar(20) NOT NULL,
-  `previous_verifiedBySignatory` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `previous_verifiedBySignatory` varchar(20) NOT NULL,
+  PRIMARY KEY (`applicationID`)
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `application`
 --
 
-INSERT INTO `application` (`applicationID`, `studentID`, `sigID`, `scholarshipID`, `appDate`, `appstatus`, `verifiedBySignatory`, `previous_appstatus`, `previous_verifiedBySignatory`) VALUES
-(38, 43, 8, 22, '2019-06-06 13:58:58', 'inactive', 'currently blocked', 'Rejected', 'Rejected'),
-(39, 43, 8, 23, '2019-06-06 13:40:15', 'Processing', 'Approved', 'Processing', 'Approved'),
-(40, 43, 8, 25, '2019-06-06 11:20:19', 'Pending', 'Pending', 'Pending', 'Pending'),
-(41, 43, 7, 31, '2019-06-07 16:17:26', 'Pending', 'Pending', 'Pending', 'Pending'),
-(42, 43, 8, 30, '2019-06-07 16:16:50', 'Pending', 'Pending', 'Pending', 'Pending'),
-(43, 43, 8, 26, '2019-06-07 08:51:11', 'Pending', 'Pending', '', ''),
-(44, 44, 8, 23, '2019-06-07 11:20:22', 'Pending', 'Pending', '', '');
-
--- --------------------------------------------------------
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `application` WRITE;
+/*!40000 ALTER TABLE `application` DISABLE KEYS */;
+INSERT INTO `application` VALUES
+(38,43,8,22,'2019-06-06 13:58:58','inactive','currently blocked','Rejected','Rejected'),
+(39,43,8,23,'2019-06-06 13:40:15','Processing','Approved','Processing','Approved'),
+(40,43,8,25,'2019-06-06 11:20:19','Pending','Pending','Pending','Pending'),
+(41,43,7,31,'2019-06-07 16:17:26','Pending','Pending','Pending','Pending'),
+(42,43,8,30,'2019-06-07 16:16:50','Pending','Pending','Pending','Pending'),
+(43,43,8,26,'2026-06-09 14:59:58','Pending','Pending','Pending','Pending'),
+(44,44,8,23,'2019-06-07 11:20:22','Pending','Pending','',''),
+(45,49,9,34,'2026-06-16 15:55:16','Pending','Pending','Pending','Pending'),
+(46,50,9,35,'2026-06-17 14:34:10','Processing','Approved','Rejected','Rejected'),
+(47,49,9,35,'2026-06-18 04:55:31','Pending','Pending','Pending','Pending');
+/*!40000 ALTER TABLE `application` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `reset_password`
 --
 
+DROP TABLE IF EXISTS `reset_password`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `reset_password` (
   `upMail` varchar(255) NOT NULL,
   `num` int(8) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `reset_password`
 --
 
-INSERT INTO `reset_password` (`upMail`, `num`) VALUES
-('dishantd999@gmail.com', 744014),
-('dishantd999@gmail.com', 287736),
-('dishantd999@gmail.com', 851718),
-('dishantd999@gmail.com', 517402),
-('dishantd999@gmail.com', 979640);
-
--- --------------------------------------------------------
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `reset_password` WRITE;
+/*!40000 ALTER TABLE `reset_password` DISABLE KEYS */;
+INSERT INTO `reset_password` VALUES
+('dishantd999@gmail.com',744014),
+('dishantd999@gmail.com',287736),
+('dishantd999@gmail.com',851718),
+('dishantd999@gmail.com',517402),
+('dishantd999@gmail.com',979640),
+('yuprivatebaddest21@gmail.com',307435),
+('yuprivatebaddest21@gmail.com',253931),
+('yuprivatebaddest21@gmail.com',212853),
+('yuprivatebaddest21@gmail.com',501868),
+('yuprivatebaddest21@gmail.com',992732);
+/*!40000 ALTER TABLE `reset_password` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `scholarship`
 --
 
+DROP TABLE IF EXISTS `scholarship`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `scholarship` (
-  `scholarshipID` int(11) NOT NULL,
+  `scholarshipID` int(11) NOT NULL AUTO_INCREMENT,
   `sigID` int(11) NOT NULL,
   `schname` varchar(255) NOT NULL,
   `schlocation` varchar(255) NOT NULL,
   `schlocationfrom` varchar(255) NOT NULL,
   `degree` varchar(255) NOT NULL,
   `gender` varchar(20) NOT NULL,
+  `target_financial_need` enum('Any','Low','Medium','High','Critical') DEFAULT 'Any',
   `religion` varchar(55) NOT NULL,
   `sch` varchar(30) NOT NULL,
   `appDeadline` date NOT NULL,
@@ -128,67 +167,77 @@ CREATE TABLE `scholarship` (
   `contact` varchar(1024) NOT NULL,
   `adminapproval` varchar(20) NOT NULL,
   `previous_adminapproval` varchar(20) NOT NULL,
-  `schstatus` varchar(20) NOT NULL DEFAULT 'active'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `schstatus` varchar(20) NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`scholarshipID`)
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `scholarship`
 --
 
-INSERT INTO `scholarship` (`scholarshipID`, `sigID`, `schname`, `schlocation`, `schlocationfrom`, `degree`, `gender`, `religion`, `sch`, `appDeadline`, `granteesNum`, `funding`, `description`, `eligibility`, `benefits`, `apply`, `links`, `contact`, `adminapproval`, `previous_adminapproval`, `schstatus`) VALUES
-(22, 8, 'abc', 'abcccc', 'abccccccc', 'graduation', 'male', 'christian', 'select', '2019-06-30', 12, '1200', 'rahul', 'abc', 'OKKKK', 'abc', 'abc', 'xyz', 'Pending', 'Approved', 'active'),
-(23, 8, 'india', 'india', 'india', 'class8', 'male+female', 'Parsi, ', 'visual_art', '2019-07-20', 12, '1200', 'india', 'india', 'india', 'india', 'india', 'india', 'Approved', 'Approved', 'active'),
-(24, 8, 'xyz', 'xyz', 'xyz', 'phd', 'male+female', 'Muslim', 'sports_talent', '2019-06-30', 12, '1200', 'xyzxyz', 'xyz', 'xyz', 'xyz', 'xyz', 'xyz', 'Pending', 'Pending', 'active'),
-(25, 8, 'pqr', 'pqr', 'pqr', 'postgraduation', 'female', 'Sikh', 'science_maths_based', '2019-06-29', 12, '1200', 'pqr', 'pqr', 'pqr', 'pqr', 'pqr', 'pqr', 'Approved', 'Approved', 'active'),
-(26, 8, 'def', 'def', 'def', 'class12passed', 'male+female', 'jain, ', 'means_based', '2019-06-22', 12, '1200', 'def', 'def', 'def', 'def', 'def', 'def', 'Approved', 'Approved', 'active'),
-(27, 8, 'my', 'my', 'my', 'class1', 'male+female', 'jain<br/>', 'merit_based', '2019-06-23', 12, '1200', 'my', 'my', 'my', 'myu', 'my', 'my', 'Rejected', 'Rejected', 'active'),
-(28, 8, 'ok', 'ok', 'ok', 'class1', 'male', 'hindu, ', 'merit_based', '2019-06-23', 12, '1200', 'ok', 'ok', 'ok', 'ok', 'ok', 'ok', 'Approved', 'Pending', 'active'),
-(29, 8, 'ppp', 'ppp', 'ppp', 'class1', 'male+female', 'buddhism,christian,Muslim', 'merit_based', '2019-06-30', 12, '1200', 'ppp', 'ppp', 'ppp', 'ppp', 'ppp', 'ppp', 'Pending', 'Pending', 'active'),
-(30, 8, 'dish', 'dish', 'dish', 'class1', 'female', 'buddhism,christian,hindu', 'merit_based', '2019-06-16', 100, '1500', 'dish <a href=\"https://www.google.com/\">click here</a>', 'dish', 'dish', 'dish', 'dish', 'dish', 'Approved', 'Approved', 'active'),
-(31, 7, 'University of Bradford Half Free Academic Excellence Scholarship 2019 ', 'Gujarat', 'Gujarat', 'postgraduation', 'male+female', 'buddhism,christian,hindu,jain,Muslim,Parsi,Sikh', 'merit_based', '2019-07-06', 100, '50% of the fees', 'The University of Bradford, UK invites applications for the Half Free Academic Excellence Scholarship 2019 from undergraduate and postgraduate applicants. These scholarships are generated with an objective to celebrate the academic excellence of talented students. The selected scholars will have the opportunity to avail a scholarship worth half of the tuition fee. A total of 10 scholarships will be provided.', 'The following applicants are eligible to apply for the scholarship program:\r\n1. Should enter the respective programme in Year 0 (Foundation) or Year 1\r\n2. Must be applying for a full-time degree either undergraduate or postgraduate taught (not research)\r\n3. Must have been made an offer to study at the University of Bradford from September 2019\r\n4. Must score the equivalent of AAA in A-levels (for undergraduate study) or a first-class honours degree (for postgraduate study)\r\n5. Must be paying the tuition fee without any external financial aidOnly open to students whose courses will be based in Bradford\r\nNote: Any external or distance learning courses are not eligible for this award.', 'The selected scholars will be eligible for a scholarship worth half of the tuition fee.\r\nNote: The scholarship will be paid in subsequent years if progressing with an average of 60% or above.', 'Follow the steps to apply: \r\nStep 1: Download the application form by visiting the scholarship page. \r\nStep 2: Fill in the form with the required details. \r\nStep 3: Attach the necessary documents. \r\nStep 4: Submit the application form to the below address before the deadline (3 June 2019): Fees and Finance Team\r\nThe Hub\r\nStudent Registry Services\r\nUniversity of Bradford\r\nRichmond Road\r\nBradford\r\nBD7 1DP\r\nStep 5: Alternatively, the duly filled application can also be sent by email to scholarships@bradford.ac.uk with the subject HALF FEE ACADEMIC SCHOLARSHIPS.', 'Original website\r\n\r\nApply online link', 'University of Bradford,\r\nRichmond Road,\r\nBradford BD7 1DP, UK\r\n\r\nPhone: 01274 236637\r\nEmail: scholarships@bradford.ac.uk', 'Approved', 'Approved', 'active'),
-(32, 7, 'abc abc abc abc', 'abc', 'abc', 'class3', 'female', 'buddhism,christian,hindu', 'merit_based', '2019-06-30', 100, '1000', 'abc', 'abc', 'abc', 'abc', 'abc', 'abc', 'Pending', 'Pending', 'active'),
-(33, 8, 'ok', 'ok', 'ok', 'class5', 'male', 'buddhism,christian,hindu,jain,Muslim', 'means_based', '2019-06-29', 12, '2000', 'ok', 'ok', 'ok', 'ook', 'ok', 'ok', 'Pending', '', 'active');
-
--- --------------------------------------------------------
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `scholarship` WRITE;
+/*!40000 ALTER TABLE `scholarship` DISABLE KEYS */;
+INSERT INTO `scholarship` VALUES
+(34,9,'Test 1','Nairobi','Kibera','select','select','Any','','sports_talent','2026-06-20',10,'$400','testtt','testtt','testtt','testtt','testtt','testtt','Approved','Pending','active'),
+(35,9,'MICROSOFT FELLOWSHIP','Nairobi','Mathare','diploma','male+female','Low','','technology_based','2026-06-18',10,'$400','This is the description','computer knowledge','Accomodation','Contact us.','https://teams.cloud.microsoft/','Contact us','Approved','Pending','active'),
+(36,9,'MICROSOFT FELLOWSHIP PT II','Nairobi','Kibera','undergraduate','male+female','Low','','technology_based','2026-06-20',23,'$4000','Endless fun!!','Come prepared','Accomodation','contact us','https://teams.cloud.microsoft/','https://teams.cloud.microsoft/','Approved','Pending','active');
+/*!40000 ALTER TABLE `scholarship` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `signatory`
 --
 
+DROP TABLE IF EXISTS `signatory`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `signatory` (
-  `sigID` int(11) NOT NULL,
+  `sigID` int(11) NOT NULL AUTO_INCREMENT,
   `upMail` varchar(255) NOT NULL,
   `password` text NOT NULL,
-  `firstName` varchar(255) NOT NULL,
-  `middleName` varchar(255) NOT NULL,
-  `lastName` varchar(255) NOT NULL,
-  `organization/university` varchar(255) NOT NULL,
-  `position` varchar(255) NOT NULL,
-  `contact` varchar(12) NOT NULL,
-  `status` varchar(20) NOT NULL DEFAULT 'active'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `firstName` varchar(255) DEFAULT '',
+  `middleName` varchar(255) DEFAULT '',
+  `lastName` varchar(255) DEFAULT '',
+  `organization/university` varchar(255) DEFAULT '',
+  `position` varchar(255) DEFAULT '',
+  `contact` varchar(12) DEFAULT '',
+  `status` varchar(20) NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`sigID`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `signatory`
 --
 
-INSERT INTO `signatory` (`sigID`, `upMail`, `password`, `firstName`, `middleName`, `lastName`, `organization/university`, `position`, `contact`, `status`) VALUES
-(7, 'rahul.bindrani.poorna@gmail.com', '$2y$10$D151khT07zy3cx7BAgvkUu84zY5icZZ3tAqvsD6V/iXzPXL/.b6CK', 'Rahul', 'C', 'Bindrani', '', 'Manager', '', 'active'),
-(8, 'arjunbd7@gmail.com', '$2y$10$Fjlsx3FEEunWm1dfwODvYeFhzNhAoMkaDq6iBHgGLaT62ebnRq4zO', 'Arjun', 'Chandraprakash', 'Bindrani', '', 'CEO', '', 'active');
-
--- --------------------------------------------------------
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `signatory` WRITE;
+/*!40000 ALTER TABLE `signatory` DISABLE KEYS */;
+INSERT INTO `signatory` VALUES
+(9,'yuprivatebaddest21@gmail.com','$2y$12$juv9EEfeVrwQqSCJLG9GoOPzfmwx2B6MQxFxh8kOElIE1Ami5I4IW','Ingridius','Finelite','Finelite','','Taraaa','','active');
+/*!40000 ALTER TABLE `signatory` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `student`
 --
 
+DROP TABLE IF EXISTS `student`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `student` (
-  `studentID` int(11) NOT NULL,
+  `studentID` int(11) NOT NULL AUTO_INCREMENT,
   `upMail` varchar(255) NOT NULL,
   `password` text NOT NULL,
-  `firstName` varchar(255) NOT NULL,
-  `middleName` varchar(255) NOT NULL,
-  `lastName` varchar(255) NOT NULL,
+  `firstName` varchar(255) DEFAULT '',
+  `middleName` varchar(255) DEFAULT '',
+  `lastName` varchar(255) DEFAULT '',
   `nationality` varchar(255) DEFAULT NULL,
   `gender` varchar(255) DEFAULT NULL,
   `birthDate` date DEFAULT NULL,
@@ -200,137 +249,69 @@ CREATE TABLE `student` (
   `permProvCity` varchar(255) DEFAULT NULL,
   `permRegion` varchar(255) DEFAULT NULL,
   `contactNo` varchar(20) DEFAULT NULL,
-  `dept` varchar(255) NOT NULL,
-  `college` varchar(255) NOT NULL,
-  `status` varchar(20) NOT NULL DEFAULT 'active'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `dept` varchar(255) DEFAULT '',
+  `college` varchar(255) DEFAULT '',
+  `status` varchar(20) NOT NULL DEFAULT 'active',
+  `current_level` varchar(255) DEFAULT NULL COMMENT 'Maps to scholarship degree requirements',
+  `financial_need` enum('Low','Medium','High','Critical') DEFAULT NULL COMMENT 'Standardized urgency scale',
+  `career_interests` varchar(1024) DEFAULT NULL COMMENT 'Comma-separated keywords for matching',
+  PRIMARY KEY (`studentID`)
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `student`
 --
 
-INSERT INTO `student` (`studentID`, `upMail`, `password`, `firstName`, `middleName`, `lastName`, `nationality`, `gender`, `birthDate`, `birthPlace`, `presStreetAddr`, `presProvCity`, `presRegion`, `permStreetAddr`, `permProvCity`, `permRegion`, `contactNo`, `dept`, `college`, `status`) VALUES
-(43, 'bindrani.rb7@gmail.com', '$2y$10$kaD0yN3fRZu9es6to1nVp.OK.dFE9Wp0peeHiEOVntlGH7EjKCi/i', 'Rahul', 'Chandraprakash', 'Bindrani', 'India', 'Male', '0000-00-00', 'Ahmedabad', '', '', '', '', '', '', '', '', '', 'active'),
-(44, 'dishantd999@gmail.com', '$2y$10$fvzm.tlEs2VAqCph0Sr3TuQnp.2PjPW2LUYtxBdHdkhz4C7/FRuWu', 'Dishant', '', 'doshi', '', '', '0000-00-00', '', '', '', '', '', '', '', '', '', '', 'active'),
-(45, 'rahulbindrani123@gmail.com', '$2y$10$RTrzzwxxBQU3LP5M4HmlHuYqSFWUhJpOiQNiwG3NNGabBQyxQ2cqm', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', 'active'),
-(47, 'internwithicon@internshala.com', '$2y$10$RTJSf0Mzp8s5rsqNXWhZyuwRoGkoE3/2j3Gw5BRIexlxCQITwKmdq', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', 'active');
-
--- --------------------------------------------------------
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `student` WRITE;
+/*!40000 ALTER TABLE `student` DISABLE KEYS */;
+INSERT INTO `student` VALUES
+(49,'kifine@proton.me','$2y$12$T/fl/oN4XLvr0iNDiZERv.ZIxcdwzgGKTpD.g5xLgPWIjbLxkbvzC','Ingridius','Finelite','Kisiwani',NULL,'male',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0655877995','','','active','diploma','Low','Technology Based'),
+(50,'natalie.chelagat@strathmore.edu','$2y$12$RNtCP9t6dFgkDnBgFRSvOuT.b4g0iZSI744G9f7L6Glm1mHW8Tete','Natalie','Burgei','Chelagat',NULL,'female',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0655877995','','','active','undergraduate','Low','Visual Art, Technology Based');
+/*!40000 ALTER TABLE `student` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `verify_signup`
 --
 
+DROP TABLE IF EXISTS `verify_signup`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `verify_signup` (
   `upMail` varchar(255) NOT NULL,
-  `action` int(2) NOT NULL DEFAULT '0',
-  `num` int(8) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `action` int(2) NOT NULL DEFAULT 0,
+  `num` int(8) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `verify_signup`
 --
 
-INSERT INTO `verify_signup` (`upMail`, `action`, `num`) VALUES
-('bindrani.rb7@gmail.com', 1, 637939),
-('dishantd999@gmail.com', 1, 501750),
-('rahulbindrani123@gmail.com', 1, 327349),
-('rahul.bindrani.poorna@gmail.com', 1, 421896),
-('arjunbd7@gmail.com', 1, 868906),
-('internwithicon@internshala.com', 0, 133692);
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `admin`
---
-ALTER TABLE `admin`
-  ADD PRIMARY KEY (`adminID`),
-  ADD UNIQUE KEY `uniq_admin_upMail` (`upMail`);
-
---
--- Indexes for table `application`
---
-ALTER TABLE `application`
-  ADD PRIMARY KEY (`applicationID`),
-  ADD KEY `idx_application_studentID` (`studentID`),
-  ADD KEY `idx_application_sigID` (`sigID`),
-  ADD KEY `idx_application_scholarshipID` (`scholarshipID`);
-
---
--- Indexes for table `scholarship`
---
-ALTER TABLE `scholarship`
-  ADD PRIMARY KEY (`scholarshipID`);
-
---
--- Indexes for table `signatory`
---
-ALTER TABLE `signatory`
-  ADD PRIMARY KEY (`sigID`),
-  ADD UNIQUE KEY `uniq_signatory_upMail` (`upMail`);
-
---
--- Indexes for table `student`
---
-ALTER TABLE `student`
-  ADD PRIMARY KEY (`studentID`),
-  ADD UNIQUE KEY `uniq_student_upMail` (`upMail`);
-
---
--- Indexes for table `verify_signup`
---
-ALTER TABLE `verify_signup`
-  ADD UNIQUE KEY `uniq_verify_signup_upMail` (`upMail`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `admin`
---
-ALTER TABLE `admin`
-  MODIFY `adminID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `application`
---
-ALTER TABLE `application`
-  MODIFY `applicationID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
-
---
--- AUTO_INCREMENT for table `scholarship`
---
-ALTER TABLE `scholarship`
-  MODIFY `scholarshipID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
-
---
--- AUTO_INCREMENT for table `signatory`
---
-ALTER TABLE `signatory`
-  MODIFY `sigID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `student`
---
-ALTER TABLE `student`
-  MODIFY `studentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
-
---
--- Constraints for dumped tables
---
-ALTER TABLE `scholarship`
-  ADD CONSTRAINT `fk_scholarship_signatory` FOREIGN KEY (`sigID`) REFERENCES `signatory` (`sigID`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
-ALTER TABLE `application`
-  ADD CONSTRAINT `fk_application_student` FOREIGN KEY (`studentID`) REFERENCES `student` (`studentID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_application_signatory` FOREIGN KEY (`sigID`) REFERENCES `signatory` (`sigID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_application_scholarship` FOREIGN KEY (`scholarshipID`) REFERENCES `scholarship` (`scholarshipID`) ON DELETE CASCADE ON UPDATE CASCADE;
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `verify_signup` WRITE;
+/*!40000 ALTER TABLE `verify_signup` DISABLE KEYS */;
+INSERT INTO `verify_signup` VALUES
+('admin@gmail.com',1,1234),
+('yuprivatebaddest21@gmail.com',1,254814),
+('kifine@proton.me',1,140591),
+('natalie.chelagat@strathmore.edu',1,773400);
+/*!40000 ALTER TABLE `verify_signup` ENABLE KEYS */;
+UNLOCK TABLES;
 COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
+
+-- Dump completed on 2026-06-23 23:14:06
