@@ -3,7 +3,8 @@ session_start();
 require '../config.php';
 require 'security.php';
 require_login(2);
-
+require_once 'SmsService.php';
+require_once 'MatchingEngine.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../admin/tempAdmin.php');
     exit();
@@ -125,6 +126,19 @@ if ($stmt->execute()) {
             $rootTag->appendChild($dataTag);
             $xml->save($xmlPath);
         }
+    }
+
+    // --- SMS Notifications for matching students ---
+    $matchedStudents = MatchingEngine::getMatchedStudentsForScholarship($schID);
+    $phones = [];
+    foreach ($matchedStudents as $ms) {
+        if (!empty($ms['phone'])) {
+            $phones[] = $ms['phone'];
+        }
+    }
+    if (!empty($phones)) {
+        $smsMsg = "New Scholarship Alert! '{$schname}' matches your profile. Log in to ScholarConnect to apply.";
+        SmsService::sendSms($phones, $smsMsg);
     }
 
     echo "<script>alert('Opportunity created successfully.'); window.location.href='../admin/tempAdmin.php';</script>";

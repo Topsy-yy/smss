@@ -49,24 +49,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 3. SMS Compose Form Mock (Africa's Talking Simulation)
+    // 3. SMS Compose Form Real Submit
     const smsForm = document.getElementById('smsComposeForm');
     if(smsForm) {
         smsForm.addEventListener('submit', (e) => {
-            e.preventDefault();
             const btn = smsForm.querySelector('.btn-submit');
-            const originalText = btn.innerText;
-            
+            if (!btn) {
+                return;
+            }
             btn.innerText = "Sending via Africa's Talking...";
             btn.style.opacity = "0.7";
-            
-            // Simulate API Latency
-            setTimeout(() => {
-                alert("SMS Dispatched Successfully! (API Simulation)");
-                btn.innerText = originalText;
-                btn.style.opacity = "1";
-                smsForm.reset();
-            }, 1200);
+            btn.disabled = true;
         });
     }
 

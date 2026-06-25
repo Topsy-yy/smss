@@ -36,7 +36,7 @@
     }
   }
 
-  $upMail=$firstName=$lastName=$middleName=$nationality=$gender=$birthPlace=$presStreetAddr=$presProvCity=$presRegion=$permProvCity=$permStreetAddr=$permRegion=$contactNo=$dept=$college=$birthDate=$status= NULL;
+  $upMail=$firstName=$lastName=$middleName=$nationality=$gender=$birthPlace=$presStreetAddr=$presProvCity=$presRegion=$permProvCity=$permStreetAddr=$permRegion=$contactNo=$phone=$dept=$college=$birthDate=$status= NULL;
   // NEW MATCHING ENGINE VARIABLES
   $current_level = $financial_need = $career_interests = NULL;
   
@@ -59,6 +59,7 @@
     $permProvCity = $row["permProvCity"];
     $permRegion = $row["permRegion"];
     $contactNo = $row["contactNo"];
+    $phone = $row["phone"] ?? '';
     $dept = $row["dept"];
     $college = $row["college"];
     $status = $row["status"];
@@ -182,6 +183,13 @@
                             <div class="form-group">
                               <label class="control-label col-sm-2" for="contactNo">Contact Number:</label>
                               <div class="col-sm-10"><input type="text" class="form-control" value="<?php echo $contactNo?>" disabled></div>
+                            </div>
+                            <?php } ?>
+
+                            <?php if(!empty($phone)){ ?>
+                            <div class="form-group">
+                              <label class="control-label col-sm-2" for="phone">Mobile (SMS):</label>
+                              <div class="col-sm-10"><input type="text" class="form-control" value="<?php echo $phone?>" disabled></div>
                             </div>
                             <?php } ?>
 
@@ -346,6 +354,12 @@
                                 <label class="control-label col-sm-2">Contact Number:</label>
                                 <div class="col-sm-10">
                                   <input type="text" class="form-control" name="contactNo" value="<?php if($contactNo!='0') { echo $contactNo; } ?>" required>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <label class="control-label col-sm-2">Mobile (SMS):</label>
+                                <div class="col-sm-10">
+                                  <input type="text" class="form-control" name="phone" value="<?php echo $phone; ?>">
                                 </div>
                               </div>
                               <div class="form-group">

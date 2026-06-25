@@ -60,6 +60,8 @@
   $applicants = array();
   $applications = array();
   $smsHistory = array();
+    $smsNoticeType = trim((string) ($_GET['sms_status'] ?? ''));
+    $smsNoticeText = trim((string) ($_GET['sms_message'] ?? ''));
 
   $statStmt = $conn->prepare(
       "SELECT
@@ -96,13 +98,14 @@
           ST.birthPlace,
           ST.presStreetAddr,
           ST.contactNo,
+            ST.phone,
           COUNT(A.applicationID) AS app_count
        FROM application A
        JOIN student ST ON ST.studentID = A.studentID
        WHERE A.sigID = ?
        GROUP BY ST.studentID, ST.firstName, ST.middleName, ST.lastName,
                 ST.presProvCity, ST.presRegion, ST.college, ST.dept, ST.gender,
-                ST.birthDate, ST.birthPlace, ST.presStreetAddr, ST.contactNo
+                ST.birthDate, ST.birthPlace, ST.presStreetAddr, ST.contactNo, ST.phone
        ORDER BY app_count DESC, ST.lastName ASC, ST.firstName ASC";
 
   $applicantStmt = $conn->prepare($applicantSql);
@@ -135,6 +138,7 @@
               'prog' => $profilePct,
               'apps' => (int) $row['app_count'],
               'need' => $need,
+              'phone' => trim((string) ($row['phone'] ?? '')),
           );
       }
       $applicantStmt->close();
@@ -420,6 +424,11 @@
             <!-- Tab 3: SMS Notifications -->
             <div class="tab-content" id="tab-sms">
                 <div class="sms-layout">
+                    <?php if ($smsNoticeType !== '' && $smsNoticeText !== ''): ?>
+                    <div style="grid-column: 1 / -1; margin-bottom: 0.5rem; padding: 0.75rem 1rem; border-radius: var(--radius-sm); background: <?php echo ($smsNoticeType === 'ok') ? '#ecfdf3' : '#fef2f2'; ?>; color: <?php echo ($smsNoticeType === 'ok') ? '#065f46' : '#991b1b'; ?>; border: 1px solid <?php echo ($smsNoticeType === 'ok') ? '#a7f3d0' : '#fecaca'; ?>; font-size: 0.9rem;">
+                        <?php echo h($smsNoticeText); ?>
+                    </div>
+                    <?php endif; ?>
                     <!-- History Table -->
                     <div>
                         <h3 style="margin-bottom: 1rem; color: var(--sig-navy); font-size: 1.1rem;">Message History</h3>
@@ -453,19 +462,19 @@
                     <!-- Compose Form -->
                     <div style="background: var(--sig-bg); padding: 1.5rem; border-radius: var(--radius-md);">
                         <h3 style="margin-bottom: 1rem; color: var(--sig-navy); font-size: 1.1rem;">Compose SMS</h3>
-                        <form id="smsComposeForm">
+                        <form id="smsComposeForm" method="post" action="../backend/sigSendSms.php">
                             <div class="form-group">
                                 <label>Recipient Student</label>
-                                <select class="form-control" id="smsRecipient" required>
+                                <select class="form-control" id="smsRecipient" name="student_id" required>
                                     <option value="">Select Student...</option>
                                     <?php foreach ($applicants as $s): ?>
-                                    <option value="<?php echo h($s['student_id']); ?>"><?php echo h($s['name']); ?></option>
+                                    <option value="<?php echo h($s['student_id']); ?>" <?php echo ($s['phone'] === '') ? 'disabled' : ''; ?>><?php echo h($s['name']); ?><?php echo ($s['phone'] === '') ? ' (No mobile set)' : ''; ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Message Type</label>
-                                <select class="form-control" id="smsType" required>
+                                <select class="form-control" id="smsType" name="message_type" required>
                                     <option value="Reminder">Deadline Reminder</option>
                                     <option value="Profile">Profile Completion</option>
                                     <option value="Status">Application Status</option>
@@ -473,7 +482,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Message Text</label>
-                                <textarea class="form-control" id="smsMessage" rows="4" placeholder="Type your message here..." required></textarea>
+                                <textarea class="form-control" id="smsMessage" name="message_text" rows="4" placeholder="Type your message here..." required></textarea>
                             </div>
                             <button type="submit" class="btn-submit">Send Message</button>
                         </form>

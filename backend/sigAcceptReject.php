@@ -9,6 +9,7 @@
 require '../config.php';
 require_once 'notification_mailer.php';
 require_once 'email_templates.php';
+require_once 'SmsService.php';
 $currentUserID=$_SESSION['currentUserID'];
   	if($currentUserID==NULL){
     	header("Location:../index.php");
@@ -30,13 +31,15 @@ $currentUserID=$_SESSION['currentUserID'];
 			$verifiedBySignatory = NULL;
 			$appID=$_POST['appID'];
 			$notifyEmail = '';
+			$notifyPhone = '';
 			$notifyStudentName = 'Student';
 			$notifyScholarship = 'your scholarship application';
-			$notifySql = "SELECT ST.upMail, ST.firstName, ST.lastName, SC.schname FROM application A JOIN student ST ON ST.studentID = A.studentID JOIN scholarship SC ON SC.scholarshipID = A.scholarshipID WHERE A.applicationID = $appID LIMIT 1";
+			$notifySql = "SELECT ST.upMail, ST.phone, ST.firstName, ST.lastName, SC.schname FROM application A JOIN student ST ON ST.studentID = A.studentID JOIN scholarship SC ON SC.scholarshipID = A.scholarshipID WHERE A.applicationID = $appID LIMIT 1";
 			$notifyRes = $conn->query($notifySql);
 			if ($notifyRes && $notifyRes->num_rows > 0) {
 				$notifyRow = $notifyRes->fetch_assoc();
 				$notifyEmail = $notifyRow['upMail'];
+				$notifyPhone = trim((string)($notifyRow['phone'] ?? ''));
 				$notifyStudentName = trim(($notifyRow['firstName'] ?? '') . ' ' . ($notifyRow['lastName'] ?? ''));
 				if ($notifyStudentName === '') { $notifyStudentName = 'Student'; }
 				$notifyScholarship = $notifyRow['schname'] ?: $notifyScholarship;
@@ -63,6 +66,10 @@ $currentUserID=$_SESSION['currentUserID'];
 						$subject = $emailTemplate['subject'];
 						$message = $emailTemplate['body'];
 						sendNotificationEmail($notifyEmail, $subject, $message);
+						if ($notifyPhone !== '') {
+							$smsMsg = "ScholarConnect: Hi {$notifyStudentName}, your application for '{$notifyScholarship}' has been approved and is now processing.";
+							SmsService::sendSms($notifyPhone, $smsMsg);
+						}
 				 ?>
 					<script type="text/javascript">
 						alert('Application is in Accepted and Processing Mode now!');
@@ -94,13 +101,15 @@ $currentUserID=$_SESSION['currentUserID'];
 			$verifiedBySignatory = NULL;
 			$appID=$_POST['appID'];
 			$notifyEmail = '';
+			$notifyPhone = '';
 			$notifyStudentName = 'Student';
 			$notifyScholarship = 'your scholarship application';
-			$notifySql = "SELECT ST.upMail, ST.firstName, ST.lastName, SC.schname FROM application A JOIN student ST ON ST.studentID = A.studentID JOIN scholarship SC ON SC.scholarshipID = A.scholarshipID WHERE A.applicationID = $appID LIMIT 1";
+			$notifySql = "SELECT ST.upMail, ST.phone, ST.firstName, ST.lastName, SC.schname FROM application A JOIN student ST ON ST.studentID = A.studentID JOIN scholarship SC ON SC.scholarshipID = A.scholarshipID WHERE A.applicationID = $appID LIMIT 1";
 			$notifyRes = $conn->query($notifySql);
 			if ($notifyRes && $notifyRes->num_rows > 0) {
 				$notifyRow = $notifyRes->fetch_assoc();
 				$notifyEmail = $notifyRow['upMail'];
+				$notifyPhone = trim((string)($notifyRow['phone'] ?? ''));
 				$notifyStudentName = trim(($notifyRow['firstName'] ?? '') . ' ' . ($notifyRow['lastName'] ?? ''));
 				if ($notifyStudentName === '') { $notifyStudentName = 'Student'; }
 				$notifyScholarship = $notifyRow['schname'] ?: $notifyScholarship;
@@ -127,6 +136,10 @@ $currentUserID=$_SESSION['currentUserID'];
 						$subject = $emailTemplate['subject'];
 						$message = $emailTemplate['body'];
 						sendNotificationEmail($notifyEmail, $subject, $message);
+						if ($notifyPhone !== '') {
+							$smsMsg = "ScholarConnect: Hi {$notifyStudentName}, your application for '{$notifyScholarship}' has been rejected. Please review your details and other opportunities.";
+							SmsService::sendSms($notifyPhone, $smsMsg);
+						}
 				 ?>
 					<script type="text/javascript">
 						alert('Application is in Rejected Mode now!');

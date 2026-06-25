@@ -8,6 +8,8 @@
 require '../config.php';
 require_once 'notification_mailer.php';
 require_once 'email_templates.php';
+require_once 'SmsService.php';
+require_once 'MatchingEngine.php';
 try{
 		/*Open a connection to mySQL*/
 		// Connect to database
@@ -36,6 +38,19 @@ try{
 				$subject = $emailTemplate['subject'];
 				$message = $emailTemplate['body'];
 				sendNotificationEmail($notifyEmail, $subject, $message);
+
+                // --- SMS Notifications for matching students ---
+                $matchedStudents = MatchingEngine::getMatchedStudentsForScholarship($schID);
+                $phones = [];
+                foreach ($matchedStudents as $ms) {
+                    if (!empty($ms['phone'])) {
+                        $phones[] = $ms['phone'];
+                    }
+                }
+                if (!empty($phones)) {
+                    $smsMsg = "New Scholarship Alert! '{$notifyScholarship}' matches your profile. Log in to ScholarConnect to apply.";
+                    SmsService::sendSms($phones, $smsMsg);
+                }
 		 ?>
 			<script type="text/javascript">
 				alert('Scholarship is Accepted!');

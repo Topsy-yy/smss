@@ -76,6 +76,10 @@ define('SMTP_USER', envValue('SMTP_USER', ''));
 define('SMTP_PASS', envValue('SMTP_PASS', ''));
 define('SMTP_FROM_NAME', envValue('SMTP_FROM_NAME', 'SMS Portal'));
 
+// Africa's Talking API Configuration
+define('AT_USERNAME', envValue('AT_USERNAME', 'sandbox'));
+define('AT_API_KEY', envValue('AT_API_KEY', ''));
+define('AT_SENDER_ID', envValue('AT_SENDER_ID', ''));
 /**
  * Get a database connection
  */

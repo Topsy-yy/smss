@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $birthDate = trim($_POST['birthDate'] ?? '');
     $birthPlace = trim($_POST['birthPlace'] ?? '');
     $contactNo = trim($_POST['contactNo'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
     $college = trim($_POST['college'] ?? '');
     $dept = trim($_POST['dept'] ?? '');
     $status = trim($_POST['status'] ?? '');
@@ -47,6 +48,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $career_interests = trim((string) $careerInterestRaw);
     }
 
+    if ($status === '') {
+        $statusStmt = $conn->prepare("SELECT status FROM student WHERE studentID = ? LIMIT 1");
+        if ($statusStmt) {
+            $statusStmt->bind_param("i", $studentID);
+            $statusStmt->execute();
+            $statusRes = $statusStmt->get_result();
+            if ($statusRes && $statusRes->num_rows > 0) {
+                $statusRow = $statusRes->fetch_assoc();
+                $status = trim((string) ($statusRow['status'] ?? ''));
+            }
+            $statusStmt->close();
+        }
+
+        if ($status === '') {
+            $status = 'active';
+        }
+    }
+
     if (
         $lastName === '' ||
         $firstName === '' ||
@@ -56,7 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $contactNo === '' ||
         $college === '' ||
         $dept === '' ||
-        $status === '' ||
         $presStreetAddr === '' ||
         $presProvCity === '' ||
         $presRegion === '' ||
@@ -81,6 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             dept = ?,
             status = ?,
             contactNo = ?,
+            phone = ?,
             presStreetAddr = ?,
             presProvCity = ?,
             presRegion = ?,
@@ -98,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<script>alert('Error preparing profile update.'); window.history.back();</script>";
     } else {
         $stmt->bind_param(
-            "ssssssssssssssssssssi",
+            "sssssssssssssssssssssi",
             $lastName,
             $firstName,
             $middleName,
@@ -110,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $dept,
             $status,
             $contactNo,
+            $phone,
             $presStreetAddr,
             $presProvCity,
             $presRegion,

@@ -186,5 +186,75 @@ class MatchingEngine {
 
         return $matchedOpportunities;
     }
+
+    /**
+     * Retrieve students whose profile matches a newly added scholarship
+     */
+    public static function getMatchedStudentsForScholarship($scholarshipId) {
+        $conn = getDbConnection();
+        if (!$conn) {
+            return [];
+        }
+
+        $schQuery = "SELECT schname, sch as category, degree, target_financial_need, gender as target_gender 
+                     FROM scholarship WHERE scholarshipID = ?";
+        $stmt = $conn->prepare($schQuery);
+        $stmt->bind_param("i", $scholarshipId);
+        $stmt->execute();
+        $schResult = $stmt->get_result();
+        $scholarship = $schResult->fetch_assoc();
+        $stmt->close();
+
+        if (!$scholarship) {
+            $conn->close();
+            return [];
+        }
+
+        $reqDegree = strtolower(trim($scholarship['degree']));
+        $reqGender = strtolower(trim($scholarship['target_gender']));
+        $targetFinancialNeed = $scholarship['target_financial_need'];
+        $category = $scholarship['category'];
+
+        $studentQuery = "SELECT studentID, firstName, phone, current_level, financial_need, career_interests, gender 
+                         FROM student WHERE status = 'active' AND phone IS NOT NULL AND phone != ''";
+        $studentResult = $conn->query($studentQuery);
+
+        $matchedStudents = [];
+
+        while ($student = $studentResult->fetch_assoc()) {
+            $studentLevel = strtolower(trim((string)$student['current_level']));
+            $studentNeed = (string)$student['financial_need'];
+            $studentInterests = (string)$student['career_interests'];
+            $studentGender = strtolower(trim((string)$student['gender']));
+
+            // --- HARD FILTERS ---
+            if (!empty($reqDegree) && $reqDegree !== 'select' && $studentLevel !== $reqDegree && !empty($studentLevel)) {
+                continue;
+            }
+
+            if (!empty($reqGender) && $reqGender !== 'select' && $reqGender !== 'male+female' && $reqGender !== 'prefer') {
+                if ($studentGender !== '' && $studentGender !== $reqGender) {
+                    continue;
+                }
+            }
+
+            // --- SOFT SCORING ---
+            $score = 0;
+            $score += self::calculateFinancialScore($studentNeed, $targetFinancialNeed);
+            $score += self::calculateInterestScore($studentInterests, $category);
+
+            // Match threshold
+            if ($score >= 20) {
+                $matchedStudents[] = [
+                    'studentID' => $student['studentID'],
+                    'name' => $student['firstName'],
+                    'phone' => $student['phone']
+                ];
+            }
+        }
+
+        $conn->close();
+        return $matchedStudents;
+    }
 }
 ?>
