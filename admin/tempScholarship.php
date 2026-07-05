@@ -2,6 +2,7 @@
 /*Start a session*/
   session_start();
 require '../config.php';
+require_once '../backend/MatchingEngine.php';
 $conn = getDbConnection();
 
   // Checks Connection
@@ -14,6 +15,31 @@ $conn = getDbConnection();
     }else{
     	$scholarship = "All";
     }
+
+		function renderMatchedStudentsHtml($scholarshipId) {
+			$matched = MatchingEngine::getMatchedStudentsForScholarship((int) $scholarshipId);
+			if (empty($matched)) {
+				return '<span style="color:#777;">No confident matches</span>';
+			}
+
+			$chunks = [];
+			$count = 0;
+			foreach ($matched as $student) {
+				if ($count >= 3) {
+					break;
+				}
+				$name = htmlspecialchars((string) ($student['name'] ?? ('Student ' . ($student['studentID'] ?? ''))));
+				$score = isset($student['score']) ? (int) $student['score'] : null;
+				if ($score !== null) {
+					$chunks[] = $name . ' (' . $score . '%)';
+				} else {
+					$chunks[] = $name;
+				}
+				$count++;
+			}
+
+			return implode('<br>', $chunks);
+		}
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -106,6 +132,7 @@ $conn = getDbConnection();
 				                                  <th class = "col-md-1" style="width: 5%"><strong>SigID</strong></th>
 				                                  <th class = "col-md-1" style="width: 20%"><strong>Name</strong></th>
 				                                  <th class = "col-md-1" style="width: 3%"><strong>Application DeadLine</strong></th>
+												  <th class = "col-md-2" style="width: 18%"><strong>IR Matched Students</strong></th>
 				                                  <th class = "col-md-1" style="width: 5%;text-align:center;font-size:26px" colspan="5"><strong>Action</strong> </th>
                                           <!-- <th class = "col-md-1"></th>
 				                               		<th class = "col-md-1"></th>
@@ -129,6 +156,7 @@ $conn = getDbConnection();
 				                                      		$schname=$row['schname'];
 				                                      		echo $row['schname']; ?></a></td>
 				                                      	<td><?php echo $row['appDeadline']; ?></td>
+												      	<td><?php echo renderMatchedStudentsHtml($schID); ?></td>
                                                 <td>
                     															<form action="tempSchView.php" method="post">
                     					                        <input type="hidden" name="schname" value="<?php echo $schname; ?>">
@@ -196,6 +224,7 @@ $conn = getDbConnection();
     				                                  <th class = "col-md-1" style="width: 5%"><strong>SigID</strong></th>
     				                                  <th class = "col-md-1" style="width: 20%"><strong>Name</strong></th>
     				                                  <th class = "col-md-1" style="width: 3%"><strong>Application DeadLine</strong></th>
+													  <th class = "col-md-2" style="width: 18%"><strong>IR Matched Students</strong></th>
     				                                  <th class = "col-md-1" style="width: 5%;text-align:center;font-size:26px" colspan="5"><strong>Action</strong> </th>
                                               <!-- <th class = "col-md-1"></th>
     				                               		<th class = "col-md-1"></th>
@@ -219,6 +248,7 @@ $conn = getDbConnection();
 				                                      		$schname=$row['schname'];
 				                                      		echo $row['schname']; ?></a></td>
 				                                      	<td><?php echo $row['appDeadline']; ?></td>
+												      	<td><?php echo renderMatchedStudentsHtml($schID); ?></td>
                                                 <td>
                                                   <form action="tempSchView.php" method="post">
                                                      <input type="hidden" name="schname" value="<?php echo $schname; ?>">

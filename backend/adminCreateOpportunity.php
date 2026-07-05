@@ -5,6 +5,7 @@ require 'security.php';
 require_login(2);
 require_once 'SmsService.php';
 require_once 'MatchingEngine.php';
+require_once 'IRRecommendationEngine.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../admin/tempAdmin.php');
     exit();
@@ -95,6 +96,10 @@ $stmt->bind_param(
 if ($stmt->execute()) {
     $schID = (int) $conn->insert_id;
 
+    if (class_exists('IRRecommendationEngine')) {
+        IRRecommendationEngine::markScholarshipCorpusDirty($conn);
+    }
+
     $xmlPath = __DIR__ . '/scholarship_data.xml';
     if (is_file($xmlPath)) {
         $xml = new DOMDocument('1.0', 'UTF-8');
@@ -128,17 +133,31 @@ if ($stmt->execute()) {
         }
     }
 
-    // --- SMS Notifications for matching students ---
+    // --- SMS Notifications for students eligible by listing threshold (>=30% match) ---
     $matchedStudents = MatchingEngine::getMatchedStudentsForScholarship($schID);
-    $phones = [];
     foreach ($matchedStudents as $ms) {
-        if (!empty($ms['phone'])) {
-            $phones[] = $ms['phone'];
+        $score = (int) ($ms['score'] ?? 0);
+        $phone = trim((string) ($ms['phone'] ?? ''));
+        if ($score < 30 || $phone === '') {
+            continue;
         }
-    }
-    if (!empty($phones)) {
-        $smsMsg = "New Scholarship Alert! '{$schname}' matches your profile. Log in to ScholarConnect to apply.";
-        SmsService::sendSms($phones, $smsMsg);
+
+        $studentName = trim((string) ($ms['name'] ?? 'Student'));
+        if ($studentName === '') {
+            $studentName = 'Student';
+        }
+
+        $reasons = [];
+        if (!empty($ms['reasons']) && is_array($ms['reasons'])) {
+            $reasons = array_slice(array_values($ms['reasons']), 0, 2);
+        }
+        $whyMatched = '';
+        if (!empty($reasons)) {
+            $whyMatched = ' Why matched: ' . implode(', ', $reasons) . '.';
+        }
+
+        $smsMsg = "Hi {$studentName}, you are eligible for '{$schname}'. Log in to ScholarConnect and apply before {$appdeadline}.{$whyMatched}";
+        SmsService::sendSms($phone, $smsMsg);
     }
 
     echo "<script>alert('Opportunity created successfully.'); window.location.href='../admin/tempAdmin.php';</script>";

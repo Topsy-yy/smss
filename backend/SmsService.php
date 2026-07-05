@@ -4,6 +4,8 @@
 require_once __DIR__ . '/../config.php';
 
 class SmsService {
+
+    private static $logTableReady = false;
     
     /**
      * Send an SMS using Africa's Talking REST API
@@ -18,6 +20,7 @@ class SmsService {
         $senderId = trim((string) AT_SENDER_ID);
         
         if (empty($apiKey)) {
+            self::logDispatch(0, 0, 0, 0, 'API key not configured', $message);
             return ['status' => false, 'error' => 'API Key not configured'];
         }
 
@@ -35,6 +38,7 @@ class SmsService {
         }
         
         if (empty($formattedNumbers)) {
+            self::logDispatch(0, 0, 0, 0, 'No valid phone numbers', $message);
             return ['status' => false, 'error' => 'No valid phone numbers provided'];
         }
 
@@ -71,12 +75,14 @@ class SmsService {
         curl_close($ch);
 
         if ($error) {
+            self::logDispatch(count($formattedNumbers), 0, count($formattedNumbers), $httpCode, 'cURL Error: ' . $error, $message);
             return ['status' => false, 'error' => 'cURL Error: ' . $error];
         }
 
         $result = json_decode($response, true);
 
         if (!is_array($result)) {
+            self::logDispatch(count($formattedNumbers), 0, count($formattedNumbers), $httpCode, 'Invalid JSON response from SMS provider', $message);
             return [
                 'status' => false,
                 'error' => 'Invalid JSON response from SMS provider',
@@ -108,6 +114,7 @@ class SmsService {
 
         // Record delivery details in PHP error logs for troubleshooting.
         error_log('SmsService sendSms result: HTTP=' . $httpCode . ' success=' . $successCount . ' failed=' . $failedCount . ' message=' . $providerMessage);
+        self::logDispatch(count($formattedNumbers), $successCount, $failedCount, $httpCode, $providerMessage, $message);
 
         return [
             'status' => (!$isProviderError && $hasDeliverySuccess),
@@ -139,6 +146,55 @@ class SmsService {
         }
 
         return '+' . $phone;
+    }
+
+    private static function ensureLogTable($conn) {
+        if (self::$logTableReady) {
+            return;
+        }
+
+        $conn->query("CREATE TABLE IF NOT EXISTS sms_dispatch_log (
+            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            recipient_count INT NOT NULL DEFAULT 0,
+            success_count INT NOT NULL DEFAULT 0,
+            failed_count INT NOT NULL DEFAULT 0,
+            provider_http_code INT NOT NULL DEFAULT 0,
+            provider_message VARCHAR(255) NOT NULL DEFAULT '',
+            message_preview VARCHAR(255) NOT NULL DEFAULT '',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_sms_dispatch_created_at (created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        self::$logTableReady = true;
+    }
+
+    private static function logDispatch($recipientCount, $successCount, $failedCount, $httpCode, $providerMessage, $message) {
+        if (!function_exists('getDbConnection')) {
+            return;
+        }
+
+        $conn = @getDbConnection();
+        if (!$conn || $conn->connect_error) {
+            return;
+        }
+
+        self::ensureLogTable($conn);
+
+        $sql = 'INSERT INTO sms_dispatch_log (recipient_count, success_count, failed_count, provider_http_code, provider_message, message_preview) VALUES (?, ?, ?, ?, ?, ?)';
+        $stmt = $conn->prepare($sql);
+        if ($stmt) {
+            $recipientCount = (int) $recipientCount;
+            $successCount = (int) $successCount;
+            $failedCount = (int) $failedCount;
+            $httpCode = (int) $httpCode;
+            $providerMessage = trim((string) $providerMessage);
+            $messagePreview = substr(trim((string) $message), 0, 255);
+            $stmt->bind_param('iiiiss', $recipientCount, $successCount, $failedCount, $httpCode, $providerMessage, $messagePreview);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        $conn->close();
     }
 }
 ?>

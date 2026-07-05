@@ -1,6 +1,7 @@
 <?php
 session_start();
 require '../config.php';
+require_once 'IRRecommendationEngine.php';
 
 if (!isset($_SESSION['currentUserID'])) {
     header("Location: ../index.php");
@@ -143,6 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         );
 
         if ($stmt->execute()) {
+            if (class_exists('IRRecommendationEngine')) {
+                IRRecommendationEngine::markStudentProfileChanged($conn, $studentID);
+            }
             $_SESSION['currentUserName'] = trim($firstName . ' ' . $lastName);
             echo "<script>alert('Profile Updated Successfully!'); window.location.href='../student/tempUserHome.php';</script>";
         } else {

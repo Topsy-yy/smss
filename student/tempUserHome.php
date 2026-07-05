@@ -38,6 +38,9 @@ if ($profileCompletion < 100) {
 // THE MATCHING ENGINE IN ACTION
 // ==========================================
 $opportunities = MatchingEngine::getMatches($currentUserID);
+$opportunities = array_values(array_filter($opportunities, function($opp) {
+    return ((int) ($opp['match'] ?? 0)) >= 30;
+}));
 
 // Live Stats Calculation
 $stats = [
@@ -48,7 +51,7 @@ $stats = [
 ];
 
 foreach ($opportunities as $opp) {
-    if ($opp['match'] >= 50) $stats['total_matches']++;
+    if ($opp['match'] >= 30) $stats['total_matches']++;
     if ($opp['urgent']) $stats['deadlines']++;
 }
 
@@ -137,7 +140,7 @@ function formatDeadlineMsg($dateStr) {
         <div class="stat-card">
             <h4>Total Matches</h4>
             <div class="value"><?php echo $stats['total_matches']; ?></div>
-            <p>Opportunities ≥ 50% match</p>
+            <p>Opportunities available for you</p>
         </div>
         <div class="stat-card">
             <h4>Active Applications</h4>
@@ -202,9 +205,6 @@ function formatDeadlineMsg($dateStr) {
                                 <?php echo htmlspecialchars($opp['org']); ?>
                             </div>
                         </div>
-                        <?php if ($profileCompletion == 100): ?>
-                            <span class="badge badge-match"><?php echo $opp['match']; ?>% Match</span>
-                        <?php endif; ?>
                     </div>
 
                     <div class="card-desc"><?php echo htmlspecialchars($opp['desc']); ?></div>

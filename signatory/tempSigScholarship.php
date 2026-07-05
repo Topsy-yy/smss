@@ -1,6 +1,7 @@
 	<?php
   session_start();
 require '../config.php';
+require_once '../backend/MatchingEngine.php';
 //check validity of the user
   $currentUserID=$_SESSION['currentUserID'];
   if($currentUserID==NULL){
@@ -40,6 +41,31 @@ foreach ($rows9 as $key => $value)
 			$_SESSION['currentUserName'] = $_SESSION['currentUserName'] . ". " . $value;
 		}
 	}
+}
+
+function renderMatchedStudentsHtml($scholarshipId) {
+	$matched = MatchingEngine::getMatchedStudentsForScholarship((int) $scholarshipId);
+	if (empty($matched)) {
+		return '<span style="color:#777;">No confident matches</span>';
+	}
+
+	$chunks = [];
+	$count = 0;
+	foreach ($matched as $student) {
+		if ($count >= 3) {
+			break;
+		}
+		$name = htmlspecialchars((string) ($student['name'] ?? ('Student ' . ($student['studentID'] ?? ''))));
+		$score = isset($student['score']) ? (int) $student['score'] : null;
+		if ($score !== null) {
+			$chunks[] = $name . ' (' . $score . '%)';
+		} else {
+			$chunks[] = $name;
+		}
+		$count++;
+	}
+
+	return implode('<br>', $chunks);
 }
 
 ?>
@@ -89,11 +115,11 @@ foreach ($rows9 as $key => $value)
 									<section>
 
 										<header>
-											<h3 style="padding-left: 36%;"><strong>Your Scholarships</strong></h3><br>
+											<h3 style="padding-left: 30%;"><strong>All Scholarships and Matched Students</strong></h3><br>
 										</header>
 
 				                                <?php
-				                                  	$sql = "SELECT * FROM scholarship WHERE sigID='".$_SESSION['currentUserID']."'";
+				                                  	$sql = "SELECT S.*, SIG.firstName AS sigFirstName, SIG.lastName AS sigLastName FROM scholarship S LEFT JOIN signatory SIG ON SIG.sigID = S.sigID ORDER BY S.appDeadline ASC";
 													$result = $conn->query($sql);
 													if ($result->num_rows > 0) {
 				                                ?>
@@ -101,9 +127,10 @@ foreach ($rows9 as $key => $value)
 				                              <thead>
 				                                <tr>
 				                                  <th class = "col-md-1"><strong>Scholarship</strong></th>
+				                                  <th class = "col-md-2"><strong>Owner</strong></th>
 				                                  <th class = "col-md-2"><strong>Application Deadline</strong></th>
 				                                  <th class = "col-md-1"><strong>Applications Limit</strong></th>
-																					<th class = "col-md-1"><strong>Total Applicants</strong></th>
+																	<th class = "col-md-2"><strong>IR Matched Students</strong></th>
 				                               	  <th class = "col-md-1"><strong>Admin Approval</strong></th>
 																					<th class = "col-md-1"><strong>Scholarship Status</strong></th>
 				                                  <th class = "col-md-1"></th>
@@ -117,6 +144,7 @@ foreach ($rows9 as $key => $value)
 				                                    <tr>
 
 				                                      <td style="text-transform : uppercase;"><strong><?php echo $row['schname']; ?></strong></td>
+															  <td><?php echo htmlspecialchars(trim(($row['sigFirstName'] ?? '') . ' ' . ($row['sigLastName'] ?? ''))); ?></td>
 				                                      <td style="padding :1%">
 				                                        <?php
 				                                          $now = time();
@@ -132,9 +160,9 @@ foreach ($rows9 as $key => $value)
 				                                        ?>
 				                                      </td>
 				                                      <td><?php echo $row['granteesNum'];?></td>
-																							<td>20</td>
+																	<td><?php echo renderMatchedStudentsHtml((int) $row['scholarshipID']); ?></td>
 				                                      <td><?php echo $row['adminapproval'];?></td>
-																							<td><strong><u>active</u></strong></td>
+																	<td><strong><u><?php echo htmlspecialchars((string) $row['schstatus']); ?></u></strong></td>
 
 					                                  <td>
 				                                      	<form method = "post" name = "editScholarshipForm" action = "tempEditScholarship.php">

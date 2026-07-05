@@ -9,6 +9,7 @@
 require '../config.php';
     require_once 'notification_mailer.php';
   require_once 'email_templates.php';
+  require_once 'IRRecommendationEngine.php';
 $conn = getDbConnection();
       if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
@@ -74,6 +75,9 @@ $conn = getDbConnection();
           if ($conn->query($sig_sql) === TRUE) {
             $sch_sql = "UPDATE scholarship SET previous_adminapproval = adminapproval, adminapproval = 'currently blocked', schstatus = 'inactive' WHERE sigID = '$sigID'";
             if ($conn->query($sch_sql) === TRUE) {
+                if (class_exists('IRRecommendationEngine')) {
+                  IRRecommendationEngine::markScholarshipCorpusDirty($conn);
+                }
                 $app_sql = "UPDATE application SET previous_appstatus=appstatus, appstatus = 'inactive',previous_verifiedBySignatory=verifiedBySignatory, verifiedBySignatory = 'currently blocked' WHERE sigID = '$sigID'";
                 if ($conn->query($app_sql) === TRUE) {
                   $emailTemplate = email_tpl_account_blocked_signatory($notifyName);

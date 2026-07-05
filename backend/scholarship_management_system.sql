@@ -211,6 +211,27 @@ CREATE TABLE `signatory` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `sms_dispatch_log`
+--
+
+DROP TABLE IF EXISTS `sms_dispatch_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sms_dispatch_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipient_count` int(11) NOT NULL DEFAULT 0,
+  `success_count` int(11) NOT NULL DEFAULT 0,
+  `failed_count` int(11) NOT NULL DEFAULT 0,
+  `provider_http_code` int(11) NOT NULL DEFAULT 0,
+  `provider_message` varchar(255) NOT NULL DEFAULT '',
+  `message_preview` varchar(255) NOT NULL DEFAULT '',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_sms_dispatch_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Dumping data for table `signatory`
 --
 
@@ -304,6 +325,162 @@ INSERT INTO `verify_signup` VALUES
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `ir_engine_meta`
+--
+
+DROP TABLE IF EXISTS `ir_engine_meta`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ir_engine_meta` (
+  `meta_key` varchar(120) NOT NULL,
+  `meta_value` text NOT NULL,
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`meta_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ir_recommendation_cache`
+--
+
+DROP TABLE IF EXISTS `ir_recommendation_cache`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ir_recommendation_cache` (
+  `student_id` int(11) NOT NULL,
+  `scholarship_id` int(11) NOT NULL,
+  `score_percent` int(11) NOT NULL,
+  `explanation_json` text NOT NULL,
+  `profile_hash` char(40) NOT NULL,
+  `corpus_hash` char(40) NOT NULL,
+  `model_version` varchar(40) NOT NULL,
+  `generated_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`student_id`,`scholarship_id`),
+  KEY `idx_ir_rec_cache_lookup` (`student_id`,`profile_hash`,`corpus_hash`,`model_version`,`generated_at`),
+  CONSTRAINT `fk_ir_rec_cache_student` FOREIGN KEY (`student_id`) REFERENCES `student` (`studentID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_ir_rec_cache_scholarship` FOREIGN KEY (`scholarship_id`) REFERENCES `scholarship` (`scholarshipID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ir_scholarship_norms`
+--
+
+DROP TABLE IF EXISTS `ir_scholarship_norms`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ir_scholarship_norms` (
+  `scholarship_id` int(11) NOT NULL,
+  `norm_value` double NOT NULL,
+  PRIMARY KEY (`scholarship_id`),
+  CONSTRAINT `fk_ir_sch_norms_scholarship` FOREIGN KEY (`scholarship_id`) REFERENCES `scholarship` (`scholarshipID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ir_scholarship_vectors`
+--
+
+DROP TABLE IF EXISTS `ir_scholarship_vectors`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ir_scholarship_vectors` (
+  `scholarship_id` int(11) NOT NULL,
+  `term_id` int(11) NOT NULL,
+  `tf_value` double NOT NULL,
+  `tfidf_value` double NOT NULL,
+  PRIMARY KEY (`scholarship_id`,`term_id`),
+  KEY `idx_ir_sch_term` (`term_id`),
+  CONSTRAINT `fk_ir_sch_vectors_scholarship` FOREIGN KEY (`scholarship_id`) REFERENCES `scholarship` (`scholarshipID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_ir_sch_vectors_term` FOREIGN KEY (`term_id`) REFERENCES `ir_vocabulary` (`term_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ir_stopwords`
+--
+
+DROP TABLE IF EXISTS `ir_stopwords`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ir_stopwords` (
+  `word` varchar(64) NOT NULL,
+  PRIMARY KEY (`word`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ir_student_documents`
+--
+
+DROP TABLE IF EXISTS `ir_student_documents`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ir_student_documents` (
+  `student_id` int(11) NOT NULL,
+  `normalized_text` longtext NOT NULL,
+  `profile_hash` char(40) NOT NULL,
+  `corpus_hash` char(40) NOT NULL,
+  `model_version` varchar(40) NOT NULL,
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`student_id`),
+  KEY `idx_ir_student_doc_hash` (`profile_hash`,`corpus_hash`,`model_version`),
+  CONSTRAINT `fk_ir_student_docs_student` FOREIGN KEY (`student_id`) REFERENCES `student` (`studentID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ir_student_vectors`
+--
+
+DROP TABLE IF EXISTS `ir_student_vectors`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ir_student_vectors` (
+  `student_id` int(11) NOT NULL,
+  `term_id` int(11) NOT NULL,
+  `tf_value` double NOT NULL,
+  `tfidf_value` double NOT NULL,
+  PRIMARY KEY (`student_id`,`term_id`),
+  KEY `idx_ir_student_term` (`term_id`),
+  CONSTRAINT `fk_ir_student_vectors_student` FOREIGN KEY (`student_id`) REFERENCES `student` (`studentID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_ir_student_vectors_term` FOREIGN KEY (`term_id`) REFERENCES `ir_vocabulary` (`term_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ir_synonyms`
+--
+
+DROP TABLE IF EXISTS `ir_synonyms`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ir_synonyms` (
+  `variant_term` varchar(191) NOT NULL,
+  `canonical_term` varchar(191) NOT NULL,
+  PRIMARY KEY (`variant_term`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ir_vocabulary`
+--
+
+DROP TABLE IF EXISTS `ir_vocabulary`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ir_vocabulary` (
+  `term_id` int(11) NOT NULL AUTO_INCREMENT,
+  `term` varchar(191) NOT NULL,
+  `doc_freq` int(11) NOT NULL DEFAULT 0,
+  `idf_value` double NOT NULL DEFAULT 0,
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`term_id`),
+  UNIQUE KEY `term` (`term`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

@@ -467,22 +467,24 @@
                                 <label>Recipient Student</label>
                                 <select class="form-control" id="smsRecipient" name="student_id" required>
                                     <option value="">Select Student...</option>
+                                    <option value="all">All Students With Mobile Numbers</option>
                                     <?php foreach ($applicants as $s): ?>
                                     <option value="<?php echo h($s['student_id']); ?>" <?php echo ($s['phone'] === '') ? 'disabled' : ''; ?>><?php echo h($s['name']); ?><?php echo ($s['phone'] === '') ? ' (No mobile set)' : ''; ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Message Type</label>
-                                <select class="form-control" id="smsType" name="message_type" required>
-                                    <option value="Reminder">Deadline Reminder</option>
-                                    <option value="Profile">Profile Completion</option>
-                                    <option value="Status">Application Status</option>
+                                <label>Message Template</label>
+                                <select class="form-control" id="smsTemplate" name="message_template" required>
+                                    <option value="deadline_reminder">Deadline Reminder</option>
+                                    <option value="profile_completion">Profile Completion</option>
+                                    <option value="status_update">Application Status Update</option>
+                                    <option value="resend_matches">Re-send Matched Scholarships</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Message Text</label>
-                                <textarea class="form-control" id="smsMessage" name="message_text" rows="4" placeholder="Type your message here..." required></textarea>
+                                <label>Template Preview</label>
+                                <textarea class="form-control" id="smsMessagePreview" rows="4" readonly>Deadline Reminder template will be sent to the selected student.</textarea>
                             </div>
                             <button type="submit" class="btn-submit">Send Message</button>
                         </form>
@@ -499,5 +501,29 @@
     </footer>
 
     <script src="../js/signatory-landing.js"></script>
+        <script>
+            (function () {
+                var templateSelect = document.getElementById('smsTemplate');
+                var preview = document.getElementById('smsMessagePreview');
+                if (!templateSelect || !preview) {
+                    return;
+                }
+
+                var previews = {
+                    deadline_reminder: 'Deadline Reminder template will be sent to the selected student.',
+                    profile_completion: 'Profile Completion template will be sent to the selected student.',
+                    status_update: 'Application Status Update template will be sent to the selected student.',
+                    resend_matches: 'Matched Scholarships template will send top scholarship positions (eligible at 30% and above) for the selected recipient(s), including why they matched.'
+                };
+
+                var syncPreview = function () {
+                    var key = templateSelect.value || 'deadline_reminder';
+                    preview.value = previews[key] || previews.deadline_reminder;
+                };
+
+                templateSelect.addEventListener('change', syncPreview);
+                syncPreview();
+            })();
+        </script>
 </body>
 </html>

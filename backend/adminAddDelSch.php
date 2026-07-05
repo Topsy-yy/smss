@@ -1,6 +1,9 @@
 <?php
   session_start();
 require '../config.php';
+require_once 'IRRecommendationEngine.php';
+require_once 'MatchingEngine.php';
+require_once 'SmsService.php';
 //check validity of the user
   $currentUserID=$_SESSION['currentUserID'];
   if($currentUserID==NULL){
@@ -95,6 +98,34 @@ require '../config.php';
       }
 
 			if (!empty($schID)) {
+				if (class_exists('IRRecommendationEngine')) {
+					IRRecommendationEngine::markScholarshipCorpusDirty($conn);
+				}
+				$matchedStudents = MatchingEngine::getMatchedStudentsForScholarship($schID);
+				foreach ($matchedStudents as $ms) {
+					$score = (int) ($ms['score'] ?? 0);
+					$phone = trim((string) ($ms['phone'] ?? ''));
+					if ($score < 30 || $phone === '') {
+						continue;
+					}
+
+					$studentName = trim((string) ($ms['name'] ?? 'Student'));
+					if ($studentName === '') {
+						$studentName = 'Student';
+					}
+
+					$reasons = [];
+					if (!empty($ms['reasons']) && is_array($ms['reasons'])) {
+						$reasons = array_slice(array_values($ms['reasons']), 0, 2);
+					}
+					$whyMatched = '';
+					if (!empty($reasons)) {
+						$whyMatched = ' Why matched: ' . implode(', ', $reasons) . '.';
+					}
+
+					$smsMsg = "Hi {$studentName}, you are eligible for '{$name}'. Log in to ScholarConnect and apply before {$appdeadline}.{$whyMatched}";
+					SmsService::sendSms($phone, $smsMsg);
+				}
         $xml = new DOMDocument("1.0","UTF-8");
 			  $xml->load("scholarship_data.xml");
   			$rootTag = $xml->getElementsByTagName("scholarships")->item(0);
@@ -153,6 +184,7 @@ require '../config.php';
 			}
 			if($flag==1){
 			$folder=$schID;
+			$fileupload = '0';
 			mkdir("../scholarship/$folder/");
 				if(is_uploaded_file($_FILES['validate']['tmp_name'])) {
 
@@ -231,6 +263,9 @@ require '../config.php';
 				);
 
 				if ($stmt->execute()) {
+					if (class_exists('IRRecommendationEngine')) {
+						IRRecommendationEngine::markScholarshipCorpusDirty($conn);
+					}
         $xml=simplexml_load_file("scholarship_data.xml") or die("Error: Cannot create object");
         foreach($xml->children() as $scholarship){
             if($scholarship['scholarshipID'] == $schID){
@@ -265,6 +300,7 @@ require '../config.php';
 			if($flag==1){
 			$folder=$schID;
       echo $folder;
+			$fileupload = '0';
 			$dir = "../scholarship/$folder/";
       if (is_dir($dir)){
         $files = glob($dir . '/*');

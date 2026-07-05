@@ -9,6 +9,7 @@
 require '../config.php';
     require_once 'notification_mailer.php';
   require_once 'email_templates.php';
+  require_once 'IRRecommendationEngine.php';
 $conn = getDbConnection();
       if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
@@ -74,6 +75,9 @@ $conn = getDbConnection();
           if ($conn->query($sig_sql) === TRUE) {
             $sch_sql = "UPDATE scholarship SET  adminapproval = previous_adminapproval, schstatus = 'active' WHERE sigID = '$sigID'";
             if ($conn->query($sch_sql) === TRUE) {
+                if (class_exists('IRRecommendationEngine')) {
+                  IRRecommendationEngine::markScholarshipCorpusDirty($conn);
+                }
                 $app_sql = "UPDATE application SET appstatus = previous_appstatus, verifiedBySignatory = previous_verifiedBySignatory WHERE sigID = '$sigID'";
                 if ($conn->query($app_sql) === TRUE) {
                   $emailTemplate = email_tpl_account_restored_signatory($notifyName);

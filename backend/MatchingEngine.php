@@ -5,6 +5,7 @@
 if (!function_exists('getDbConnection')) {
     require_once __DIR__ . '/../config.php';
 }
+require_once __DIR__ . '/IRRecommendationEngine.php';
 
 class MatchingEngine {
 
@@ -80,181 +81,40 @@ class MatchingEngine {
      * Main function to retrieve, score, and rank opportunities for a specific student
      */
     public static function getMatches($studentId) {
-        $conn = getDbConnection();
-        if (!$conn) {
+        // IR-only matching engine.
+        if (!class_exists('IRRecommendationEngine')) {
             return [];
         }
 
-        // 1. Retrieve the Student's Profile
-        $studentQuery = "SELECT current_level, financial_need, career_interests, gender FROM student WHERE studentID = ?";
-        $stmt = $conn->prepare($studentQuery);
-        $stmt->bind_param("i", $studentId);
-        $stmt->execute();
-        $studentResult = $stmt->get_result();
-        $student = $studentResult->fetch_assoc();
-        $stmt->close();
-
-        if (!$student) {
-            $conn->close();
-            return []; // Student not found
+        try {
+            $irMatches = IRRecommendationEngine::getMatches((int) $studentId);
+            if (is_array($irMatches)) {
+                return $irMatches;
+            }
+        } catch (Throwable $e) {
+            return [];
         }
-
-        $studentLevel = strtolower(trim((string)$student['current_level']));
-        $studentNeed = (string)$student['financial_need'];
-        $studentInterests = (string)$student['career_interests'];
-        $studentGender = strtolower(trim((string)$student['gender']));
-
-        // 2. Retrieve Active Scholarships
-        // We also fetch whether the student has already applied using a LEFT JOIN
-        $oppSql = "SELECT S.scholarshipID as id, S.schname as title, S.sch as category, 
-                          S.degree, S.target_financial_need, S.gender as target_gender,
-                          S.appDeadline as deadline, S.funding as amount, S.description as `desc`,
-                          SI.firstName, SI.middleName, SI.lastName,
-                          CASE WHEN A.applicationID IS NULL THEN 0 ELSE 1 END AS applied
-                   FROM scholarship S
-                   LEFT JOIN signatory SI ON SI.sigID = S.sigID
-                   LEFT JOIN application A ON A.scholarshipID = S.scholarshipID AND A.studentID = ?
-                   WHERE S.adminapproval = 'Approved' 
-                     AND S.schstatus = 'active'
-                     AND S.appDeadline >= CURDATE()";
-                     
-        $oppStmt = $conn->prepare($oppSql);
-        $oppStmt->bind_param("i", $studentId);
-        $oppStmt->execute();
-        $oppResult = $oppStmt->get_result();
-
-        $matchedOpportunities = [];
-
-        // 3. The Matching Loop
-        while ($row = $oppResult->fetch_assoc()) {
-            
-            // --- HARD FILTERS ---
-            // A. Educational Level Filter
-            $reqDegree = strtolower(trim($row['degree']));
-            if (!empty($reqDegree) && $reqDegree !== 'select' && $studentLevel !== $reqDegree && !empty($studentLevel)) {
-                continue; // Fails Hard Filter: Skip this scholarship entirely
-            }
-
-            // B. Gender Filter (Optional but recommended to keep logic sound)
-            $reqGender = strtolower(trim($row['target_gender']));
-            if (!empty($reqGender) && $reqGender !== 'select' && $reqGender !== 'male+female' && $reqGender !== 'prefer') {
-                if ($studentGender !== '' && $studentGender !== $reqGender) {
-                    continue; // Fails Hard Filter: Gender mismatch
-                }
-            }
-
-            // --- SOFT SCORING ---
-            $score = 0;
-            
-            // Pillar 1: Financial Need (Max 60)
-            $score += self::calculateFinancialScore($studentNeed, $row['target_financial_need']);
-            
-            // Pillar 2: Career Interests / Category (Max 40)
-            $score += self::calculateInterestScore($studentInterests, $row['category']);
-
-            // Compile the data for the frontend
-            $orgParts = array_filter([$row['firstName'], $row['middleName'], $row['lastName']]);
-            $orgName = trim(implode(' ', $orgParts)) ?: 'Partner Organization';
-            
-            $daysLeft = (int) ceil((strtotime($row['deadline']) - time()) / (60 * 60 * 24));
-
-            $matchedOpportunities[] = [
-                'id' => (int)$row['id'],
-                'title' => $row['title'],
-                'org' => $orgName,
-                'category' => $row['category'],
-                'match' => $score, // The calculated percentage out of 100
-                'verified' => true,
-                'deadline' => $row['deadline'],
-                'amount' => $row['amount'],
-                'desc' => $row['desc'],
-                'urgent' => ($daysLeft <= 7),
-                'applied' => ((int)$row['applied']) === 1
-            ];
-        }
-
-        $oppStmt->close();
-        $conn->close();
-
-        // 4. Ranking (Sort descending by match score, then ascending by nearest deadline)
-        usort($matchedOpportunities, function($a, $b) {
-            if ($a['match'] === $b['match']) {
-                return strtotime($a['deadline']) <=> strtotime($b['deadline']);
-            }
-            return $b['match'] <=> $a['match']; // Higher score first
-        });
-
-        return $matchedOpportunities;
+        return [];
     }
 
     /**
      * Retrieve students whose profile matches a newly added scholarship
      */
     public static function getMatchedStudentsForScholarship($scholarshipId) {
-        $conn = getDbConnection();
-        if (!$conn) {
+        if (!class_exists('IRRecommendationEngine')) {
             return [];
         }
 
-        $schQuery = "SELECT schname, sch as category, degree, target_financial_need, gender as target_gender 
-                     FROM scholarship WHERE scholarshipID = ?";
-        $stmt = $conn->prepare($schQuery);
-        $stmt->bind_param("i", $scholarshipId);
-        $stmt->execute();
-        $schResult = $stmt->get_result();
-        $scholarship = $schResult->fetch_assoc();
-        $stmt->close();
-
-        if (!$scholarship) {
-            $conn->close();
+        try {
+            $matched = IRRecommendationEngine::getTopStudentsForScholarship((int) $scholarshipId, 10);
+            if (is_array($matched)) {
+                return $matched;
+            }
+        } catch (Throwable $e) {
             return [];
         }
 
-        $reqDegree = strtolower(trim($scholarship['degree']));
-        $reqGender = strtolower(trim($scholarship['target_gender']));
-        $targetFinancialNeed = $scholarship['target_financial_need'];
-        $category = $scholarship['category'];
-
-        $studentQuery = "SELECT studentID, firstName, phone, current_level, financial_need, career_interests, gender 
-                         FROM student WHERE status = 'active' AND phone IS NOT NULL AND phone != ''";
-        $studentResult = $conn->query($studentQuery);
-
-        $matchedStudents = [];
-
-        while ($student = $studentResult->fetch_assoc()) {
-            $studentLevel = strtolower(trim((string)$student['current_level']));
-            $studentNeed = (string)$student['financial_need'];
-            $studentInterests = (string)$student['career_interests'];
-            $studentGender = strtolower(trim((string)$student['gender']));
-
-            // --- HARD FILTERS ---
-            if (!empty($reqDegree) && $reqDegree !== 'select' && $studentLevel !== $reqDegree && !empty($studentLevel)) {
-                continue;
-            }
-
-            if (!empty($reqGender) && $reqGender !== 'select' && $reqGender !== 'male+female' && $reqGender !== 'prefer') {
-                if ($studentGender !== '' && $studentGender !== $reqGender) {
-                    continue;
-                }
-            }
-
-            // --- SOFT SCORING ---
-            $score = 0;
-            $score += self::calculateFinancialScore($studentNeed, $targetFinancialNeed);
-            $score += self::calculateInterestScore($studentInterests, $category);
-
-            // Match threshold
-            if ($score >= 20) {
-                $matchedStudents[] = [
-                    'studentID' => $student['studentID'],
-                    'name' => $student['firstName'],
-                    'phone' => $student['phone']
-                ];
-            }
-        }
-
-        $conn->close();
-        return $matchedStudents;
+        return [];
     }
 }
 ?>
