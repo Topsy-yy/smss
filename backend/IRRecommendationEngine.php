@@ -179,12 +179,13 @@ class IRRecommendationEngine {
         self::ensureInfrastructure($conn);
 
         $conn->query("DELETE FROM ir_engine_meta WHERE meta_key = 'scholarship_corpus_hash'");
-        $conn->query('TRUNCATE TABLE ir_vocabulary');
         $conn->query('TRUNCATE TABLE ir_scholarship_vectors');
         $conn->query('TRUNCATE TABLE ir_scholarship_norms');
         $conn->query('TRUNCATE TABLE ir_student_vectors');
         $conn->query('TRUNCATE TABLE ir_student_documents');
         $conn->query('TRUNCATE TABLE ir_recommendation_cache');
+        $conn->query('DELETE FROM ir_vocabulary');
+        $conn->query('ALTER TABLE ir_vocabulary AUTO_INCREMENT = 1');
     }
 
     public static function getTopStudentsForScholarship($scholarshipId, $limit = 5) {
@@ -590,12 +591,13 @@ class IRRecommendationEngine {
 
         $totalDocs = max(1, count($docTermsByScholarship));
 
-        $conn->query('TRUNCATE TABLE ir_vocabulary');
         $conn->query('TRUNCATE TABLE ir_scholarship_vectors');
         $conn->query('TRUNCATE TABLE ir_scholarship_norms');
         $conn->query('TRUNCATE TABLE ir_student_vectors');
         $conn->query('TRUNCATE TABLE ir_student_documents');
         $conn->query('TRUNCATE TABLE ir_recommendation_cache');
+        $conn->query('DELETE FROM ir_vocabulary');
+        $conn->query('ALTER TABLE ir_vocabulary AUTO_INCREMENT = 1');
 
         if (!empty($dfCounter)) {
             $insertVocab = $conn->prepare('INSERT INTO ir_vocabulary (term, doc_freq, idf_value) VALUES (?, ?, ?)');

@@ -197,7 +197,7 @@
                             <div class="form-group" style="background: var(--sig-bg); padding: 1.5rem; border-radius: var(--radius-md); margin-top: 2rem;">
                                 <label><strong>Upload Validation Document</strong> <span style="color: var(--accent-red);">*</span></label>
                                 <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Provide an official soft copy letter from your organization authorizing this scholarship.</label>
-                                <input type="file" class="form-control" name="validate" id="validate" onchange="return fileValidation('validate')" accept=".pdf" required style="background: white;">
+                                <input type="file" class="form-control" name="validate" id="validate" onchange="return fileValidation('validate')" accept=".pdf"  required style="background: white;">
                             </div>
 
                             <input type="hidden" name="adminapproval" value="Pending">
