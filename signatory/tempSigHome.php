@@ -58,6 +58,7 @@
 
   $stats = array('students' => 0, 'profile_pct' => 0, 'active' => 0, 'approved' => 0);
   $applicants = array();
+    $studentProfiles = array();
   $applications = array();
   $smsHistory = array();
     $smsNoticeType = trim((string) ($_GET['sms_status'] ?? ''));
@@ -129,6 +130,7 @@
           $name = trim(implode(' ', array_filter(array($row['firstName'], $row['middleName'], $row['lastName']))));
           $location = trim((string) ($row['presProvCity'] ?: $row['presRegion'] ?: 'Not set'));
           $education = trim((string) ($row['college'] ?: $row['dept'] ?: 'Not set'));
+          $primaryPhone = trim((string) (($row['phone'] ?? '') !== '' ? ($row['phone'] ?? '') : ($row['contactNo'] ?? '')));
 
           $applicants[] = array(
               'student_id' => (int) $row['studentID'],
@@ -138,7 +140,22 @@
               'prog' => $profilePct,
               'apps' => (int) $row['app_count'],
               'need' => $need,
-              'phone' => trim((string) ($row['phone'] ?? '')),
+              'phone' => $primaryPhone,
+          );
+
+          $studentProfiles[(int) $row['studentID']] = array(
+              'name' => ($name !== '') ? $name : ('Student #' . (int) $row['studentID']),
+              'location' => $location,
+              'education' => $education,
+              'gender' => trim((string) ($row['gender'] ?? '')),
+              'birthDate' => trim((string) ($row['birthDate'] ?? '')),
+              'birthPlace' => trim((string) ($row['birthPlace'] ?? '')),
+              'address' => trim((string) ($row['presStreetAddr'] ?? '')),
+              'region' => trim((string) ($row['presRegion'] ?? '')),
+              'phone' => $primaryPhone,
+              'profilePct' => $profilePct,
+              'appCount' => (int) $row['app_count'],
+              'recentApplications' => array(),
           );
       }
       $applicantStmt->close();
@@ -212,6 +229,51 @@
 
   if (count($smsHistory) > 6) {
       $smsHistory = array_slice($smsHistory, 0, 6);
+  }
+
+  $recentByStudentSql =
+      "SELECT
+          A.studentID,
+          A.applicationID,
+          A.appDate,
+          A.appstatus,
+          A.verifiedBySignatory,
+          S.schname
+       FROM application A
+       JOIN scholarship S ON S.scholarshipID = A.scholarshipID
+       WHERE A.sigID = ?
+       ORDER BY A.studentID ASC, A.appDate DESC, A.applicationID DESC";
+
+  $recentStmt = $conn->prepare($recentByStudentSql);
+  if ($recentStmt) {
+      $recentStmt->bind_param('i', $currentUserID);
+      $recentStmt->execute();
+      $recentRes = $recentStmt->get_result();
+      while ($recentRes && ($row = $recentRes->fetch_assoc())) {
+          $sid = (int) ($row['studentID'] ?? 0);
+          if (!isset($studentProfiles[$sid])) {
+              continue;
+          }
+
+          if (count($studentProfiles[$sid]['recentApplications']) >= 5) {
+              continue;
+          }
+
+          $decision = trim((string) ($row['verifiedBySignatory'] ?? ''));
+          if ($decision === '') {
+              $decision = trim((string) ($row['appstatus'] ?? 'Pending'));
+          }
+
+          $studentProfiles[$sid]['recentApplications'][] = array(
+              'applicationID' => (int) ($row['applicationID'] ?? 0),
+              'scholarship' => trim((string) ($row['schname'] ?? 'Scholarship')),
+              'submitted' => (!empty($row['appDate']) && $row['appDate'] !== '0000-00-00')
+                  ? date('M d, Y', strtotime((string) $row['appDate']))
+                  : 'Not available',
+              'status' => ($decision !== '') ? $decision : 'Pending',
+          );
+      }
+      $recentStmt->close();
   }
 
   $conn->close();
@@ -394,7 +456,11 @@
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <a href="tempSigApplication.php?student=<?php echo h($s['student_id']); ?>" class="btn-action" style="text-decoration:none; display:inline-block;">View Details</a>
+                                <button
+                                    type="button"
+                                    class="btn-action js-student-profile-popup"
+                                    data-student-id="<?php echo h($s['student_id']); ?>"
+                                >View Details</button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -530,6 +596,45 @@
         </div>
     </div>
 
+    <div id="studentProfileModal" class="review-modal" aria-hidden="true">
+        <div class="review-modal-card student-profile-modal-card" role="dialog" aria-modal="true" aria-labelledby="studentProfileModalTitle">
+            <button type="button" class="review-modal-close" id="studentProfileModalClose" aria-label="Close">&times;</button>
+            <h3 id="studentProfileModalTitle">Applicant Profile Details</h3>
+            <div class="student-profile-grid">
+                <p><strong>Full Name:</strong> <span id="studentProfileName">-</span></p>
+                <p><strong>Profile Completion:</strong> <span id="studentProfilePct">-</span></p>
+                <p><strong>Location:</strong> <span id="studentProfileLocation">-</span></p>
+                <p><strong>Education:</strong> <span id="studentProfileEducation">-</span></p>
+                <p><strong>Gender:</strong> <span id="studentProfileGender">-</span></p>
+                <p><strong>Birth Date:</strong> <span id="studentProfileBirthDate">-</span></p>
+                <p><strong>Birth Place:</strong> <span id="studentProfileBirthPlace">-</span></p>
+                <p><strong>Region:</strong> <span id="studentProfileRegion">-</span></p>
+                <p><strong>Address:</strong> <span id="studentProfileAddress">-</span></p>
+                <p><strong>Mobile:</strong> <span id="studentProfilePhone">-</span></p>
+                <p><strong>Total Applications:</strong> <span id="studentProfileTotalApps">-</span></p>
+            </div>
+
+            <h4 class="student-recent-title">Recent Applications Submitted</h4>
+            <div class="student-recent-wrap">
+                <table class="table student-recent-table">
+                    <thead>
+                        <tr>
+                            <th>Application ID</th>
+                            <th>Scholarship</th>
+                            <th>Submitted</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentRecentBody"></tbody>
+                </table>
+            </div>
+
+            <div class="review-modal-actions">
+                <button type="button" class="btn-outline" id="studentProfileModalDone">Done</button>
+            </div>
+        </div>
+    </div>
+
     <!-- FOOTER -->
     <footer class="sig-footer">
         <p>© 2026 ScholarConnect · Signatory Portal · Powered by Africa's Talking SMS</p>
@@ -537,6 +642,8 @@
 
     <script src="../js/signatory-landing.js"></script>
         <script>
+            var studentProfileData = <?php echo json_encode($studentProfiles, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
             (function () {
                 var templateSelect = document.getElementById('smsTemplate');
                 var preview = document.getElementById('smsMessagePreview');
@@ -612,6 +719,106 @@
 
                 closeBtn.addEventListener('click', closeModal);
                 cancelBtn.addEventListener('click', closeModal);
+                modal.addEventListener('click', function (evt) {
+                    if (evt.target === modal) {
+                        closeModal();
+                    }
+                });
+                document.addEventListener('keydown', function (evt) {
+                    if (evt.key === 'Escape' && modal.classList.contains('active')) {
+                        closeModal();
+                    }
+                });
+            })();
+
+            (function () {
+                var modal = document.getElementById('studentProfileModal');
+                var closeBtn = document.getElementById('studentProfileModalClose');
+                var doneBtn = document.getElementById('studentProfileModalDone');
+                var triggers = document.querySelectorAll('.js-student-profile-popup');
+                var nameEl = document.getElementById('studentProfileName');
+                var pctEl = document.getElementById('studentProfilePct');
+                var locationEl = document.getElementById('studentProfileLocation');
+                var educationEl = document.getElementById('studentProfileEducation');
+                var genderEl = document.getElementById('studentProfileGender');
+                var birthDateEl = document.getElementById('studentProfileBirthDate');
+                var birthPlaceEl = document.getElementById('studentProfileBirthPlace');
+                var regionEl = document.getElementById('studentProfileRegion');
+                var addressEl = document.getElementById('studentProfileAddress');
+                var phoneEl = document.getElementById('studentProfilePhone');
+                var totalAppsEl = document.getElementById('studentProfileTotalApps');
+                var recentBody = document.getElementById('studentRecentBody');
+
+                if (!modal || !closeBtn || !doneBtn || !triggers.length || !recentBody) {
+                    return;
+                }
+
+                function valOrDash(value) {
+                    return (value && String(value).trim() !== '') ? String(value) : '-';
+                }
+
+                function openModal() {
+                    modal.classList.add('active');
+                    modal.setAttribute('aria-hidden', 'false');
+                    document.body.style.overflow = 'hidden';
+                }
+
+                function closeModal() {
+                    modal.classList.remove('active');
+                    modal.setAttribute('aria-hidden', 'true');
+                    document.body.style.overflow = '';
+                }
+
+                function renderRecentApps(apps) {
+                    recentBody.innerHTML = '';
+
+                    if (!apps || !apps.length) {
+                        var empty = document.createElement('tr');
+                        empty.innerHTML = '<td colspan="4" style="text-align:center;color:#64748b;">No recent applications found for this student.</td>';
+                        recentBody.appendChild(empty);
+                        return;
+                    }
+
+                    apps.forEach(function (app) {
+                        var tr = document.createElement('tr');
+                        tr.innerHTML =
+                            '<td>' + valOrDash(app.applicationID) + '</td>' +
+                            '<td>' + valOrDash(app.scholarship) + '</td>' +
+                            '<td>' + valOrDash(app.submitted) + '</td>' +
+                            '<td>' + valOrDash(app.status) + '</td>';
+                        recentBody.appendChild(tr);
+                    });
+                }
+
+                function populate(profile) {
+                    nameEl.textContent = valOrDash(profile.name);
+                    pctEl.textContent = valOrDash(profile.profilePct) + '%';
+                    locationEl.textContent = valOrDash(profile.location);
+                    educationEl.textContent = valOrDash(profile.education);
+                    genderEl.textContent = valOrDash(profile.gender);
+                    birthDateEl.textContent = valOrDash(profile.birthDate);
+                    birthPlaceEl.textContent = valOrDash(profile.birthPlace);
+                    regionEl.textContent = valOrDash(profile.region);
+                    addressEl.textContent = valOrDash(profile.address);
+                    phoneEl.textContent = valOrDash(profile.phone);
+                    totalAppsEl.textContent = valOrDash(profile.appCount);
+                    renderRecentApps(profile.recentApplications || []);
+                }
+
+                triggers.forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var studentId = btn.getAttribute('data-student-id');
+                        var profile = (studentProfileData && studentProfileData[studentId]) ? studentProfileData[studentId] : null;
+                        if (!profile) {
+                            return;
+                        }
+                        populate(profile);
+                        openModal();
+                    });
+                });
+
+                closeBtn.addEventListener('click', closeModal);
+                doneBtn.addEventListener('click', closeModal);
                 modal.addEventListener('click', function (evt) {
                     if (evt.target === modal) {
                         closeModal();

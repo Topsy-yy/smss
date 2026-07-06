@@ -944,6 +944,7 @@ select[name="class"] {
 .stagger-item {
   opacity: 0;
   transform: translateY(14px);
+  font-size: 75%;
   animation: slideUpFade .5s var(--ease) forwards;
 }
 

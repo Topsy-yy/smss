@@ -1,0 +1,198 @@
+/* Page-specific styles for admin/tempSchView.php */
+
+.scholarship-view-page {
+  margin-top: 1rem;
+  border-radius: 16px;
+  border: 1px solid #dbe6f2;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+}
+
+.scholarship-headline {
+  text-align: center;
+  padding: 1.25rem 1rem 1rem;
+  border-bottom: 1px solid #e4ecf5;
+}
+
+.sch-title {
+  margin: 0 0 0.9rem;
+  font-size: 1.8rem;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.sch-meta-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.sch-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.42rem 0.82rem;
+  background: #f3f8ff;
+  border: 1px solid #d6e5f8;
+}
+
+.sch-meta-item span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #334155;
+  font-weight: 700;
+}
+
+.sch-meta-item strong {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.scholarship-content {
+  padding: 1.2rem 1.1rem 0.3rem;
+}
+
+.scholarship-content section h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  color: #0f172a;
+}
+
+.scholarship-content section p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.62;
+  color: #334155;
+}
+
+.section-divider {
+  margin: 1rem 0;
+  border: 0;
+  border-top: 1px solid #e4ecf5;
+}
+
+.files-header {
+  padding: 0 1.1rem;
+}
+
+.files-header h1 {
+  margin: 0.2rem 0 0.7rem;
+  font-size: 1.2rem;
+  color: #0f172a;
+}
+
+.file-list-table {
+  margin: 0 1.1rem 0.7rem;
+  width: calc(100% - 2.2rem);
+  border: 1px solid #d9e5f2;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.file-list-table > thead > tr > th {
+  background: #f6faff;
+  color: #334155;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #dbe6f2;
+}
+
+.file-list-table > tbody > tr > td {
+  vertical-align: middle;
+  color: #1e293b;
+  border-top: 1px solid #e5edf6;
+}
+
+.btn-inline-view {
+  border: 1px solid #1d4ed8;
+  background: #ffffff;
+  color: #1d4ed8;
+  border-radius: 8px;
+  padding: 0.35rem 0.72rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.btn-inline-view:hover {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.file-empty-state {
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+  padding: 0.85rem 0.7rem;
+}
+
+.scholarship-actions {
+  padding: 0.45rem 1.1rem 1.25rem;
+}
+
+.action-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.7rem;
+}
+
+.action-btn {
+  border-radius: 10px;
+  padding: 0.58rem 1.08rem;
+  border: 1px solid transparent;
+  font-size: 0.88rem;
+  font-weight: 700;
+  min-width: 148px;
+}
+
+.action-btn.accept {
+  background: #166534;
+  color: #ffffff;
+}
+
+.action-btn.reject {
+  background: #b91c1c;
+  color: #ffffff;
+}
+
+.action-btn.neutral {
+  background: #0f4c81;
+  color: #ffffff;
+}
+
+.action-btn.back {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.action-btn:hover {
+  filter: brightness(0.96);
+}
+
+@media (max-width: 768px) {
+  .sch-title {
+    font-size: 1.45rem;
+  }
+
+  .scholarship-content {
+    padding: 1rem 0.8rem 0.2rem;
+  }
+
+  .file-list-table {
+    margin: 0 0.8rem 0.7rem;
+    width: calc(100% - 1.6rem);
+  }
+
+  .action-btn {
+    width: 100%;
+    max-width: 320px;
+  }
+}

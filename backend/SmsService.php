@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config.php';
 class SmsService {
 
     private static $logTableReady = false;
+    private static $logSchemaMode = null;
     
     /**
      * Send an SMS using Africa's Talking REST API
@@ -168,33 +169,105 @@ class SmsService {
         self::$logTableReady = true;
     }
 
+    private static function resolveLogSchemaMode($conn) {
+        if (self::$logSchemaMode !== null) {
+            return self::$logSchemaMode;
+        }
+
+        $hasLegacy = false;
+        $hasNew = false;
+
+        $legacyCheck = $conn->query("SHOW COLUMNS FROM sms_dispatch_log LIKE 'recipient'");
+        if ($legacyCheck && $legacyCheck->num_rows > 0) {
+            $hasLegacy = true;
+        }
+
+        $newCheck = $conn->query("SHOW COLUMNS FROM sms_dispatch_log LIKE 'recipient_count'");
+        if ($newCheck && $newCheck->num_rows > 0) {
+            $hasNew = true;
+        }
+
+        if ($hasNew) {
+            self::$logSchemaMode = 'new';
+        } elseif ($hasLegacy) {
+            self::$logSchemaMode = 'legacy';
+        } else {
+            self::$logSchemaMode = 'none';
+        }
+
+        return self::$logSchemaMode;
+    }
+
     private static function logDispatch($recipientCount, $successCount, $failedCount, $httpCode, $providerMessage, $message) {
         if (!function_exists('getDbConnection')) {
             return;
         }
 
-        $conn = @getDbConnection();
-        if (!$conn || $conn->connect_error) {
-            return;
-        }
+        $conn = null;
+        try {
+            $conn = @getDbConnection();
+            if (!$conn || $conn->connect_error) {
+                return;
+            }
 
-        self::ensureLogTable($conn);
+            self::ensureLogTable($conn);
 
-        $sql = 'INSERT INTO sms_dispatch_log (recipient_count, success_count, failed_count, provider_http_code, provider_message, message_preview) VALUES (?, ?, ?, ?, ?, ?)';
-        $stmt = $conn->prepare($sql);
-        if ($stmt) {
             $recipientCount = (int) $recipientCount;
             $successCount = (int) $successCount;
             $failedCount = (int) $failedCount;
             $httpCode = (int) $httpCode;
             $providerMessage = trim((string) $providerMessage);
             $messagePreview = substr(trim((string) $message), 0, 255);
-            $stmt->bind_param('iiiiss', $recipientCount, $successCount, $failedCount, $httpCode, $providerMessage, $messagePreview);
-            $stmt->execute();
-            $stmt->close();
-        }
 
-        $conn->close();
+            $schemaMode = self::resolveLogSchemaMode($conn);
+
+            if ($schemaMode === 'new') {
+                $sql = 'INSERT INTO sms_dispatch_log (recipient_count, success_count, failed_count, provider_http_code, provider_message, message_preview) VALUES (?, ?, ?, ?, ?, ?)';
+                $stmt = $conn->prepare($sql);
+                if ($stmt) {
+                    $stmt->bind_param('iiiiss', $recipientCount, $successCount, $failedCount, $httpCode, $providerMessage, $messagePreview);
+                    $stmt->execute();
+                    $stmt->close();
+                }
+            } elseif ($schemaMode === 'legacy') {
+                $recipientLabel = ($recipientCount > 1)
+                    ? ('multiple (' . $recipientCount . ')')
+                    : 'single';
+
+                if ($successCount > 0 && $failedCount === 0) {
+                    $providerStatus = 'sent';
+                } elseif ($successCount > 0 && $failedCount > 0) {
+                    $providerStatus = 'partial';
+                } else {
+                    $providerStatus = 'failed';
+                }
+
+                $messageType = 'general';
+                if (stripos($messagePreview, 'Matched Scholarships') !== false) {
+                    $messageType = 'matched_scholarships';
+                } elseif (stripos($messagePreview, 'Deadline Reminder') !== false) {
+                    $messageType = 'deadline_reminder';
+                } elseif (stripos($messagePreview, 'Profile Completion') !== false) {
+                    $messageType = 'profile_completion';
+                }
+
+                $triggerSource = 'manual';
+
+                $legacySql = 'INSERT INTO sms_dispatch_log (recipient, message_preview, message_type, trigger_source, provider_http_code, provider_status, provider_message) VALUES (?, ?, ?, ?, ?, ?, ?)';
+                $legacyStmt = $conn->prepare($legacySql);
+                if ($legacyStmt) {
+                    $legacyStmt->bind_param('ssssiss', $recipientLabel, $messagePreview, $messageType, $triggerSource, $httpCode, $providerStatus, $providerMessage);
+                    $legacyStmt->execute();
+                    $legacyStmt->close();
+                }
+            }
+        } catch (Throwable $e) {
+            error_log('SmsService logDispatch skipped: ' . $e->getMessage());
+        } finally {
+            if ($conn) {
+                $conn->close();
+            }
+        }
     }
 }
 ?>

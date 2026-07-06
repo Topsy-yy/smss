@@ -28,6 +28,7 @@ require '../config.php';
 
       <link href="../css/admin.css" rel="stylesheet">
       <link href="../css/pages/admin.css" rel="stylesheet">
+      <link href="../css/pages/admin-schview.css" rel="stylesheet">
 
   </head>
 
@@ -77,197 +78,219 @@ require '../config.php';
 					</header>
 
 					<!-- One -->
-						<section class="content-card container">
-              <span style="text-align:center">
-                <br><h1 style="font-size : 28px"><strong><?php echo $_POST['schname']; ?> </strong></h1>
-                <hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                <h1><strong> Scholarship ID :  <?php  echo $_POST['schID']; ?> </strong></h1>
-  							<h1><strong>Signatory ID :  <?php  echo $_POST['sigID']; ?> </strong></h1></span><hr style=" height: 1px;color: red;background-color: grey;border: none;">
+  					<section class="content-card container scholarship-view-page">
+                <div class="scholarship-headline">
+                  <h1 class="sch-title"><?php echo htmlspecialchars((string) $_POST['schname'], ENT_QUOTES, 'UTF-8'); ?></h1>
+                  <div class="sch-meta-grid">
+                    <div class="sch-meta-item"><span>Scholarship ID</span><strong><?php  echo (int) $_POST['schID']; ?></strong></div>
+  							<div class="sch-meta-item"><span>Signatory ID</span><strong><?php  echo (int) $_POST['sigID']; ?></strong></div>
+                  </div>
+                </div>
             <?php
-              try{
-                $adminapproval = NULL;
-                $status = NULL;
-            		/*If the view button was clicked*/
-            		if ($_POST['view'] == 'View'){
-                  $schid = $_POST['schID'];
-                  $sql = "SELECT adminapproval,schstatus FROM scholarship WHERE scholarshipID = $schid";
-                  $result = $conn->query($sql);
-                  if($result->num_rows > 0){
-                    while($row = $result->fetch_assoc()){
-                      $adminapproval = $row['adminapproval'];
-                      $status = $row['schstatus'];
+              try {
+                $schid = (int) ($_POST['schID'] ?? 0);
+                $isView = (($_POST['view'] ?? '') === 'View');
+
+                $status = '';
+                $adminapproval = '';
+                $schname = (string) ($_POST['schname'] ?? 'Scholarship');
+                $schlocation = '';
+                $schlocationfrom = '';
+                $description = '';
+                $eligibility = '';
+                $benefits = '';
+                $apply = '';
+                $links = '';
+                $contact = '';
+                $loadedFromDb = false;
+
+                if ($isView && $schid > 0) {
+                  $sql = "SELECT schname, schlocation, schlocationfrom, description, eligibility, benefits, apply, links, contact, adminapproval, schstatus
+                          FROM scholarship WHERE scholarshipID = ? LIMIT 1";
+                  $stmt = $conn->prepare($sql);
+                  if ($stmt) {
+                    $stmt->bind_param('i', $schid);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+                    $row = $res ? $res->fetch_assoc() : null;
+                    $stmt->close();
+
+                    if ($row) {
+                      $loadedFromDb = true;
+                      $schname = (string) ($row['schname'] ?? $schname);
+                      $schlocation = (string) ($row['schlocation'] ?? '');
+                      $schlocationfrom = (string) ($row['schlocationfrom'] ?? '');
+                      $description = (string) ($row['description'] ?? '');
+                      $eligibility = (string) ($row['eligibility'] ?? '');
+                      $benefits = (string) ($row['benefits'] ?? '');
+                      $apply = (string) ($row['apply'] ?? '');
+                      $links = (string) ($row['links'] ?? '');
+                      $contact = (string) ($row['contact'] ?? '');
+                      $adminapproval = (string) ($row['adminapproval'] ?? '');
+                      $status = (string) ($row['schstatus'] ?? '');
                     }
                   }
-                  $xml=simplexml_load_file("../backend/scholarship_data.xml") or die("Error: Cannot create object");
-                  foreach($xml->children() as $sch){
-                      if($sch['scholarshipID'] == $schid){
-                        $schID = $sch->sigID;
-                        $schname = $sch->schname;
-                        $schlocation = $sch->schlocation;
-                        $schlocationfrom = $sch->schlocationfrom;
-                        $degree = $sch->degree;
-                        $gender = $sch->gender;
-                        $religion = $sch->religion;
-                        $scholarshipp = $sch->sch;
-                        $appDeadline = $sch->appDeadline;
-                        $granteesNum = $sch->granteesNum;
-                        $funding = $sch->funding;
-                        $description = $sch->description;
-                        $eligibility = $sch->eligibility;
-                        $benefits = $sch->benefits;
-                        $apply = $sch->apply;
-                        $links = $sch->links;
-                        $contact = $sch->contact;
-              ?>
+                }
 
-                        <div class="content">
-                          <section style="text-align: justify;">
-                            <h1><b>What is <?php echo $schname; ?> ?</b></h1>
-                            <p><?php echo $description; ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                          <section>
-                            <h1><b>Who is offering the scholarship?</b></h1>
-                            <p><?php //university or organization name ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                          <section>
-                            <h1><b>Documents required?</b></h1>
-                            <p><?php //university or organization name ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                          <section>
-                            <h1><b>Who can apply for the scholarship?</b></h1>
-                            <p><?php echo $eligibility; ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                          <section>
-                            <h1><b>What are the benifits?</b></h1>
-                            <p><?php echo $benefits; ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                          <section>
-                            <h1><b>How can you apply?</b></h1>
-                            <p><?php echo $apply; ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                          <section>
-                            <h1><b>Applicants must be Located at? </b></h1>
-                            <p><?php echo $schlocation; ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                          <section>
-                            <h1><b>Applicants HomeTown must be ?</b></h1>
-                            <p><?php echo $schlocationfrom; ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                          <section>
-                            <h1><b>Important Links</b></h1>
-                            <p><?php echo $links; ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                          <section>
-                            <h1><b>Contact Details</b></h1>
-                            <p><?php echo $contact; ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                          <section>
-                            <h1><b>Admin Approval</b></h1>
-                            <p><?php echo $adminapproval; } } $conn->close(); ?></p>
-                          </section>
-                          <br><hr><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-                        </div>
+                // Fallback for legacy rows that may exist only in XML mirror.
+                if (!$loadedFromDb && $schid > 0) {
+                  $xmlPath = "../backend/scholarship_data.xml";
+                  if (is_file($xmlPath)) {
+                    $xml = @simplexml_load_file($xmlPath);
+                    if ($xml !== false) {
+                      foreach ($xml->children() as $sch) {
+                        if ((int) $sch['scholarshipID'] === $schid) {
+                          $schname = (string) ($sch->schname ?? $schname);
+                          $schlocation = (string) ($sch->schlocation ?? '');
+                          $schlocationfrom = (string) ($sch->schlocationfrom ?? '');
+                          $description = (string) ($sch->description ?? '');
+                          $eligibility = (string) ($sch->eligibility ?? '');
+                          $benefits = (string) ($sch->benefits ?? '');
+                          $apply = (string) ($sch->apply ?? '');
+                          $links = (string) ($sch->links ?? '');
+                          $contact = (string) ($sch->contact ?? '');
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }
 
-              <?php
+                $folder = $schid;
+                $dir = "../scholarship/$folder/";
+            ?>
 
-            			$sigID=$_POST['sigID'];
-            			$schname=$_POST['schname'];
-            			$folder=$schid;
-            			$dir = "../scholarship/$folder/";
-              ?>
-              <br><h1><b>Files : </b></h1>
-							<table class="table table-bordered">
+                <div class="content scholarship-content">
+                  <section>
+                    <h1><b>What is <?php echo htmlspecialchars($schname, ENT_QUOTES, 'UTF-8'); ?> ?</b></h1>
+                    <p><?php echo nl2br(htmlspecialchars($description, ENT_QUOTES, 'UTF-8')); ?></p>
+                  </section>
+                  <hr class="section-divider">
+                  <section>
+                    <h1><b>Who is offering the scholarship?</b></h1>
+                    <p><?php //university or organization name ?></p>
+                  </section>
+                  <hr class="section-divider">
+                  <section>
+                    <h1><b>Documents required?</b></h1>
+                    <p><?php //university or organization name ?></p>
+                  </section>
+                  <hr class="section-divider">
+                  <section>
+                    <h1><b>Who can apply for the scholarship?</b></h1>
+                    <p><?php echo nl2br(htmlspecialchars($eligibility, ENT_QUOTES, 'UTF-8')); ?></p>
+                  </section>
+                  <hr class="section-divider">
+                  <section>
+                    <h1><b>What are the benifits?</b></h1>
+                    <p><?php echo nl2br(htmlspecialchars($benefits, ENT_QUOTES, 'UTF-8')); ?></p>
+                  </section>
+                  <hr class="section-divider">
+                  <section>
+                    <h1><b>How can you apply?</b></h1>
+                    <p><?php echo nl2br(htmlspecialchars($apply, ENT_QUOTES, 'UTF-8')); ?></p>
+                  </section>
+                  <hr class="section-divider">
+                  <section>
+                    <h1><b>Applicants must be Located at? </b></h1>
+                    <p><?php echo htmlspecialchars($schlocation, ENT_QUOTES, 'UTF-8'); ?></p>
+                  </section>
+                  <hr class="section-divider">
+                  <section>
+                    <h1><b>Applicants HomeTown must be ?</b></h1>
+                    <p><?php echo htmlspecialchars($schlocationfrom, ENT_QUOTES, 'UTF-8'); ?></p>
+                  </section>
+                  <hr class="section-divider">
+                  <section>
+                    <h1><b>Important Links</b></h1>
+                    <p><?php echo nl2br(htmlspecialchars($links, ENT_QUOTES, 'UTF-8')); ?></p>
+                  </section>
+                  <hr class="section-divider">
+                  <section>
+                    <h1><b>Contact Details</b></h1>
+                    <p><?php echo nl2br(htmlspecialchars($contact, ENT_QUOTES, 'UTF-8')); ?></p>
+                  </section>
+                  <hr class="section-divider">
+                  <section>
+                    <h1><b>Admin Approval</b></h1>
+                    <p><?php echo htmlspecialchars($adminapproval, ENT_QUOTES, 'UTF-8'); ?></p>
+                  </section>
+                </div>
+
+                <div class="files-header"><h1><b>Files</b></h1></div>
+                <table class="table table-bordered file-list-table">
                   <thead>
-                  	<tr>
+                    <tr>
                       <th style="width:3%">File Name </th>
                       <th style="width:3%"></th>
                     </tr>
                   </thead>
                   <tbody>
-  	<?php
+              <?php
+                // List uploaded files, but do not fail the page when the folder is missing/empty.
+                $hasFiles = false;
+                if (is_dir($dir)) {
+                  if ($dh = opendir($dir)) {
+                    while (($file = readdir($dh)) !== false) {
+                      if ($file !== '.' && $file !== '..') {
+                        $filePath = $dir . $file;
+                        if (!is_file($filePath)) {
+                          continue;
+                        }
+                        $hasFiles = true;
+              ?>
+                        <tr>
+                          <td><?php echo htmlspecialchars($file, ENT_QUOTES, 'UTF-8'); ?></td>
+                          <td>
+                            <a href="<?php echo htmlspecialchars($filePath, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                              <button type="button" class="btn-inline-view">View</button>
+                            </a>
+                          </td>
+                        </tr>
+              <?php
+                      }
+                    }
+                    closedir($dh);
+                  }
+                }
 
+                if (!$hasFiles) {
+              ?>
+                    <tr>
+                      <td colspan="2" class="file-empty-state">No supporting files uploaded for this scholarship.</td>
+                    </tr>
+              <?php
+                }
+              ?>
+                  </tbody>
+                </table>
 
-      // Open a directory and list actual files only.
-      if (is_dir($dir)){
-        if ($dh = opendir($dir)){
-          while (($file = readdir($dh)) !== false){
-          	if($file !== '.' && $file !== '..'){
-          		$filePath = $dir . $file;
-          		if (!is_file($filePath)) {
-          			continue;
-          		}
-	?>
-						<tr>
-							<td>
-                <?php echo htmlspecialchars($file);?>
-							</td>
-							<td>
-                <a href="<?php echo htmlspecialchars($filePath); ?>" target="_blank" rel="noopener noreferrer">
-                  <button type="button">View</button>
-                </a>
-			         </td>
-    <?php
-			      	}
-			    }
-			    closedir($dh);
-			  }
-	?>
-					</tbody>
-        </table>
-	<?php
-			} else {
-	?>
-			<script>
-				alert("Error! File View Failed!");
-				location.replace("tempScholarship.php");
-			</script>
-		<?php
-			}
-    ?>
-    <br><br><hr style=" height: 1px;color: red;background-color: grey;border: none;">
-    <div class="wrapper">
-      <form method="post" style="display:inline;">
-        <input type="hidden" name="schID" value="<?php echo $schid; ?>">
-        <input type="submit" name="accrej" value="Accept" formaction="../backend/adminAcceptReject.php" style="margin-left:12%">
-        <input type="submit" name="accrej" value="Reject" formaction="../backend/adminAcceptReject.php" style="margin-left:10%">
-      </form>
-      <br><br><br>
-      <form name="blockform"  action="../backend/adminBlockUnblockSch.php" method="post" onsubmit="confirmblock(this,'This will Block the Scholarship and corresponding Applications.\n This wont Block the corresponding Signatory.\n Are your Sure?')">
-        <input type="hidden" name="schID" value="<?php echo $schid; ?>">
-        <input type="submit"  name="blk_unblk" id="blockSchbtn" value="blockScholarship" <?php if($status === "inactive"){
-          echo " style = 'color:#fff;display:none'";
-        }else{
-          echo "style = 'margin-left:32%;'";
-        } ?>>
-      </form>
-      <form name="unblockform" action="../backend/adminBlockUnblockSch.php" onsubmit="confirmunblock(this,'This will Unblock the Scholarships and corresponding Applications.\n This wont Unblock the corresponding Signatory.\n Are your Sure?')"  method="post">
-        <input type="hidden" name="schID" value="<?php echo $schid; ?>">
-        <input type="submit" name="blk_unblk" id="unblockSchbtn" value="unblockScholarship" <?php if($status === "active"){
-          echo " style = 'color:#fff;display:none;'";
-        } else{
-          echo "style = 'margin-left:32%;'";
-        } ?>>
-      </form>
-      <form action="tempScholarship.php" method="post">
-         <br><input type="submit" style="margin-left:32%"  value="<< Go Back">
-      </form>
-  </div>
-    <?php
-		}
-	} catch(PDOException $e){
-		echo $e->getMessage();
-	}
-?>
+                <hr class="section-divider">
+                <div class="scholarship-actions">
+                  <form method="post" class="action-row">
+                    <input type="hidden" name="schID" value="<?php echo $schid; ?>">
+                    <input type="submit" class="action-btn accept" name="accrej" value="Accept" formaction="../backend/adminAcceptReject.php">
+                    <input type="submit" class="action-btn reject" name="accrej" value="Reject" formaction="../backend/adminAcceptReject.php">
+                  </form>
+                  <form name="blockform" class="action-row" action="../backend/adminBlockUnblockSch.php" method="post" onsubmit="confirmblock(this,'This will Block the Scholarship and corresponding Applications.\n This wont Block the corresponding Signatory.\n Are your Sure?')">
+                    <input type="hidden" name="schID" value="<?php echo $schid; ?>">
+                    <input type="submit" class="action-btn neutral" name="blk_unblk" id="blockSchbtn" value="blockScholarship" <?php if ($status === 'inactive') { echo " style='display:none'"; } ?>>
+                  </form>
+                  <form name="unblockform" class="action-row" action="../backend/adminBlockUnblockSch.php" onsubmit="confirmunblock(this,'This will Unblock the Scholarships and corresponding Applications.\n This wont Unblock the corresponding Signatory.\n Are your Sure?')" method="post">
+                    <input type="hidden" name="schID" value="<?php echo $schid; ?>">
+                    <input type="submit" class="action-btn neutral" name="blk_unblk" id="unblockSchbtn" value="unblockScholarship" <?php if ($status === 'active') { echo " style='display:none'"; } ?>>
+                  </form>
+                  <form action="tempScholarship.php" method="post" class="action-row">
+                    <input type="submit" class="action-btn back" value="<< Go Back">
+                  </form>
+                </div>
+
+            <?php
+              } catch (Throwable $e) {
+                echo htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+              }
+              $conn->close();
+            ?>
 				</section>
 			</article>
 			<!-- Footer -->

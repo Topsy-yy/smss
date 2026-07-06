@@ -69,6 +69,7 @@ $oppSql = "
         S.scholarshipID AS id,
         S.sigID,
         S.schname AS title,
+      S.description AS description,
         COALESCE(NULLIF(SIG.`organization/university`, ''), TRIM(CONCAT(COALESCE(SIG.firstName, ''), ' ', COALESCE(SIG.lastName, ''))), 'Unknown Organization') AS org,
         S.sch AS type_code,
         S.appDeadline AS deadline,
@@ -78,7 +79,7 @@ $oppSql = "
     FROM scholarship S
     LEFT JOIN signatory SIG ON SIG.sigID = S.sigID
     LEFT JOIN application A ON A.scholarshipID = S.scholarshipID
-    GROUP BY S.scholarshipID, S.sigID, S.schname, org, S.sch, S.appDeadline, S.adminapproval, S.schstatus
+    GROUP BY S.scholarshipID, S.sigID, S.schname, S.description, org, S.sch, S.appDeadline, S.adminapproval, S.schstatus
     ORDER BY S.appDeadline ASC, S.scholarshipID DESC
 ";
 $oppRes = $conn->query($oppSql);
@@ -219,10 +220,7 @@ require __DIR__ . '/../includes/head-dashboard.php';
         <div class="banner-content">
           <h2>Admin Dashboard</h2>
           <p>Manage opportunities and verify listings</p>
-          <div class="btn-primary" style="border: 2px solid white; color: white; background: transparent; display: inline-flex; align-items: center; gap: 8px; cursor: default; opacity: 0.95;" aria-label="Opportunity creation disabled for admin">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            Scholarship creation is signatory-only
-          </div>
+          
         </div>
       </section>
 
@@ -272,6 +270,7 @@ require __DIR__ . '/../includes/head-dashboard.php';
           <thead>
             <tr>
               <th>Title</th>
+              <th>Description</th>
               <th>Organization</th>
               <th>Type</th>
               <th>Deadline</th>
@@ -288,6 +287,18 @@ require __DIR__ . '/../includes/head-dashboard.php';
               ?>
               <tr class="opp-row" data-status="<?php echo $statusFilter; ?>">
                 <td style="font-weight: 600; color: var(--admin-primary);"><?php echo htmlspecialchars($opp['title'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td>
+                  <?php
+                    $desc = trim((string) ($opp['description'] ?? ''));
+                    if ($desc === '') {
+                      echo '<span style="color:#64748b;">No description provided.</span>';
+                    } else {
+                      $preview = substr($desc, 0, 140);
+                      $suffix = (strlen($desc) > 140) ? '...' : '';
+                      echo htmlspecialchars($preview . $suffix, ENT_QUOTES, 'UTF-8');
+                    }
+                  ?>
+                </td>
                 <td><?php echo htmlspecialchars($opp['org'], ENT_QUOTES, 'UTF-8'); ?></td>
                 <td><span class="badge badge-type"><?php echo htmlspecialchars($opp['type'], ENT_QUOTES, 'UTF-8'); ?></span></td>
                 <td class="<?php echo ((int)$opp['days_left'] < 7) ? 'text-danger' : ''; ?>">
