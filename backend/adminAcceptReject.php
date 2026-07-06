@@ -43,7 +43,8 @@ try{
                 $matchedStudents = MatchingEngine::getMatchedStudentsForScholarship($schID);
                 $phones = [];
                 foreach ($matchedStudents as $ms) {
-                    if (!empty($ms['phone'])) {
+					$score = (int) ($ms['score'] ?? 0);
+					if ($score > 30 && !empty($ms['phone'])) {
                         $phones[] = $ms['phone'];
                     }
                 }

@@ -219,10 +219,10 @@ require __DIR__ . '/../includes/head-dashboard.php';
         <div class="banner-content">
           <h2>Admin Dashboard</h2>
           <p>Manage opportunities and verify listings</p>
-          <button id="btnOpenModal" class="btn-primary" type="button" style="border: 2px solid white; color: white; background: transparent;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Add Opportunity
-          </button>
+          <div class="btn-primary" style="border: 2px solid white; color: white; background: transparent; display: inline-flex; align-items: center; gap: 8px; cursor: default; opacity: 0.95;" aria-label="Opportunity creation disabled for admin">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            Scholarship creation is signatory-only
+          </div>
         </div>
       </section>
 
@@ -394,101 +394,7 @@ require __DIR__ . '/../includes/head-dashboard.php';
       </div>
     </div>
 
-    <div id="addOppModal" class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Create New Opportunity</h2>
-          <button class="btn-close btn-close-modal" type="button">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <form id="addOppForm" action="../backend/adminCreateOpportunity.php" method="post">
-            <div class="form-grid">
-              <div class="form-group full">
-                <label>Opportunity Title</label>
-                <input type="text" class="form-control" name="schname" placeholder="e.g. Master's IT Scholarship 2026" required>
-              </div>
-              <div class="form-group">
-                <label>Signatory Owner</label>
-                <select class="form-control" name="sigID" required>
-                  <option value="">Select signatory</option>
-                  <?php foreach ($activeSignatories as $sig): ?>
-                    <option value="<?php echo (int)$sig['sigID']; ?>"><?php echo htmlspecialchars($sig['name'] . ' (ID:' . $sig['sigID'] . ')', ENT_QUOTES, 'UTF-8'); ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Category</label>
-                <select class="form-control" name="scholarship" required>
-                  <option value="merit_based">Merit Based</option>
-                  <option value="means_based">Means Based</option>
-                  <option value="cultural_talent">Cultural / Arts</option>
-                  <option value="visual_art">Visual Art</option>
-                  <option value="sports_talent">Sports Talent</option>
-                  <option value="science_maths_based">Science & Maths</option>
-                  <option value="technology_based">Technology Based</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Education Level</label>
-                <select class="form-control" name="degree" required>
-                  <option value="high school">High School</option>
-                  <option value="diploma">Diploma</option>
-                  <option value="undergraduate">Undergraduate</option>
-                  <option value="postgraduate">Postgraduate</option>
-                  <option value="phd">PhD</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Gender</label>
-                <select class="form-control" name="gender" required>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="male+female">Open To All</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Target Financial Need</label>
-                <select class="form-control" name="target_financial_need" required>
-                  <option value="Any">Any</option>
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                  <option value="Critical">Critical</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Deadline</label>
-                <input type="date" class="form-control" name="appdeadline" required>
-              </div>
-              <div class="form-group">
-                <label>Funding</label>
-                <input type="text" class="form-control" name="funding" placeholder="e.g. KES 100,000">
-              </div>
-              <div class="form-group full">
-                <label>Location</label>
-                <input type="text" class="form-control" name="schlocation" placeholder="e.g. Nairobi or Remote">
-              </div>
-              <div class="form-group full">
-                <label>Description</label>
-                <textarea class="form-control" rows="3" name="description" placeholder="Brief overview..." required></textarea>
-              </div>
-              <div class="form-group full">
-                <label>Eligibility Requirements</label>
-                <textarea class="form-control" rows="3" name="eligibility" placeholder="Who can apply..." required></textarea>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary btn-close-modal">Cancel</button>
-          <button type="submit" form="addOppForm" class="btn-primary">Create Opportunity</button>
-        </div>
-      </div>
-    </div>
+    <div id="addOppModal" class="modal-overlay" aria-hidden="true" style="display:none;"></div>
 
     <?php
     $ctaTitle = 'Ready to keep the platform <strong>running smoothly</strong>?';

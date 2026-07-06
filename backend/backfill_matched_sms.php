@@ -1,5 +1,5 @@
 <?php
-// One-time backfill: notify currently eligible students of existing scholarships (>=30% match).
+// One-time backfill: notify currently eligible students of existing scholarships (>30% match).
 
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/MatchingEngine.php';
@@ -48,7 +48,7 @@ while ($student = $res->fetch_assoc()) {
     $eligible = [];
     foreach ($matches as $m) {
         $score = (int) ($m['match'] ?? 0);
-        if ($score < 30) {
+        if ($score <= 30) {
             continue;
         }
         $eligible[] = $m;

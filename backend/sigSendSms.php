@@ -136,7 +136,7 @@ foreach ($recipients as $recipient) {
         foreach ($matches as $match) {
             $schId = (int) ($match['id'] ?? 0);
             $score = (int) ($match['match'] ?? 0);
-            if ($schId <= 0 || $score < 30 || !isset($sigScholarshipIds[$schId])) {
+            if ($schId <= 0 || $score <= 30 || !isset($sigScholarshipIds[$schId])) {
                 continue;
             }
             $eligible[] = $match;

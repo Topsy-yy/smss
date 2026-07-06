@@ -148,6 +148,10 @@
       $stats['profile_pct'] = (int) round($completionTotal / count($applicants));
   }
 
+  $needsAttentionCount = count(array_filter($applicants, function ($a) {
+      return ((int) ($a['prog'] ?? 0)) < 75;
+  }));
+
   $reviewSql =
       "SELECT
           A.applicationID,
@@ -162,7 +166,8 @@
        FROM application A
        JOIN student ST ON ST.studentID = A.studentID
        JOIN scholarship S ON S.scholarshipID = A.scholarshipID
-       WHERE A.sigID = ?
+             WHERE A.sigID = ?
+                 AND LOWER(A.verifiedBySignatory) IN ('approved', 'rejected')
        ORDER BY A.appDate DESC
        LIMIT 8";
 
@@ -334,14 +339,21 @@
 
             <!-- Tab 1: Applicant Tracking -->
             <div class="tab-content active" id="tab-tracking">
+                <?php if ($smsNoticeType !== '' && $smsNoticeText !== ''): ?>
+                <div style="margin-bottom: 0.75rem; padding: 0.75rem 1rem; border-radius: var(--radius-sm); background: <?php echo ($smsNoticeType === 'ok') ? '#ecfdf3' : '#fef2f2'; ?>; color: <?php echo ($smsNoticeType === 'ok') ? '#065f46' : '#991b1b'; ?>; border: 1px solid <?php echo ($smsNoticeType === 'ok') ? '#a7f3d0' : '#fecaca'; ?>; font-size: 0.9rem;">
+                    <?php echo h($smsNoticeText); ?>
+                </div>
+                <?php endif; ?>
                 <div class="alert-card">
                     <div>
                         <strong style="color: #b45309;">Applicants Needing Attention</strong>
                         <p style="font-size: 0.85rem; color: #d97706; margin-top: 4px;">
-                            <?php echo h(count(array_filter($applicants, function ($a) { return $a['prog'] < 75; }))); ?> students need profile updates before deadlines.
+                            <?php echo h($needsAttentionCount); ?> students need profile updates before deadlines.
                         </p>
                     </div>
-                    <button class="btn-action" style="background: #f59e0b;">Send Bulk Reminder</button>
+                    <form method="post" action="../backend/sigBulkReminder.php" style="margin: 0;">
+                        <button type="submit" class="btn-action" style="background: #f59e0b;">Send Bulk Reminder</button>
+                    </form>
                 </div>
                 
                 <table class="table">
@@ -395,8 +407,8 @@
                 <div class="app-grid">
                     <?php if (empty($applications)): ?>
                     <div class="app-card">
-                        <h3>No applications yet</h3>
-                        <p style="font-size: 0.9rem; color: var(--text-muted);">Incoming applications for your scholarships will appear here.</p>
+                        <h3>No reviewed applications yet</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Only approved and rejected scholarship applications appear in this section.</p>
                     </div>
                     <?php endif; ?>
                     <?php foreach($applications as $app): ?>
@@ -409,12 +421,17 @@
                         <p style="font-size: 0.85rem; color: var(--text-muted);"><?php echo h($app['summary']); ?></p>
                         <div class="docs-list"><strong>Docs:</strong> <?php echo h($app['docs']); ?></div>
                         <div class="app-actions">
-                            <?php if(strtolower($app['status']) == 'draft' || strtolower($app['status']) == 'pending'): ?>
-                                <button class="btn-outline" type="button">Remind to Complete</button>
-                            <?php else: ?>
-                                <a href="sigAppView.php?appID=<?php echo h($app['id']); ?>" class="btn-endorse" style="text-decoration:none; text-align:center;">Approve</a>
-                                <button class="btn-outline" type="button">Contact</button>
-                            <?php endif; ?>
+                            <?php $statusLower = strtolower(trim((string) $app['status'])); ?>
+                            <button
+                                type="button"
+                                class="btn-endorse js-review-popup"
+                                data-app-id="<?php echo h($app['id']); ?>"
+                                data-student="<?php echo h($app['student']); ?>"
+                                data-opp="<?php echo h($app['opp']); ?>"
+                                data-status="<?php echo h($app['status']); ?>"
+                                data-summary="<?php echo h($app['summary']); ?>"
+                                data-action="<?php echo ($statusLower === 'rejected') ? 'Accept' : 'Reject'; ?>"
+                            >Review</button>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -495,6 +512,24 @@
         </div>
     </section>
 
+    <div id="reviewAppModal" class="review-modal" aria-hidden="true">
+        <div class="review-modal-card" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+            <button type="button" class="review-modal-close" id="reviewModalClose" aria-label="Close">&times;</button>
+            <h3 id="reviewModalTitle">Application Review Summary</h3>
+            <p id="reviewModalDesc" style="color: var(--text-muted); font-size: 0.92rem;"></p>
+            <div class="review-modal-meta">
+                <p><strong>Student:</strong> <span id="reviewModalStudent"></span></p>
+                <p><strong>Scholarship:</strong> <span id="reviewModalOpp"></span></p>
+                <p><strong>Current Decision:</strong> <span id="reviewModalStatus"></span></p>
+            </div>
+            <form id="reviewModalActionForm" method="post" action="../backend/sigAcceptReject.php" class="review-modal-actions">
+                <input type="hidden" name="appID" id="reviewModalAppId" value="">
+                <button type="button" class="btn-outline" id="reviewModalCancel">Cancel</button>
+                <button type="submit" class="btn-endorse" id="reviewModalSubmit" name="accrej" value="Reject">Reject</button>
+            </form>
+        </div>
+    </div>
+
     <!-- FOOTER -->
     <footer class="sig-footer">
         <p>© 2026 ScholarConnect · Signatory Portal · Powered by Africa's Talking SMS</p>
@@ -513,7 +548,7 @@
                     deadline_reminder: 'Deadline Reminder template will be sent to the selected student.',
                     profile_completion: 'Profile Completion template will be sent to the selected student.',
                     status_update: 'Application Status Update template will be sent to the selected student.',
-                    resend_matches: 'Matched Scholarships template will send top scholarship positions (eligible at 30% and above) for the selected recipient(s), including why they matched.'
+                    resend_matches: 'Matched Scholarships template will send top scholarship positions (eligible above 30%) for the selected recipient(s), including why they matched.'
                 };
 
                 var syncPreview = function () {
@@ -523,6 +558,70 @@
 
                 templateSelect.addEventListener('change', syncPreview);
                 syncPreview();
+            })();
+
+            (function () {
+                var modal = document.getElementById('reviewAppModal');
+                var closeBtn = document.getElementById('reviewModalClose');
+                var cancelBtn = document.getElementById('reviewModalCancel');
+                var submitBtn = document.getElementById('reviewModalSubmit');
+                var appIdInput = document.getElementById('reviewModalAppId');
+                var desc = document.getElementById('reviewModalDesc');
+                var student = document.getElementById('reviewModalStudent');
+                var opp = document.getElementById('reviewModalOpp');
+                var status = document.getElementById('reviewModalStatus');
+                var triggers = document.querySelectorAll('.js-review-popup');
+
+                if (!modal || !closeBtn || !cancelBtn || !submitBtn || !appIdInput || !desc || !student || !opp || !status || !triggers.length) {
+                    return;
+                }
+
+                function openModal() {
+                    modal.classList.add('active');
+                    modal.setAttribute('aria-hidden', 'false');
+                    document.body.style.overflow = 'hidden';
+                }
+
+                function closeModal() {
+                    modal.classList.remove('active');
+                    modal.setAttribute('aria-hidden', 'true');
+                    document.body.style.overflow = '';
+                }
+
+                triggers.forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var appId = btn.getAttribute('data-app-id') || '';
+                        var appStudent = btn.getAttribute('data-student') || 'Student';
+                        var appOpp = btn.getAttribute('data-opp') || 'Scholarship';
+                        var appStatus = btn.getAttribute('data-status') || 'Pending';
+                        var appSummary = btn.getAttribute('data-summary') || '';
+                        var action = btn.getAttribute('data-action') || 'Reject';
+
+                        appIdInput.value = appId;
+                        student.textContent = appStudent;
+                        opp.textContent = appOpp;
+                        status.textContent = appStatus;
+                        desc.textContent = appSummary;
+
+                        submitBtn.value = action;
+                        submitBtn.textContent = action;
+
+                        openModal();
+                    });
+                });
+
+                closeBtn.addEventListener('click', closeModal);
+                cancelBtn.addEventListener('click', closeModal);
+                modal.addEventListener('click', function (evt) {
+                    if (evt.target === modal) {
+                        closeModal();
+                    }
+                });
+                document.addEventListener('keydown', function (evt) {
+                    if (evt.key === 'Escape' && modal.classList.contains('active')) {
+                        closeModal();
+                    }
+                });
             })();
         </script>
 </body>

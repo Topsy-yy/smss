@@ -59,11 +59,11 @@ require '../config.php';
               <li class = "submenu">
                 <a href = "">Users</a>
                 <ul>
-                  <li><a href = "tempAdminShow.php">Admin</a></li>
                   <li><a href = "tempSignatoryShow.php">Signatory</a></li>
                   <li><a href = "tempStudentShow.php">Students</a></li>
                 </ul>
               </li>
+              <li><a href="tempReports.php">Reports</a></li>
               <li><a href = "../backend/logout.php" class="app-btn">Logout</a></li>
             </ul>
           </nav>

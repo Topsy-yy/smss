@@ -6,6 +6,10 @@ require_login(2);
 require_once 'SmsService.php';
 require_once 'MatchingEngine.php';
 require_once 'IRRecommendationEngine.php';
+
+echo "<script>alert('Admins cannot add scholarships. Please use a signatory account to create scholarship listings.'); window.location.href='../admin/tempAdmin.php';</script>";
+exit();
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../admin/tempAdmin.php');
     exit();
@@ -133,12 +137,12 @@ if ($stmt->execute()) {
         }
     }
 
-    // --- SMS Notifications for students eligible by listing threshold (>=30% match) ---
+    // --- SMS Notifications for students eligible by listing threshold (>30% match) ---
     $matchedStudents = MatchingEngine::getMatchedStudentsForScholarship($schID);
     foreach ($matchedStudents as $ms) {
         $score = (int) ($ms['score'] ?? 0);
         $phone = trim((string) ($ms['phone'] ?? ''));
-        if ($score < 30 || $phone === '') {
+        if ($score <= 30 || $phone === '') {
             continue;
         }
 

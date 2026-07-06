@@ -105,7 +105,7 @@ require_once 'SmsService.php';
 				foreach ($matchedStudents as $ms) {
 					$score = (int) ($ms['score'] ?? 0);
 					$phone = trim((string) ($ms['phone'] ?? ''));
-					if ($score < 30 || $phone === '') {
+					if ($score <= 30 || $phone === '') {
 						continue;
 					}
 

@@ -22,7 +22,7 @@
       <li class="submenu">
         <a href="#">Users</a>
         <ul>
-          <li><a href="tempAdminShow.php">Admin</a></li>
+          
           <li><a href="tempSignatoryShow.php">Signatory</a></li>
           <li><a href="tempStudentShow.php">Students</a></li>
         </ul>
