@@ -6,6 +6,7 @@ require_once 'security.php';
 require_once 'SmsService.php';
 
 require_login(3);
+@set_time_limit(180);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../signatory/tempSigHome.php?sms_status=err&sms_message=' . urlencode('Invalid request method.'));
@@ -102,7 +103,14 @@ if (empty($needsAttention)) {
 
 $sent = 0;
 $failed = 0;
+$invalid = 0;
 foreach ($needsAttention as $recipient) {
+    if (!SmsService::formatPhoneNumber($recipient['phone'])) {
+        $failed++;
+        $invalid++;
+        continue;
+    }
+
     $message = "ScholarConnect [Profile Reminder]: Hi {$recipient['name']}, your profile is {$recipient['profilePct']}% complete. Please update missing details to improve scholarship review readiness.";
     if (strlen($message) > 480) {
         $message = substr($message, 0, 477) . '...';
@@ -122,7 +130,16 @@ if ($sent > 0 && $failed === 0) {
 }
 
 if ($sent > 0 && $failed > 0) {
-    header('Location: ../signatory/tempSigHome.php?sms_status=ok&sms_message=' . urlencode("Bulk reminder partially sent. Success: {$sent}, Failed: {$failed}."));
+    $msg = "Bulk reminder partially sent. Success: {$sent}, Failed: {$failed}";
+    if ($invalid > 0) {
+        $msg .= " (invalid mobile format: {$invalid})";
+    }
+    header('Location: ../signatory/tempSigHome.php?sms_status=ok&sms_message=' . urlencode($msg . '.'));
+    exit;
+}
+
+if ($failed > 0 && $invalid > 0) {
+    header('Location: ../signatory/tempSigHome.php?sms_status=err&sms_message=' . urlencode("Bulk reminder failed. Invalid mobile format for {$invalid} recipient(s)."));
     exit;
 }
 

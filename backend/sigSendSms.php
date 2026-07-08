@@ -7,6 +7,7 @@ require_once 'SmsService.php';
 require_once 'MatchingEngine.php';
 
 require_login(3);
+@set_time_limit(180);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../signatory/tempSigHome.php?sms_status=err&sms_message=' . urlencode('Invalid request method.'));
@@ -120,8 +121,15 @@ $conn->close();
 
 $sentCount = 0;
 $failedCount = 0;
+$invalidCount = 0;
 
 foreach ($recipients as $recipient) {
+    if (!SmsService::formatPhoneNumber($recipient['phone'])) {
+        $failedCount++;
+        $invalidCount++;
+        continue;
+    }
+
     $studentName = $recipient['name'];
 
     if ($messageTemplate === 'deadline_reminder') {
@@ -185,7 +193,16 @@ if ($sentCount > 0 && $failedCount === 0) {
 }
 
 if ($sentCount > 0 && $failedCount > 0) {
-    header('Location: ../signatory/tempSigHome.php?sms_status=ok&sms_message=' . urlencode('SMS partially sent. Success: ' . $sentCount . ', Failed: ' . $failedCount . '.'));
+    $details = 'SMS partially sent. Success: ' . $sentCount . ', Failed: ' . $failedCount;
+    if ($invalidCount > 0) {
+        $details .= ' (invalid mobile format: ' . $invalidCount . ')';
+    }
+    header('Location: ../signatory/tempSigHome.php?sms_status=ok&sms_message=' . urlencode($details . '.'));
+    exit;
+}
+
+if ($failedCount > 0 && $invalidCount > 0) {
+    header('Location: ../signatory/tempSigHome.php?sms_status=err&sms_message=' . urlencode('SMS failed. Invalid mobile format found for ' . $invalidCount . ' recipient(s).'));
     exit;
 }
 

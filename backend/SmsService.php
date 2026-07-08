@@ -31,16 +31,28 @@ class SmsService {
         }
         
         $formattedNumbers = [];
+        $invalidNumbers = [];
         foreach ($phoneNumbers as $phone) {
             $formatted = self::formatPhoneNumber($phone);
             if ($formatted) {
                 $formattedNumbers[] = $formatted;
+            } else {
+                $invalidNumbers[] = trim((string) $phone);
             }
+        }
+
+        if (!empty($formattedNumbers)) {
+            $formattedNumbers = array_values(array_unique($formattedNumbers));
         }
         
         if (empty($formattedNumbers)) {
             self::logDispatch(0, 0, 0, 0, 'No valid phone numbers', $message);
-            return ['status' => false, 'error' => 'No valid phone numbers provided'];
+            return [
+                'status' => false,
+                'error' => 'No valid phone numbers provided',
+                'invalidCount' => count($invalidNumbers),
+                'invalidNumbers' => $invalidNumbers,
+            ];
         }
 
         $url = ($username === 'sandbox') 
@@ -67,6 +79,8 @@ class SmsService {
             'Content-Type: application/x-www-form-urlencoded',
             'apiKey: ' . $apiKey
         ]);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
 
@@ -96,33 +110,60 @@ class SmsService {
         $recipients = $result['SMSMessageData']['Recipients'] ?? [];
         $successCount = 0;
         $failedCount = 0;
+        $failedRecipients = [];
 
         if (is_array($recipients)) {
             foreach ($recipients as $recipient) {
                 $statusCode = (int) ($recipient['statusCode'] ?? 0);
                 $statusText = strtolower((string) ($recipient['status'] ?? ''));
-                $isSuccess = ($statusCode === 101) || ($statusText === 'success');
+                $recipientNumber = (string) ($recipient['number'] ?? ($recipient['phoneNumber'] ?? ($recipient['phone'] ?? '')));
+
+                $isSuccess = in_array($statusCode, [100, 101, 102], true)
+                    || (strpos($statusText, 'success') !== false)
+                    || (strpos($statusText, 'queued') !== false)
+                    || (strpos($statusText, 'sent') !== false)
+                    || (strpos($statusText, 'submit') !== false);
                 if ($isSuccess) {
                     $successCount++;
                 } else {
                     $failedCount++;
+                    $failedRecipients[] = [
+                        'number' => $recipientNumber,
+                        'statusCode' => $statusCode,
+                        'status' => (string) ($recipient['status'] ?? ''),
+                    ];
                 }
             }
+        }
+
+        if ($successCount === 0 && $failedCount === 0) {
+            $failedCount = count($formattedNumbers);
         }
 
         $isProviderError = ($httpCode >= 400);
         $hasDeliverySuccess = ($successCount > 0);
 
         // Record delivery details in PHP error logs for troubleshooting.
-        error_log('SmsService sendSms result: HTTP=' . $httpCode . ' success=' . $successCount . ' failed=' . $failedCount . ' message=' . $providerMessage);
+        error_log(
+            'SmsService sendSms result: HTTP=' . $httpCode
+            . ' success=' . $successCount
+            . ' failed=' . $failedCount
+            . ' invalid=' . count($invalidNumbers)
+            . ' message=' . $providerMessage
+        );
         self::logDispatch(count($formattedNumbers), $successCount, $failedCount, $httpCode, $providerMessage, $message);
 
         return [
             'status' => (!$isProviderError && $hasDeliverySuccess),
             'httpCode' => $httpCode,
             'providerMessage' => $providerMessage,
+            'requestedCount' => count($phoneNumbers),
+            'validCount' => count($formattedNumbers),
+            'invalidCount' => count($invalidNumbers),
+            'invalidNumbers' => $invalidNumbers,
             'successCount' => $successCount,
             'failedCount' => $failedCount,
+            'failedRecipients' => $failedRecipients,
             'response' => $result
         ];
     }
@@ -131,22 +172,40 @@ class SmsService {
      * Helper to format local numbers to E.164 (Assuming +254 for default)
      */
     public static function formatPhoneNumber($phone) {
-        $phone = preg_replace('/[^0-9+]/', '', (string)$phone);
-        if (empty($phone)) return null;
+        $phone = trim((string) $phone);
+        if ($phone === '') {
+            return null;
+        }
+
+        $phone = preg_replace('/[^0-9+]/', '', $phone);
+        if ($phone === null || $phone === '') {
+            return null;
+        }
+
+        if (strpos($phone, '00') === 0) {
+            $phone = '+' . substr($phone, 2);
+        }
 
         if (strpos($phone, '+') === 0) {
-            return $phone; // Already formatted
+            return preg_match('/^\+[1-9]\d{7,14}$/', $phone) ? $phone : null;
         }
-        
-        if (strpos($phone, '0') === 0 && strlen($phone) == 10) {
+
+        // Kenyan local mobile format, e.g. 07XXXXXXXX or 01XXXXXXXX.
+        if (preg_match('/^0(1|7)\d{8}$/', $phone)) {
             return '+254' . substr($phone, 1);
         }
-        
-        if (strpos($phone, '254') === 0 && strlen($phone) == 12) {
+
+        // Kenyan international without plus, e.g. 2547XXXXXXXX or 2541XXXXXXXX.
+        if (preg_match('/^254(1|7)\d{8}$/', $phone)) {
             return '+' . $phone;
         }
 
-        return '+' . $phone;
+        // Fallback for already international digits without plus.
+        if (preg_match('/^[1-9]\d{7,14}$/', $phone)) {
+            return '+' . $phone;
+        }
+
+        return null;
     }
 
     private static function ensureLogTable($conn) {
