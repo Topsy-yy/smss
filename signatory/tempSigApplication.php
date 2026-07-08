@@ -8,6 +8,9 @@ require '../config.php';
     header("Location:../index.php");
   }
 
+  $sigFlashMessage = trim((string) ($_SESSION['sig_flash_message'] ?? ''));
+  unset($_SESSION['sig_flash_message']);
+
   // Connect to database
     $conn = getDbConnection();
 
@@ -61,9 +64,104 @@ foreach ($rows9 as $key => $value)
       <link href="../css/sig.css" rel="stylesheet">
       <link href="../css/pages/signatory-dashboard.css" rel="stylesheet">
 
+      <style>
+        .sig-toast {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          z-index: 2500;
+          max-width: 420px;
+          background: #0f172a;
+          color: #f8fafc;
+          border: 1px solid rgba(148, 163, 184, 0.3);
+          border-left: 5px solid #16a34a;
+          border-radius: 12px;
+          box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
+          padding: 12px 14px;
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          opacity: 0;
+          transform: translateY(-10px);
+          pointer-events: none;
+          transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .sig-toast.is-visible {
+          opacity: 1;
+          transform: translateY(0);
+          pointer-events: auto;
+        }
+
+        .sig-toast__badge {
+          background: #16a34a;
+          color: #ffffff;
+          border-radius: 999px;
+          font-size: 0.75rem;
+          line-height: 1;
+          padding: 4px 8px;
+          margin-top: 1px;
+          flex: 0 0 auto;
+        }
+
+        .sig-toast__text {
+          margin: 0;
+          font-size: 0.92rem;
+          line-height: 1.45;
+          flex: 1 1 auto;
+        }
+
+        .sig-toast__close {
+          background: transparent;
+          border: 0;
+          color: #cbd5e1;
+          font-size: 1rem;
+          line-height: 1;
+          cursor: pointer;
+          padding: 2px;
+          margin-left: 4px;
+          flex: 0 0 auto;
+        }
+      </style>
+
   </head>
 
-  <body class="app-shell">
+  <body class="app-shell sig-applications-page">
+    <?php if ($sigFlashMessage !== '') { ?>
+      <div id="sigToast" class="sig-toast" role="status" aria-live="polite" aria-atomic="true">
+        <span class="sig-toast__badge">Success</span>
+        <p class="sig-toast__text"><?php echo htmlspecialchars($sigFlashMessage, ENT_QUOTES, 'UTF-8'); ?></p>
+        <button type="button" id="sigToastClose" class="sig-toast__close" aria-label="Close notification">x</button>
+      </div>
+      <script type="text/javascript">
+        (function () {
+          var toast = document.getElementById('sigToast');
+          var closeBtn = document.getElementById('sigToastClose');
+          if (!toast) {
+            return;
+          }
+
+          var hideToast = function () {
+            toast.classList.remove('is-visible');
+            window.setTimeout(function () {
+              if (toast && toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+              }
+            }, 220);
+          };
+
+          window.setTimeout(function () {
+            toast.classList.add('is-visible');
+          }, 30);
+
+          if (closeBtn) {
+            closeBtn.addEventListener('click', hideToast);
+          }
+
+          window.setTimeout(hideToast, 4200);
+        })();
+      </script>
+    <?php } ?>
     <div class="app-page">
 
       <?php
@@ -72,14 +170,14 @@ foreach ($rows9 as $key => $value)
       ?>
 
 
-			<!-- Main -->
-				<article id="main">
+      <!-- Main -->
+        <article id="main" class="sig-app-main">
 
-					<header class="page-hero container">
+          <header class="page-hero">
 					</header>
 
 					<!-- One -->
-						<section class="content-card container">
+            <section class="content-card">
 							<!-- Content -->
   						<div class="content">
                               <div class="form-group">
@@ -96,7 +194,30 @@ foreach ($rows9 as $key => $value)
                                   $selectedScholarshipId = (int) $_GET['class'];
                                 }
 
-                                $sql = "SELECT scholarshipID, schname FROM scholarship WHERE sigID = $currentUserID";
+                                $showAllByDefault = ($selectedScholarshipId <= 0);
+
+                                $countCaseExpr = "COUNT(A.applicationID)";
+                                if ($app === 'Pending') {
+                                  $countCaseExpr = "SUM(CASE WHEN (LOWER(A.verifiedBySignatory) = 'pending' OR LOWER(A.appstatus) = 'pending') THEN 1 ELSE 0 END)";
+                                } elseif ($app === 'Approved') {
+                                  $countCaseExpr = "SUM(CASE WHEN (LOWER(A.verifiedBySignatory) = 'approved' OR LOWER(A.appstatus) = 'processing') THEN 1 ELSE 0 END)";
+                                } elseif ($app === 'Rejected') {
+                                  $countCaseExpr = "SUM(CASE WHEN (LOWER(A.verifiedBySignatory) = 'rejected' OR LOWER(A.appstatus) = 'rejected') THEN 1 ELSE 0 END)";
+                                }
+
+                                $countLabel = ($app === 'All') ? 'Total' : $app;
+
+                                $sql = "SELECT 
+                                          S.scholarshipID,
+                                          S.schname,
+                                          COALESCE($countCaseExpr, 0) AS filter_count
+                                        FROM scholarship S
+                                        LEFT JOIN application A
+                                          ON A.scholarshipID = S.scholarshipID
+                                         AND A.sigID = $currentUserID
+                                        WHERE S.sigID = $currentUserID
+                                        GROUP BY S.scholarshipID, S.schname
+                                        ORDER BY S.schname ASC";
                                 $result = mysqli_query($conn, $sql);
                               ?>
                                 <label style="margin-left: 30%"><h2><b>Select Your Scholarship</b></h2></label>
@@ -105,13 +226,14 @@ foreach ($rows9 as $key => $value)
                                     <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="GET" name="scholarshipFilterForm">
                                       <input type="hidden" name="app" value="<?php echo htmlspecialchars($app, ENT_QUOTES, 'UTF-8'); ?>">
                                       <select name="class" id="class" onchange="this.form.submit()" style="padding-top:2%;padding-bottom:2%;padding-left:2%;display:block;">
-                                        <option value="0" <?php echo ($selectedScholarshipId <= 0) ? 'selected' : ''; ?>><strong>Select Your Scholarship</strong></option>
+                                        <option value="0" <?php echo ($selectedScholarshipId <= 0) ? 'selected' : ''; ?>><strong>All Scholarships</strong></option>
                                         <?php
                                         while ($rows9 = mysqli_fetch_row($result)) {
                                           $tempschid = (int) $rows9[0];
                                           $tempname = $rows9[1];
+                                          $filterCount = (int) $rows9[2];
                                         ?>
-                                          <option value="<?php echo $tempschid; ?>" <?php echo ($selectedScholarshipId === $tempschid) ? 'selected' : ''; ?>><?php echo htmlspecialchars($tempname, ENT_QUOTES, 'UTF-8'); ?></option>
+                                          <option value="<?php echo $tempschid; ?>" <?php echo ($selectedScholarshipId === $tempschid) ? 'selected' : ''; ?>><?php echo htmlspecialchars($tempname, ENT_QUOTES, 'UTF-8'); ?> (<?php echo htmlspecialchars($countLabel, ENT_QUOTES, 'UTF-8'); ?>: <?php echo $filterCount; ?>)</option>
                                         <?php
                                         }
                                         ?>
@@ -120,29 +242,36 @@ foreach ($rows9 as $key => $value)
                                   </center>
                                 </div>
                               </div>
-                              <br><br><br><br><br><br><br>
+                              <div style="height: 1.5rem;"></div>
 
-                              <?php if ($selectedScholarshipId > 0) { ?>
+                              <?php if ($selectedScholarshipId > 0 || $showAllByDefault) { ?>
                                 <section id="application">
                                   <?php
                                     if ($app === 'Pending' || $app === 'Approved' || $app === 'Rejected') {
                                       $statusFilter = strtolower($app);
                                       if ($statusFilter === 'approved') {
-                                        $statusClause = "(LOWER(verifiedBySignatory) = 'approved' OR LOWER(appstatus) = 'processing')";
+                                        $statusClause = "(LOWER(A.verifiedBySignatory) = 'approved' OR LOWER(A.appstatus) = 'processing')";
                                       } elseif ($statusFilter === 'rejected') {
-                                        $statusClause = "(LOWER(verifiedBySignatory) = 'rejected' OR LOWER(appstatus) = 'rejected')";
+                                        $statusClause = "(LOWER(A.verifiedBySignatory) = 'rejected' OR LOWER(A.appstatus) = 'rejected')";
                                       } else {
-                                        $statusClause = "(LOWER(verifiedBySignatory) = 'pending' OR LOWER(appstatus) = 'pending')";
+                                        $statusClause = "(LOWER(A.verifiedBySignatory) = 'pending' OR LOWER(A.appstatus) = 'pending')";
                                       }
-                                      $queryScholarship = "SELECT applicationID, studentID, scholarshipID, appDate, appstatus, verifiedBySignatory FROM application WHERE scholarshipID = $selectedScholarshipId AND sigID = $currentUserID AND $statusClause";
+                                      $queryScholarship = "SELECT A.applicationID, A.studentID, A.scholarshipID, A.appDate, A.appstatus, A.verifiedBySignatory, S.schname FROM application A INNER JOIN scholarship S ON S.scholarshipID = A.scholarshipID WHERE A.sigID = $currentUserID AND $statusClause";
                                     } else {
-                                      $queryScholarship = "SELECT applicationID, studentID, scholarshipID, appDate, appstatus, verifiedBySignatory FROM application WHERE scholarshipID = $selectedScholarshipId AND sigID = $currentUserID";
+                                      $queryScholarship = "SELECT A.applicationID, A.studentID, A.scholarshipID, A.appDate, A.appstatus, A.verifiedBySignatory, S.schname FROM application A INNER JOIN scholarship S ON S.scholarshipID = A.scholarshipID WHERE A.sigID = $currentUserID";
                                     }
+
+                                    if ($selectedScholarshipId > 0) {
+                                      $queryScholarship .= " AND A.scholarshipID = $selectedScholarshipId";
+                                    }
+
+                                    $queryScholarship .= " ORDER BY A.appDate DESC, A.applicationID DESC";
 
                                     $qSchoResult = mysqli_query($conn, $queryScholarship);
                                     if ($qSchoResult && $qSchoResult->num_rows > 0) {
                                   ?>
-                                    <h1><strong><center><?php echo htmlspecialchars($app, ENT_QUOTES, 'UTF-8'); ?> Applications of Scholarship ID: <?php echo $selectedScholarshipId; ?></center> </strong></h1>
+                                    <h1><strong><center><?php echo htmlspecialchars($app, ENT_QUOTES, 'UTF-8'); ?> Applications <?php echo ($selectedScholarshipId > 0) ? ('of Scholarship ID: ' . $selectedScholarshipId) : '(All Scholarships)'; ?></center> </strong></h1>
+                                    <div class="sig-app-table-wrap">
                                     <table class="table table-bordered">
                                       <thead>
                                         <tr>
@@ -222,9 +351,10 @@ foreach ($rows9 as $key => $value)
                                     ?>
                                       </tbody>
                                     </table>
+                                    </div>
                                   <?php
                                     } else {
-                                      echo "<center><b>No applications found for this scholarship.</b></center>";
+                                      echo "<center><b>No applications found for this filter.</b></center>";
                                     }
                                   ?>
                                 </section>

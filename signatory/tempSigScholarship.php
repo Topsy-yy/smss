@@ -91,7 +91,7 @@ function renderMatchedStudentsHtml($scholarshipId) {
 
   </head>
 
-  <body class="app-shell">
+	<body class="app-shell sig-scholarships-page">
     <div class="app-page">
 
 		<?php
@@ -102,13 +102,13 @@ function renderMatchedStudentsHtml($scholarshipId) {
 
 
 			<!-- Main -->
-				<article id="main">
+				<article id="main" class="sig-scholarship-main">
 
-					<header class="page-hero container">
+					<header class="page-hero">
 					</header>
 
 					<!-- One -->
-						<section class="content-card container">
+						<section class="content-card">
 
 							<!-- Content -->
 								<div class="content">
@@ -123,7 +123,8 @@ function renderMatchedStudentsHtml($scholarshipId) {
 													$result = $conn->query($sql);
 													if ($result->num_rows > 0) {
 				                                ?>
-				                            <table class = "table table-hover table-condensed">
+					                            <div class="sig-scholarship-table-wrap">
+					                            <table class = "table table-hover table-condensed">
 				                              <thead>
 				                                <tr>
 				                                  <th class = "col-md-1"><strong>Scholarship</strong></th>
@@ -181,7 +182,8 @@ function renderMatchedStudentsHtml($scholarshipId) {
 				                               <?php
 				                            	}
 				                              ?>
-				                            </table>
+					                            </table>
+					                            </div>
 
 
 				                           <form action = "tempAddScholarship.php" class = "text-center">

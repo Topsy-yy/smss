@@ -288,8 +288,8 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `student` WRITE;
 /*!40000 ALTER TABLE `student` DISABLE KEYS */;
 INSERT INTO `student` VALUES
-(49,'kifine@proton.me','$2y$12$T/fl/oN4XLvr0iNDiZERv.ZIxcdwzgGKTpD.g5xLgPWIjbLxkbvzC','Ingridius','Finelite','Kisiwani',NULL,'male',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0655877995','','','active','diploma','Low','Technology Based'),
-(50,'natalie.chelagat@strathmore.edu','$2y$12$RNtCP9t6dFgkDnBgFRSvOuT.b4g0iZSI744G9f7L6Glm1mHW8Tete','Natalie','Burgei','Chelagat',NULL,'female',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0655877995','','','active','undergraduate','Low','Visual Art, Technology Based');
+(49,'kifine@proton.me','$2y$12$T/fl/oN4XLvr0iNDiZERv.ZIxcdwzgGKTpD.g5xLgPWIjbLxkbvzC','Ingridius','Finelite','Kisiwani',NULL,'male',NULL,NULL,NULL,NULL,'Nairobi',NULL,NULL,'Mombasa','0655877995','technology based computing scholarship support','Technology Scholarship Program','active','diploma','Medium','merit based, stem, scholarship, diploma, visual art, students, financial need, computer science, cultural arts, artificial intelligence'),
+(50,'natalie.chelagat@strathmore.edu','$2y$12$RNtCP9t6dFgkDnBgFRSvOuT.b4g0iZSI744G9f7L6Glm1mHW8Tete','Natalie','Burgei','Chelagat',NULL,'female',NULL,NULL,NULL,NULL,'Nairobi technology',NULL,NULL,'Mombasa','0655877995','Information Technology','Technology Scholarship Program','active','undergraduate','Low','scholarship, technology based, cultural arts, support, cybersecurity, computer science, students, stem, engineering');
 /*!40000 ALTER TABLE `student` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;

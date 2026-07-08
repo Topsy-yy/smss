@@ -39,7 +39,7 @@ if ($profileCompletion < 100) {
 // ==========================================
 $opportunities = MatchingEngine::getMatches($currentUserID);
 $opportunities = array_values(array_filter($opportunities, function($opp) {
-    return ((int) ($opp['match'] ?? 0)) >= 10;
+    return ((int) ($opp['match'] ?? 0)) >= 30;
 }));
 
 // Live Stats Calculation
@@ -51,7 +51,7 @@ $stats = [
 ];
 
 foreach ($opportunities as $opp) {
-    if ($opp['match'] >= 10) $stats['total_matches']++;
+    if ($opp['match'] >= 30) $stats['total_matches']++;
     if ($opp['urgent']) $stats['deadlines']++;
 }
 

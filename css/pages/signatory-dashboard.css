@@ -291,6 +291,89 @@ body.app-shell, body.index {
     max-width: 980px;
 }
 
+body.sig-applications-page .sig-app-main {
+    width: 100%;
+}
+
+body.sig-applications-page .page-hero {
+    width: calc(100% - 2rem);
+    max-width: none;
+    margin: 1.25rem auto 1rem;
+}
+
+body.sig-applications-page .content-card {
+    width: calc(100% - 2rem);
+    max-width: none;
+    margin: 0 auto 1.5rem;
+    padding: 1.25rem;
+}
+
+body.sig-applications-page .content {
+    width: 100%;
+}
+
+body.sig-applications-page .sig-app-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+body.sig-applications-page table.table {
+    min-width: 980px;
+}
+
+@media (max-width: 768px) {
+    body.sig-applications-page .content-card {
+        width: calc(100% - 1rem);
+        padding: 0.75rem;
+    }
+
+    body.sig-applications-page .page-hero {
+        width: calc(100% - 1rem);
+    }
+}
+
+body.sig-scholarships-page .sig-scholarship-main,
+body.sig-add-scholarship-page .sig-scholarship-main {
+    width: 100%;
+}
+
+body.sig-scholarships-page .page-hero,
+body.sig-add-scholarship-page .page-hero {
+    width: calc(100% - 2rem);
+    max-width: none;
+    margin: 1.25rem auto 1rem;
+}
+
+body.sig-scholarships-page .content-card,
+body.sig-add-scholarship-page .content-card {
+    width: calc(100% - 2rem);
+    max-width: none;
+    margin: 0 auto 1.5rem;
+    padding: 1.25rem;
+}
+
+body.sig-scholarships-page .sig-scholarship-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+body.sig-scholarships-page table.table {
+    min-width: 1020px;
+}
+
+@media (max-width: 768px) {
+    body.sig-scholarships-page .content-card,
+    body.sig-add-scholarship-page .content-card {
+        width: calc(100% - 1rem);
+        padding: 0.75rem;
+    }
+
+    body.sig-scholarships-page .page-hero,
+    body.sig-add-scholarship-page .page-hero {
+        width: calc(100% - 1rem);
+    }
+}
+
 .content-card h1, .content-card h2, .content-card h3 { color: var(--sig-navy); margin-bottom: 1rem; }
 
 /* ==========================================================================

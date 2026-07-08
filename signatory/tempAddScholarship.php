@@ -40,7 +40,7 @@
       <link href="../css/pages/signatory-dashboard.css" rel="stylesheet">
   </head>
 
-  <body class="app-shell">
+    <body class="app-shell sig-add-scholarship-page">
 
   	<script type="text/javascript">
         function fileValidation(name){
@@ -67,11 +67,11 @@
         ?>
 
         <!-- Main -->
-        <article id="main">
-            <header class="page-hero container"></header>
+        <article id="main" class="sig-scholarship-main">
+            <header class="page-hero"></header>
 
             <!-- One -->
-            <section class="content-card container">
+            <section class="content-card">
                 <!-- Content -->
                 <div class="content">
                     <section>

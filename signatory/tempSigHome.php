@@ -13,6 +13,9 @@
       exit;
   }
 
+    $sigFlashMessage = trim((string) ($_SESSION['sig_flash_message'] ?? ''));
+    unset($_SESSION['sig_flash_message']);
+
   $conn = getDbConnection();
   if (!$conn || $conn->connect_error) {
       die('Database connection failed.');
@@ -287,8 +290,103 @@
     <title>Signatory Dashboard | ScholarConnect</title>
     <!-- Linked directly to your new Signatory CSS file -->
     <link rel="stylesheet" href="../css/pages/signatory.css">
+
+        <style>
+            .sig-toast {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 2500;
+                max-width: 420px;
+                background: #0f172a;
+                color: #f8fafc;
+                border: 1px solid rgba(148, 163, 184, 0.3);
+                border-left: 5px solid #16a34a;
+                border-radius: 12px;
+                box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
+                padding: 12px 14px;
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                opacity: 0;
+                transform: translateY(-10px);
+                pointer-events: none;
+                transition: opacity 0.2s ease, transform 0.2s ease;
+            }
+
+            .sig-toast.is-visible {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            .sig-toast__badge {
+                background: #16a34a;
+                color: #ffffff;
+                border-radius: 999px;
+                font-size: 0.75rem;
+                line-height: 1;
+                padding: 4px 8px;
+                margin-top: 1px;
+                flex: 0 0 auto;
+            }
+
+            .sig-toast__text {
+                margin: 0;
+                font-size: 0.92rem;
+                line-height: 1.45;
+                flex: 1 1 auto;
+            }
+
+            .sig-toast__close {
+                background: transparent;
+                border: 0;
+                color: #cbd5e1;
+                font-size: 1rem;
+                line-height: 1;
+                cursor: pointer;
+                padding: 2px;
+                margin-left: 4px;
+                flex: 0 0 auto;
+            }
+        </style>
 </head>
 <body>
+        <?php if ($sigFlashMessage !== '') { ?>
+            <div id="sigToast" class="sig-toast" role="status" aria-live="polite" aria-atomic="true">
+                <span class="sig-toast__badge">Success</span>
+                <p class="sig-toast__text"><?php echo htmlspecialchars($sigFlashMessage, ENT_QUOTES, 'UTF-8'); ?></p>
+                <button type="button" id="sigToastClose" class="sig-toast__close" aria-label="Close notification">x</button>
+            </div>
+            <script type="text/javascript">
+                (function () {
+                    var toast = document.getElementById('sigToast');
+                    var closeBtn = document.getElementById('sigToastClose');
+                    if (!toast) {
+                        return;
+                    }
+
+                    var hideToast = function () {
+                        toast.classList.remove('is-visible');
+                        window.setTimeout(function () {
+                            if (toast && toast.parentNode) {
+                                toast.parentNode.removeChild(toast);
+                            }
+                        }, 220);
+                    };
+
+                    window.setTimeout(function () {
+                        toast.classList.add('is-visible');
+                    }, 30);
+
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', hideToast);
+                    }
+
+                    window.setTimeout(hideToast, 4200);
+                })();
+            </script>
+        <?php } ?>
 
     <?php
       $sigNavActive = 'home';
